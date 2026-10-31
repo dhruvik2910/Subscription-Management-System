@@ -1,0 +1,26 @@
+{
+  "name": "subscription-management-system",
+  "version": "1.0.0",
+  "description": "[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Status: In Development](https://img.shields.io/badge/Status-In%20Development-orange.svg)](#) [![Architecture: Modular SaaS](https://img.shields.io/badge/Architecture-Modular%20SaaS-emerald.svg)](#) [![Performance SLA: <2s](https://img.shields.io/badge/Query%20Latency-%3C%202s-brightgreen.svg)](#)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhruvik2910/Subscription-Management-System.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/dhruvik2910/Subscription-Management-System/issues"
+  },
+  "homepage": "https://github.com/dhruvik2910/Subscription-Management-System#readme",
+  "devDependencies": {
+    "vite": "^8.3.5"
+  }
+}

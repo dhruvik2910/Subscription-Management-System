@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primary-fixed-variant": "#3a4667", "surface-container-highest": "#d3e4fe", "on-error-container": "#93000a", "secondary-fixed-dim": "#6bd8cb", "surface-variant": "#d3e4fe", "on-primary-fixed": "#0d1a39", "outline": "#76777f", "secondary": "#006a61", "primary-fixed": "#dae2ff", "on-tertiary-fixed-variant": "#005137", "secondary-container": "#86f2e4", "surface-container": "#e5eeff", "on-tertiary": "#ffffff", "on-tertiary-fixed": "#002114", "tertiary-fixed-dim": "#68dba9", "surface-container-lowest": "#ffffff", "inverse-surface": "#213145", "tertiary-fixed": "#85f8c4", "inverse-on-surface": "#eaf1ff", "on-secondary-container": "#006f66", "primary-fixed-dim": "#bac5ee", "primary-container": "#1e2a4a", "secondary-fixed": "#89f5e7", "on-background": "#0b1c30", "on-primary-container": "#8691b7", "tertiary-container": "#003220", "error-container": "#ffdad6", "background": "#f8f9ff", "tertiary": "#001b10", "on-secondary-fixed": "#00201d", "outline-variant": "#c6c6cf", "surface-bright": "#f8f9ff", "inverse-primary": "#bac5ee", "surface-dim": "#cbdbf5", "error": "#ba1a1a", "surface-container-low": "#eff4ff", "on-error": "#ffffff", "on-secondary": "#ffffff", "surface": "#f8f9ff", "surface-tint": "#525d80", "on-primary": "#ffffff", "on-surface": "#0b1c30", "on-secondary-fixed-variant": "#005049", "on-surface-variant": "#45464e", "surface-container-high": "#dce9ff", "on-tertiary-container": "#27a577", "primary": "#081534" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "gutter": "1rem", "space-sm": "0.5rem", "space-lg": "1.25rem", "margin": "1rem", "margin-md": "1.5rem", "space-xs": "0.25rem", "space-md": "0.75rem", "gutter-lg": "1.5rem", "space-xl": "1.75rem", "margin-lg": "2rem" }, "fontFamily": { "headline-lg-mobile": ["Inter"], "headline-sm": ["Inter"], "label-num-lg": ["JetBrains Mono"], "headline-md": ["Inter"], "title-md": ["Inter"], "label-code": ["JetBrains Mono"], "body-lg": ["Inter"], "headline-lg": ["Inter"], "label-caps": ["Inter"], "display": ["Inter"], "body-md": ["Inter"], "body-sm": ["Inter"] }, "fontSize": { "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}], "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}], "label-num-lg": ["20px", {"lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600"}], "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}], "title-md": ["15px", {"lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "600"}], "label-code": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500"}], "body-lg": ["15px", {"lineHeight": "22px", "fontWeight": "400"}], "headline-lg": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600"}], "label-caps": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}], "display": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700"}], "body-md": ["13px", {"lineHeight": "18px", "fontWeight": "400"}], "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}] } } } }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-margin-lg flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-md shrink-0"><img alt="Brightloop Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XVTGyl8tojox9o2Pj_Gw52ui8m4Qc6BsoNXjEeBbigeneWvaLD4xi_AEHZs6_KYy5yHtLKYrZ1p0N1lDO4gL0HnsjsEl8Qa95kM5WQU-hKaS4g6q8dNaJjxFoFeCNE3Evqk5hNUfcD51trh1fdN0Xy4pYRghZqfdBaIlVwhdpAPW0E5XHuSDYECML6Jr9H063kLfzJxRYa3C-DhTq9bmTIHyCNAdXnUv6ULonArA_2"/><span class="font-title-md text-title-md text-primary font-bold">Brightloop</span><div class="hidden xl:flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-code text-label-code"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span>Production • Billing Month: Oct 2024</span></div></div><nav class="hidden lg:flex items-center gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-title-md"><a aria-current="page" class="px-space-md py-space-sm rounded-lg transition-all bg-primary-container text-on-primary-container font-title-md" data-path="revenue-operations" href="#">Revenue &amp; Operations</a><a class="px-space-md py-space-sm rounded-lg font-title-md text-title-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="subscriptions-quotes" href="#">Subscriptions &amp; Quotes</a><a class="px-space-md py-space-sm rounded-lg font-title-md text-title-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="billing-invoices" href="#">Billing &amp; Invoices</a><a class="px-space-md py-space-sm rounded-lg font-title-md text-title-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="products-plans" href="#">Products &amp; Plans</a><a class="px-space-md py-space-sm rounded-lg font-title-md text-title-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="customer-portal" href="#">Customer Portal</a></nav><div class="flex items-center gap-space-md shrink-0"><div class="hidden md:flex items-center bg-surface-container-low px-space-md py-space-xs rounded-lg gap-space-xs w-64 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><span class="material-symbols-outlined text-outline text-lg">search</span><span class="font-body-sm text-body-sm text-outline flex-1 truncate">Jump to...</span><kbd class="font-label-code text-label-code bg-surface-container px-space-xs py-0.5 rounded text-on-surface-variant">Cmd+K</kbd></div><button class="inline-flex items-center gap-space-xs bg-primary-container text-on-primary px-space-md py-space-xs rounded-lg font-title-md text-title-md hover:bg-primary transition-colors shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><span class="material-symbols-outlined text-base">add</span><span>New Quote</span></button><div class="relative flex items-center justify-center p-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors cursor-pointer"><span class="material-symbols-outlined text-xl">notifications</span><span class="absolute -top-1 -right-1 bg-error text-on-error font-label-caps text-label-caps px-1 py-0.5 rounded-full ring-2 ring-surface">3</span></div><div class="flex items-center gap-space-sm pl-space-xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-sy6hINsvVWcZrChfs2EgMvtB51ZaiWmmLxg0fGtDr-cgqIJmAxWlCT-dJskpeLrDboulyB_1odAlts-CRUrqosQU9PtVwZMAArMRsrlxRukaQkqY__Yo1-Jt6rD99xEO4dH_OBuNulETV5wRngsBHxufIitOT1Hm1gqcDp8vTCVdmyHNofVECXIJ9WvuQrCNrx1WKTAbHoP4RU6pyJTdQZ4hSvZXyuZQOBZ91Wg"/><div class="hidden 2xl:flex flex-col text-left"><span class="font-title-md text-title-md text-on-surface font-semibold leading-tight">Elena Rostova</span><span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Admin (Finance Lead)</span></div></div></div></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-80px)]"><div class="max-w-7xl mx-auto px-margin-lg py-margin-md"><div class="flex flex-col w-full">
+<div class="flex flex-col gap-space-lg w-full">
+<!-- Top Action / Control Bar -->
+<div class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md pb-space-xs">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm flex-wrap">
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Revenue &amp; Operations Overview</h1>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/10 text-secondary font-label-code text-label-code font-semibold shadow-sm">
+<span class="material-symbols-outlined text-sm">bolt</span>
+<span>Query execution: 142ms (<span class="font-bold">target &lt;2s</span>)</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Billing Month: October 2024 • Consolidated Ledger &amp; Cash Reconciliation</p>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm">
+<!-- Date Segmented Control -->
+<div class="inline-flex items-center p-1 rounded-xl bg-surface-container-high shadow-inner">
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-title-md text-title-md shadow-sm transition-all" type="button">Last 30 Days</button>
+<button class="px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface font-title-md text-title-md transition-all" type="button">Q3 vs Q4</button>
+<button class="px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface font-title-md text-title-md transition-all" type="button">Fiscal YTD</button>
+</div>
+<!-- Export Action -->
+<div class="relative inline-block text-left">
+<button class="inline-flex items-center gap-space-xs px-3.5 py-2 rounded-xl bg-surface-container-lowest text-primary font-title-md text-title-md shadow-sm hover:bg-surface-container-low transition-all" id="exportDropdownBtn">
+<span class="material-symbols-outlined text-base">download</span>
+<span>Export Report</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+</div>
+<button class="inline-flex items-center gap-space-xs px-3.5 py-2 rounded-xl bg-primary-container text-on-primary font-title-md text-title-md shadow-md hover:bg-primary transition-all">
+<span class="material-symbols-outlined text-base">sync</span>
+<span>Refresh Ledger</span>
+</button>
+</div>
+</div>
+<!-- 4 High-Density KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Card 1: Active Subscriptions -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">Active Subscriptions</span>
+<span class="material-symbols-outlined text-on-surface-variant/70 text-lg">autorenew</span>
+</div>
+<div class="flex items-baseline justify-between gap-2">
+<span class="font-label-num-lg text-display text-primary font-bold">1,428</span>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-secondary/10 text-secondary font-label-code text-label-code font-bold">
+<span class="material-symbols-outlined text-xs">trending_up</span>+12.4%
+          </span>
+</div>
+<div class="flex items-center justify-between pt-3 mt-3 bg-surface-container-low/60 rounded-lg px-2 py-1.5 font-label-code text-label-code text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> 1,284 Renewed</span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-error"></span> 24 Churned</span>
+</div>
+</div>
+<!-- Card 2: Recognized MRR & Invoiced -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">Recognized MRR / Invoiced</span>
+<span class="material-symbols-outlined text-on-surface-variant/70 text-lg">account_balance</span>
+</div>
+<div class="flex items-baseline justify-between gap-2">
+<span class="font-label-num-lg text-display text-primary font-bold">$348,650</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container text-primary font-label-code text-label-code font-semibold">
+            Oct 2024
+          </span>
+</div>
+<div class="flex items-center justify-between pt-3 mt-3 bg-surface-container-low/60 rounded-lg px-2 py-1.5 font-label-code text-label-code text-on-surface-variant">
+<span>Collected: <strong class="text-on-surface font-semibold">$312,200</strong></span>
+<span class="text-secondary font-bold">89.5% Rate</span>
+</div>
+</div>
+<!-- Card 3: Payments Recorded -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">Payments Recorded</span>
+<span class="material-symbols-outlined text-on-surface-variant/70 text-lg">check_circle</span>
+</div>
+<div class="flex items-baseline justify-between gap-2">
+<span class="font-label-num-lg text-display text-primary font-bold">$312,200</span>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-code text-label-code">
+            1,180 txns
+          </span>
+</div>
+<div class="flex items-center justify-between pt-3 mt-3 bg-surface-container-low/60 rounded-lg px-2 py-1.5 font-label-code text-label-code text-on-surface-variant">
+<span class="truncate">Stripe (72%) • ACH (22%) • Wire (6%)</span>
+</div>
+</div>
+<!-- Card 4: Overdue & Outstanding -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-2">
+<span class="font-body-sm text-body-sm text-error font-semibold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span> Overdue &amp; Outstanding
+          </span>
+<span class="material-symbols-outlined text-error text-lg">warning</span>
+</div>
+<div class="flex items-baseline justify-between gap-2">
+<span class="font-label-num-lg text-display text-error font-bold">$36,450</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-code text-label-code font-bold">
+            34 Invoices
+          </span>
+</div>
+<div class="flex items-center justify-between pt-3 mt-3 bg-error-container/40 rounded-lg px-2 py-1.5 font-label-code text-label-code text-on-error-container">
+<span class="font-semibold text-error">14 Invoices &gt;15 Days Past Due</span>
+<span class="font-bold underline cursor-pointer hover:text-on-error-container" onclick="document.getElementById('overdueTableSection').scrollIntoView({behavior:'smooth'})">Review</span>
+</div>
+</div>
+</div>
+<!-- Main Grid Section (2/3 + 1/3) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- Left Column: 8 Cols (2/3 width) -->
+<div class="lg:col-span-8 flex flex-col gap-space-lg">
+<!-- Interactive Chart & Revenue Breakdown Card -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm mb-space-md">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary">Monthly Billing &amp; Cash Inflow Dynamics</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Real-time reconciliation tracking accrued billing vs settled cash</p>
+</div>
+<!-- Legend Indicators -->
+<div class="flex items-center gap-space-md font-label-code text-label-code">
+<span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-primary"></span> Monthly Rec.</span>
+<span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-secondary"></span> Annual Amort.</span>
+<span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-surface-container-highest"></span> Add-ons/Usage</span>
+</div>
+</div>
+<!-- SVG Visual Chart Simulation -->
+<div class="w-full bg-surface-container-low rounded-xl p-space-md relative overflow-hidden">
+<div class="h-44 w-full flex items-end justify-between gap-2 pt-6">
+<!-- Week 1 -->
+<div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+<div class="w-full max-w-[48px] flex flex-col gap-0.5 items-center">
+<span class="opacity-0 group-hover:opacity-100 transition-opacity font-label-code text-label-code font-bold text-primary mb-1">$74.2k</span>
+<div class="w-full bg-surface-container-highest rounded-t-sm h-6 group-hover:brightness-95 transition-all"></div>
+<div class="w-full bg-secondary h-14 group-hover:brightness-95 transition-all"></div>
+<div class="w-full bg-primary rounded-b-sm h-16 group-hover:brightness-95 transition-all"></div>
+</div>
+<span class="font-label-code text-label-code text-on-surface-variant font-medium">Oct 01-07</span>
+</div>
+<!-- Week 2 -->
+<div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+<div class="w-full max-w-[48px] flex flex-col gap-0.5 items-center">
+<span class="opacity-0 group-hover:opacity-100 transition-opacity font-label-code text-label-code font-bold text-primary mb-1">$88.5k</span>
+<div class="w-full bg-surface-container-highest rounded-t-sm h-8 group-hover:brightness-95 transition-all"></div>
+<div class="w-full bg-secondary h-16 group-hover:brightness-95 transition-all"></div>
+<div class="w-full bg-primary rounded-b-sm h-20 group-hover:brightness-95 transition-all"></div>
+</div>
+<span class="font-label-code text-label-code text-on-surface-variant font-medium">Oct 08-14</span>
+</div>
+<!-- Week 3 -->
+<div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+<div class="w-full max-w-[48px] flex flex-col gap-0.5 items-center">
+<span class="opacity-0 group-hover:opacity-100 transition-opacity font-label-code text-label-code font-bold text-primary mb-1">$96.1k</span>
+<div class="w-full bg-surface-container-highest rounded-t-sm h-10 group-hover:brightness-95 transition-all"></div>
+<div class="w-full bg-secondary h-18 group-hover:brightness-95 transition-all"></div>
+<div class="w-full bg-primary rounded-b-sm h-22 group-hover:brightness-95 transition-all"></div>
+</div>
+<span class="font-label-code text-label-code text-on-surface-variant font-medium">Oct 15-21</span>
+</div>
+<!-- Week 4 (Current) -->
+<div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+<div class="w-full max-w-[48px] flex flex-col gap-0.5 items-center">
+<span class="opacity-0 group-hover:opacity-100 transition-opacity font-label-code text-label-code font-bold text-primary mb-1">$89.8k</span>
+<div class="w-full bg-surface-container-highest rounded-t-sm h-7 group-hover:brightness-95 transition-all"></div>
+<div class="w-full bg-secondary h-15 group-hover:brightness-95 transition-all"></div>
+<div class="w-full bg-primary rounded-b-sm h-21 group-hover:brightness-95 transition-all"></div>
+</div>
+<span class="font-label-code text-label-code text-on-surface-variant font-bold text-primary">Oct 22-28</span>
+</div>
+<!-- Week 5 (Forecasted / Closing) -->
+<div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group opacity-75">
+<div class="w-full max-w-[48px] flex flex-col gap-0.5 items-center">
+<span class="opacity-0 group-hover:opacity-100 transition-opacity font-label-code text-label-code font-bold text-primary mb-1">~$24.0k</span>
+<div class="w-full bg-surface-container-highest/60 rounded-t-sm h-3 border-dashed"></div>
+<div class="w-full bg-secondary/60 h-8"></div>
+<div class="w-full bg-primary/60 rounded-b-sm h-10"></div>
+</div>
+<span class="font-label-code text-label-code text-on-surface-variant font-medium italic">Oct 29-31</span>
+</div>
+</div>
+<!-- Inflow Summary Banner -->
+<div class="mt-4 pt-3 flex flex-wrap items-center justify-between gap-2 bg-surface-container-lowest/80 backdrop-blur rounded-lg px-space-md py-2 shadow-sm font-label-code text-label-code">
+<span class="text-on-surface-variant">Monthly Recurring: <strong class="text-primary font-bold">$218,400</strong></span>
+<span class="text-on-surface-variant">Annualized Amortization: <strong class="text-secondary font-bold">$98,150</strong></span>
+<span class="text-on-surface-variant">Usage &amp; Add-ons: <strong class="text-primary-container font-bold">$32,100</strong></span>
+<span class="inline-flex items-center gap-1 text-on-tertiary-container font-semibold bg-tertiary-container/10 px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-xs">verified</span> Ledger Balanced
+              </span>
+</div>
+</div>
+</div>
+<!-- Priority Overdue Invoices Action Table -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col" id="overdueTableSection">
+<div class="p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm bg-surface-container-low/40">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-headline-sm text-primary">Priority Overdue Invoices</h2>
+<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-code text-label-code font-bold">Action Required</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">High-balance uncollected invoices prioritized by aging bracket</p>
+</div>
+<div class="flex items-center gap-space-xs">
+<div class="relative">
+<input class="bg-surface-container-lowest px-3 py-1.5 pl-8 rounded-lg font-body-sm text-body-sm text-on-surface shadow-sm focus:outline-none focus:ring-1 focus:ring-secondary w-44" id="invoiceFilter" placeholder="Filter customer..." type="text"/>
+<span class="material-symbols-outlined absolute left-2 top-2 text-outline text-base">filter_list</span>
+</div>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-high text-primary font-title-md text-title-md hover:bg-surface-container transition-all flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-sm">mail</span>
+<span>Batch Chase (14)</span>
+</button>
+</div>
+</div>
+<!-- Table Container -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high/60 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+<th class="py-2.5 px-space-md">Invoice #</th>
+<th class="py-2.5 px-space-md">Customer &amp; Tier</th>
+<th class="py-2.5 px-space-md">Subscription</th>
+<th class="py-2.5 px-space-md">Due Date</th>
+<th class="py-2.5 px-space-md text-right">Amount</th>
+<th class="py-2.5 px-space-md text-center">Days Overdue</th>
+<th class="py-2.5 px-space-md text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container font-body-sm text-body-sm" id="invoiceTableBody">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-space-md font-label-code text-label-code font-bold text-primary">INV-2024-0891</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Nexus Logistics Ltd</span>
+<span class="text-xs text-on-surface-variant font-label-code">Enterprise Fleet • APAC</span>
+</div>
+</td>
+<td class="py-3 px-space-md font-label-code text-label-code text-on-surface-variant">SUB-4412</td>
+<td class="py-3 px-space-md font-label-code text-label-code text-on-surface">Oct 10, 2024</td>
+<td class="py-3 px-space-md font-label-code text-label-code font-bold text-primary text-right">$12,400.00</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-code text-label-code font-bold">
+                      18 days
+                    </span>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="inline-flex items-center gap-1 justify-end">
+<button class="px-2 py-1 rounded bg-error/10 hover:bg-error hover:text-on-error text-error font-title-md text-title-md transition-colors shadow-sm" title="Send email dunning notification">Chase</button>
+<button class="px-2 py-1 rounded bg-surface-container-high hover:bg-primary hover:text-on-primary text-primary font-title-md text-title-md transition-colors shadow-sm" title="Record manual wire/cash">Record Pay</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-space-md font-label-code text-label-code font-bold text-primary">INV-2024-0914</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">CloudScale Hyperion</span>
+<span class="text-xs text-on-surface-variant font-label-code">Scale Tier • US-East</span>
+</div>
+</td>
+<td class="py-3 px-space-md font-label-code text-label-code text-on-surface-variant">SUB-3908</td>
+<td class="py-3 px-space-md font-label-code text-label-code text-on-surface">Oct 12, 2024</td>
+<td class="py-3 px-space-md font-label-code text-label-code font-bold text-primary text-right">$8,750.00</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-code text-label-code font-bold">
+                      16 days
+                    </span>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="inline-flex items-center gap-1 justify-end">
+<button class="px-2 py-1 rounded bg-error/10 hover:bg-error hover:text-on-error text-error font-title-md text-title-md transition-colors shadow-sm">Chase</button>
+<button class="px-2 py-1 rounded bg-surface-container-high hover:bg-primary hover:text-on-primary text-primary font-title-md text-title-md transition-colors shadow-sm">Record Pay</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-space-md font-label-code text-label-code font-bold text-primary">INV-2024-0955</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Aura Financial AI</span>
+<span class="text-xs text-on-surface-variant font-label-code">Fintech Multi-Seat • EMEA</span>
+</div>
+</td>
+<td class="py-3 px-space-md font-label-code text-label-code text-on-surface-variant">SUB-5120</td>
+<td class="py-3 px-space-md font-label-code text-label-code text-on-surface">Oct 18, 2024</td>
+<td class="py-3 px-space-md font-label-code text-label-code font-bold text-primary text-right">$6,200.00</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container text-on-surface font-label-code text-label-code font-semibold">
+                      10 days
+                    </span>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="inline-flex items-center gap-1 justify-end">
+<button class="px-2 py-1 rounded bg-error/10 hover:bg-error hover:text-on-error text-error font-title-md text-title-md transition-colors shadow-sm">Chase</button>
+<button class="px-2 py-1 rounded bg-surface-container-high hover:bg-primary hover:text-on-primary text-primary font-title-md text-title-md transition-colors shadow-sm">Record Pay</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-space-md font-label-code text-label-code font-bold text-primary">INV-2024-0982</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Vanguard Robotics</span>
+<span class="text-xs text-on-surface-variant font-label-code">Hardware Core Plan • US-West</span>
+</div>
+</td>
+<td class="py-3 px-space-md font-label-code text-label-code text-on-surface-variant">SUB-4819</td>
+<td class="py-3 px-space-md font-label-code text-label-code text-on-surface">Oct 21, 2024</td>
+<td class="py-3 px-space-md font-label-code text-label-code font-bold text-primary text-right">$5,300.00</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container text-on-surface font-label-code text-label-code font-semibold">
+                      7 days
+                    </span>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="inline-flex items-center gap-1 justify-end">
+<button class="px-2 py-1 rounded bg-error/10 hover:bg-error hover:text-on-error text-error font-title-md text-title-md transition-colors shadow-sm">Chase</button>
+<button class="px-2 py-1 rounded bg-surface-container-high hover:bg-primary hover:text-on-primary text-primary font-title-md text-title-md transition-colors shadow-sm">Record Pay</button>
+</div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-space-md font-label-code text-label-code font-bold text-primary">INV-2024-1002</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">OmniRetail Services</span>
+<span class="text-xs text-on-surface-variant font-label-code">Usage-Billing High Water • UK</span>
+</div>
+</td>
+<td class="py-3 px-space-md font-label-code text-label-code text-on-surface-variant">SUB-3760</td>
+<td class="py-3 px-space-md font-label-code text-label-code text-on-surface">Oct 24, 2024</td>
+<td class="py-3 px-space-md font-label-code text-label-code font-bold text-primary text-right">$3,800.00</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container text-on-surface font-label-code text-label-code font-semibold">
+                      4 days
+                    </span>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="inline-flex items-center gap-1 justify-end">
+<button class="px-2 py-1 rounded bg-error/10 hover:bg-error hover:text-on-error text-error font-title-md text-title-md transition-colors shadow-sm">Chase</button>
+<button class="px-2 py-1 rounded bg-surface-container-high hover:bg-primary hover:text-on-primary text-primary font-title-md text-title-md transition-colors shadow-sm">Record Pay</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-space-sm px-space-md bg-surface-container-low flex items-center justify-between text-on-surface-variant font-label-code text-label-code">
+<span>Showing top 5 of 34 overdue items ($36,450.00 total owed)</span>
+<a class="font-semibold text-primary hover:underline flex items-center gap-0.5" href="#">
+<span>Open Complete Debt Aging Ledger</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Right Column: 4 Cols (1/3 width) -->
+<div class="lg:col-span-4 flex flex-col gap-space-lg">
+<!-- Quick Reconciliation Feed -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col">
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-lg">receipt_long</span>
+<h3 class="font-title-md text-title-md text-primary font-bold">Quick Reconciliation Feed</h3>
+</div>
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse" title="Live webhook feed operational"></span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">Real-time incoming settled transactions</p>
+<div class="flex flex-col divide-y divide-surface-container">
+<!-- Feed Item 1 -->
+<div class="py-2.5 flex items-start justify-between gap-2 hover:bg-surface-container-low/50 px-1 rounded transition-colors">
+<div class="flex items-start gap-2">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-primary text-sm">credit_card</span>
+</div>
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface text-body-sm leading-tight">Quantum Leap Labs</span>
+<div class="flex items-center gap-1.5 mt-0.5 font-label-code text-label-code text-on-surface-variant">
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-on-surface font-semibold">Stripe</span>
+<span>•</span>
+<span class="text-primary hover:underline cursor-pointer">INV-2024-1082</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-code text-label-code font-bold text-secondary">+$14,200.00</span>
+<span class="font-label-code text-[10px] text-outline">3 mins ago</span>
+</div>
+</div>
+<!-- Feed Item 2 -->
+<div class="py-2.5 flex items-start justify-between gap-2 hover:bg-surface-container-low/50 px-1 rounded transition-colors">
+<div class="flex items-start gap-2">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-primary text-sm">account_balance</span>
+</div>
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface text-body-sm leading-tight">Apex Data Systems</span>
+<div class="flex items-center gap-1.5 mt-0.5 font-label-code text-label-code text-on-surface-variant">
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-on-surface font-semibold">ACH Direct</span>
+<span>•</span>
+<span class="text-primary hover:underline cursor-pointer">INV-2024-1080</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-code text-label-code font-bold text-secondary">+$9,500.00</span>
+<span class="font-label-code text-[10px] text-outline">21 mins ago</span>
+</div>
+</div>
+<!-- Feed Item 3 -->
+<div class="py-2.5 flex items-start justify-between gap-2 hover:bg-surface-container-low/50 px-1 rounded transition-colors">
+<div class="flex items-start gap-2">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-primary text-sm">swap_horiz</span>
+</div>
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface text-body-sm leading-tight">Solstice Solar BV</span>
+<div class="flex items-center gap-1.5 mt-0.5 font-label-code text-label-code text-on-surface-variant">
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-on-surface font-semibold">Wire Transfer</span>
+<span>•</span>
+<span class="text-primary hover:underline cursor-pointer">INV-2024-1077</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-code text-label-code font-bold text-secondary">+$22,800.00</span>
+<span class="font-label-code text-[10px] text-outline">1 hr ago</span>
+</div>
+</div>
+<!-- Feed Item 4 -->
+<div class="py-2.5 flex items-start justify-between gap-2 hover:bg-surface-container-low/50 px-1 rounded transition-colors">
+<div class="flex items-start gap-2">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-primary text-sm">credit_card</span>
+</div>
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface text-body-sm leading-tight">KiteWorks Cloud</span>
+<div class="flex items-center gap-1.5 mt-0.5 font-label-code text-label-code text-on-surface-variant">
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-on-surface font-semibold">Stripe CC</span>
+<span>•</span>
+<span class="text-primary hover:underline cursor-pointer">INV-2024-1075</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-code text-label-code font-bold text-secondary">+$4,250.00</span>
+<span class="font-label-code text-[10px] text-outline">2 hrs ago</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-primary font-title-md text-title-md transition-colors text-center shadow-sm">
+            View All 1,180 Transactions
+          </button>
+</div>
+<!-- Billing Health Check & Upcoming Forecast Card -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col">
+<div class="flex items-center justify-between pb-space-xs">
+<h3 class="font-title-md text-title-md text-primary font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-lg">health_and_safety</span>
+              Billing Health Check
+            </h3>
+<span class="font-label-code text-label-code font-bold text-secondary bg-secondary/10 px-2 py-0.5 rounded">99.8% Healthy</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">Pre-flight triggers and upcoming subscription lifecycle events</p>
+<!-- Renewal Pipeline Section -->
+<div class="flex flex-col gap-space-sm">
+<div class="bg-surface-container-low rounded-xl p-3 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Next 7 Days Renewals</span>
+<span class="font-label-code text-label-code font-bold text-primary">48 Renewals</span>
+</div>
+<div class="flex items-center justify-between font-label-code text-label-code text-on-surface-variant">
+<span>Projected Billing Volume</span>
+<strong class="text-primary text-body-md font-bold">$18,400.00</strong>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 82%;"></div>
+</div>
+<span class="text-[11px] text-outline">82% configured for automated CC/ACH recharge</span>
+</div>
+<!-- Unbilled Draft Quotes Section -->
+<div class="bg-surface-container-low rounded-xl p-3 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Unbilled Draft Quotes</span>
+<span class="font-label-code text-label-code font-bold text-on-error-container bg-error-container/60 px-2 py-0.5 rounded">5 Quotes Pending</span>
+</div>
+<div class="flex items-center justify-between font-label-code text-label-code text-on-surface-variant">
+<span>Total Stalled Pipeline</span>
+<strong class="text-error text-body-md font-bold">$9,200.00</strong>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="text-[11px] text-outline font-label-code">Oldest quote: 6 days unapproved</span>
+<button class="text-xs font-semibold text-primary hover:underline">Push to Invoicing →</button>
+</div>
+</div>
+<!-- Dunning & Gateway Health -->
+<div class="p-3 rounded-xl bg-surface-container-high/40 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-base">verified_user</span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-medium">Smart Dunning Engine</span>
+<span class="text-xs text-on-surface-variant">Recovered 18 cards ($7,300)</span>
+</div>
+</div>
+<span class="font-label-code text-label-code text-secondary font-bold">Active</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Simple interactive filter for overdue table demo
+  const filterInput = document.getElementById('invoiceFilter');
+  if (filterInput) {
+    filterInput.addEventListener('keyup', function(e) {
+      const term = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('#invoiceTableBody tr');
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(term) ? '' : 'none';
+      });
+    });
+  }
+
+  // Export Button feedback
+  const exportBtn = document.getElementById('exportDropdownBtn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', function() {
+      const originalHtml = exportBtn.innerHTML;
+      exportBtn.innerHTML = '<span class="material-symbols-outlined text-base animate-spin">sync</span> <span>Generating...</span>';
+      setTimeout(() => {
+        exportBtn.innerHTML = originalHtml;
+        alert('Consolidated October 2024 Revenue Ledger downloaded as CSV & PDF package.');
+      }, 700);
+    });
+  }
+</script></div></main><footer class="w-full bg-surface-container-low py-space-lg shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="max-w-7xl mx-auto px-margin-lg flex flex-col md:flex-row items-center justify-between gap-space-md text-on-surface-variant font-body-sm text-body-sm"><div class="flex items-center gap-space-md"><span class="font-title-md text-title-md text-primary font-bold">Brightloop</span><span>© 2024 Brightloop Technologies, Inc. Enterprise Billing Engine.</span></div><div class="flex items-center gap-space-lg"><span class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-secondary"></span><span>API v2.4 Status: Operational</span></span><a class="hover:text-on-surface transition-colors" href="#">Audit Logs</a><a class="hover:text-on-surface transition-colors" href="#">Security &amp; Compliance</a><a class="hover:text-on-surface transition-colors" href="#">Support Desk</a></div></div></footer></body></html>

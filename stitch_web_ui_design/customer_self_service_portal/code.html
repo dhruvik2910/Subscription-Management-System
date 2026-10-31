@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-bright": "#f8f9ff", "on-background": "#0b1c30", "secondary": "#006a61", "surface-container": "#e5eeff", "on-primary-container": "#8691b7", "tertiary": "#001b10", "on-tertiary-fixed": "#002114", "surface": "#f8f9ff", "surface-tint": "#525d80", "inverse-on-surface": "#eaf1ff", "on-primary": "#ffffff", "on-primary-fixed-variant": "#3a4667", "surface-container-high": "#dce9ff", "primary-fixed-dim": "#bac5ee", "surface-variant": "#d3e4fe", "on-secondary-container": "#006f66", "on-surface": "#0b1c30", "inverse-primary": "#bac5ee", "inverse-surface": "#213145", "on-surface-variant": "#45464e", "surface-container-lowest": "#ffffff", "surface-dim": "#cbdbf5", "primary": "#081534", "secondary-fixed": "#89f5e7", "outline-variant": "#c6c6cf", "error": "#ba1a1a", "tertiary-fixed": "#85f8c4", "on-tertiary-container": "#27a577", "primary-container": "#1e2a4a", "outline": "#76777f", "surface-container-low": "#eff4ff", "secondary-container": "#86f2e4", "on-secondary-fixed": "#00201d", "tertiary-fixed-dim": "#68dba9", "on-error-container": "#93000a", "on-secondary": "#ffffff", "error-container": "#ffdad6", "primary-fixed": "#dae2ff", "on-tertiary": "#ffffff", "tertiary-container": "#003220", "secondary-fixed-dim": "#6bd8cb", "on-primary-fixed": "#0d1a39", "on-secondary-fixed-variant": "#005049", "surface-container-highest": "#d3e4fe", "background": "#f8f9ff", "on-tertiary-fixed-variant": "#005137", "on-error": "#ffffff" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xl": "1.75rem", "gutter-lg": "1.5rem", "margin": "1rem", "margin-md": "1.5rem", "space-md": "0.75rem", "space-lg": "1.25rem", "space-sm": "0.5rem", "margin-lg": "2rem", "space-xs": "0.25rem", "gutter": "1rem" }, "fontFamily": { "headline-sm": ["Inter"], "headline-lg": ["Inter"], "body-sm": ["Inter"], "label-num-lg": ["JetBrains Mono"], "display": ["Inter"], "body-md": ["Inter"], "label-caps": ["Inter"], "body-lg": ["Inter"], "label-code": ["JetBrains Mono"], "title-md": ["Inter"], "headline-md": ["Inter"], "headline-lg-mobile": ["Inter"] }, "fontSize": { "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}], "headline-lg": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600"}], "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}], "label-num-lg": ["20px", {"lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600"}], "display": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700"}], "body-md": ["13px", {"lineHeight": "18px", "fontWeight": "400"}], "label-caps": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}], "body-lg": ["15px", {"lineHeight": "22px", "fontWeight": "400"}], "label-code": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500"}], "title-md": ["15px", {"lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "600"}], "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}], "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}] } } } }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-margin-lg flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-md shrink-0"><img alt="Brightloop Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XVTGyl8tojox9o2Pj_Gw52ui8m4Qc6BsoNXjEeBbigeneWvaLD4xi_AEHZs6_KYy5yHtLKYrZ1p0N1lDO4gL0HnsjsEl8Qa95kM5WQU-hKaS4g6q8dNaJjxFoFeCNE3Evqk5hNUfcD51trh1fdN0Xy4pYRghZqfdBaIlVwhdpAPW0E5XHuSDYECML6Jr9H063kLfzJxRYa3C-DhTq9bmTIHyCNAdXnUv6ULonArA_2"/><span class="font-title-md text-title-md text-primary font-bold">Brightloop</span><div class="hidden xl:flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-code text-label-code"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span>Production • Billing Month: Oct 2024</span></div></div><nav class="hidden lg:flex items-center gap-space-xs" data-active-classes="bg-primary-container text-on-primary font-title-md"><a class="px-space-md py-space-sm rounded-lg font-title-md text-title-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="revenue-operations-dashboard" href="#">Revenue &amp; Operations</a><a class="px-space-md py-space-sm rounded-lg font-title-md text-title-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="subscription-quotation-detail" href="#">Subscriptions &amp; Quotes</a><a class="px-space-md py-space-sm rounded-lg font-title-md text-title-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="billing-day-invoice-operations" href="#">Billing &amp; Invoices</a><a class="px-space-md py-space-sm rounded-lg font-title-md text-title-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="products-plans-discount-catalog" href="#">Products &amp; Plans</a><a aria-current="page" class="px-space-md py-space-sm rounded-lg transition-all bg-primary-container text-on-primary font-title-md" data-path="customer-self-service-portal" href="#">Customer Portal</a></nav><div class="flex items-center gap-space-md shrink-0"><div class="hidden md:flex items-center bg-surface-container-low px-space-md py-space-xs rounded-lg gap-space-xs w-64 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><span class="material-symbols-outlined text-outline text-lg">search</span><span class="font-body-sm text-body-sm text-outline flex-1 truncate">Jump to...</span><kbd class="font-label-code text-label-code bg-surface-container px-space-xs py-0.5 rounded text-on-surface-variant">Cmd+K</kbd></div><button class="inline-flex items-center gap-space-xs bg-primary-container text-on-primary px-space-md py-space-xs rounded-lg font-title-md text-title-md hover:bg-primary transition-colors shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><span class="material-symbols-outlined text-base">add</span><span>New Quote</span></button><div class="relative flex items-center justify-center p-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors cursor-pointer"><span class="material-symbols-outlined text-xl">notifications</span><span class="absolute -top-1 -right-1 bg-error text-on-error font-label-caps text-label-caps px-1 py-0.5 rounded-full ring-2 ring-surface">3</span></div><div class="flex items-center gap-space-sm pl-space-xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-sy6hINsvVWcZrChfs2EgMvtB51ZaiWmmLxg0fGtDr-cgqIJmAxWlCT-dJskpeLrDboulyB_1odAlts-CRUrqosQU9PtVwZMAArMRsrlxRukaQkqY__Yo1-Jt6rD99xEO4dH_OBuNulETV5wRngsBHxufIitOT1Hm1gqcDp8vTCVdmyHNofVECXIJ9WvuQrCNrx1WKTAbHoP4RU6pyJTdQZ4hSvZXyuZQOBZ91Wg"/><div class="hidden 2xl:flex flex-col text-left"><span class="font-title-md text-title-md text-on-surface font-semibold leading-tight">Elena Rostova</span><span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Admin (Finance Lead)</span></div></div></div></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-80px)]"><div class="flex flex-col w-full">
+<!-- Toast Notification Bar (Dismissable) -->
+<div class="bg-surface-container-high px-margin-lg py-space-sm shadow-sm transition-all duration-300" id="alert-banner">
+<div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-space-sm text-on-surface">
+<div class="flex items-center gap-space-sm">
+<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-error text-on-error text-xs font-bold">!</span>
+<span class="font-body-md text-body-md text-on-surface">
+<strong>Attention:</strong> Invoice <span class="font-label-code text-label-code bg-surface-container px-1 py-0.5 rounded">INV-2024-1029</span> ($1,450.00) is awaiting manual confirmation. Please settle balance to avoid automated service throttling.
+        </span>
+</div>
+<div class="flex items-center gap-space-md shrink-0">
+<button class="px-space-md py-1 rounded bg-primary text-on-primary font-title-md text-body-sm hover:bg-primary-container transition-colors shadow-sm" onclick="openPaymentModal()">
+          Pay Now
+        </button>
+<button class="text-on-surface-variant hover:text-on-surface p-1" onclick="document.getElementById('alert-banner').remove()">
+<span class="material-symbols-outlined text-base leading-none">close</span>
+</button>
+</div>
+</div>
+</div>
+<div class="max-w-7xl mx-auto w-full px-margin-lg py-margin-lg space-y-gutter-lg">
+<!-- 1. Customer Account & Organization Header Panel -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-margin-md sm:p-gutter-lg relative overflow-hidden">
+<!-- Ambient decorative backdrop glow -->
+<div class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-surface-container-high/60 blur-3xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-gutter-lg">
+<div class="space-y-space-xs">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="font-label-caps text-label-caps px-space-sm py-0.5 rounded bg-surface-container-high text-primary font-semibold tracking-wider">
+              CLIENT PORTAL
+            </span>
+<span class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded bg-emerald-50 text-emerald-800 font-label-caps text-label-caps font-semibold">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Active • In Good Standing
+            </span>
+<span class="font-label-code text-label-code text-on-surface-variant bg-surface-container-low px-2 py-0.5 rounded">
+              Org ID: #CUST-98214
+            </span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">
+            Apex Retail Inc
+          </h1>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-space-sm">
+<span>Primary Billing Account: <strong>Alex Chen</strong> (VP Operations)</span>
+<span class="text-outline-variant">•</span>
+<span>Enterprise SLA: Tier-1 Production</span>
+</p>
+</div>
+<!-- Quick actions -->
+<div class="flex flex-wrap items-center gap-space-sm shrink-0">
+<button class="inline-flex items-center gap-space-xs px-space-md py-space-sm rounded bg-surface-container-low text-primary font-title-md text-title-md hover:bg-surface-container transition-colors shadow-sm" onclick="scrollToElement('payment-methods-section')">
+<span class="material-symbols-outlined text-base">credit_card</span>
+<span>Payment Methods</span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-md py-space-sm rounded bg-surface-container-low text-primary font-title-md text-title-md hover:bg-surface-container transition-colors shadow-sm" onclick="openBillingContactsModal()">
+<span class="material-symbols-outlined text-base">contact_mail</span>
+<span>Billing Contacts</span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-md py-space-sm rounded bg-primary text-on-primary font-title-md text-title-md hover:bg-primary-container transition-colors shadow-sm" onclick="openUpgradeModal()">
+<span class="material-symbols-outlined text-base">upgrade</span>
+<span>Request Plan Upgrade</span>
+</button>
+</div>
+</div>
+<!-- Quick Metrics Strip -->
+<div class="mt-gutter-lg pt-gutter-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter bg-surface-container-low/60 rounded-xl p-gutter">
+<div class="space-y-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">Subscriptions In Service</span>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-label-num-lg text-label-num-lg text-primary font-bold">1</span>
+<span class="font-body-sm text-body-sm text-secondary font-medium">(Monthly recurring)</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline-variant uppercase">Enterprise Core Platform</span>
+</div>
+<div class="space-y-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">Next Scheduled Invoice</span>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-label-num-lg text-label-num-lg text-primary font-bold">$1,450.00</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">USD</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Charges on <strong>Nov 14, 2024</strong></span>
+</div>
+<div class="space-y-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">Primary Payment Flow</span>
+<div class="flex items-center gap-space-xs">
+<span class="font-label-num-lg text-label-num-lg text-primary font-bold">Visa •• 4242</span>
+<span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">AUTO</span>
+</div>
+<span class="font-body-sm text-body-sm text-emerald-700 font-medium">Auto-pay enabled &amp; active</span>
+</div>
+<div class="space-y-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">Monthly Contract Period</span>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-label-num-lg text-label-num-lg text-primary font-bold">Day 14 of 30</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 46%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- 2. Active Subscription Card & License Capacity Bento -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg">
+<!-- Primary Subscription Core Card (8 cols) -->
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-xl shadow-sm p-margin-md sm:p-gutter-lg flex flex-col justify-between space-y-gutter">
+<div>
+<!-- Header and status -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-space-sm">
+<div>
+<div class="flex items-center gap-space-sm">
+<span class="font-label-code text-label-code font-bold text-primary">SUB-2024-8842</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-semibold">
+                  LIVE SUBSCRIPTION
+                </span>
+</div>
+<h2 class="font-headline-md text-headline-md text-primary mt-1">
+                Enterprise ERP Suite with Odoo Brand Edition
+              </h2>
+</div>
+<div class="text-left sm:text-right">
+<span class="font-label-num-lg text-label-num-lg text-primary font-bold block">$1,450.00</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Billed monthly (excl. local VAT)</span>
+</div>
+</div>
+<!-- Description and lifecycle info -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md py-space-md bg-surface-container-low/50 rounded-lg px-space-md">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Activation Date</span>
+<span class="font-body-md text-body-md font-semibold text-primary">Aug 14, 2023 (14 mos)</span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Renewal Terms</span>
+<span class="font-body-md text-body-md font-semibold text-primary">Automatic (30 days cadence)</span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Support SLA</span>
+<span class="font-body-md text-body-md font-semibold text-primary">Priority 4hr Response</span>
+</div>
+</div>
+<!-- Capacity Bar & Alert Banner -->
+<div class="mt-space-lg space-y-space-sm">
+<div class="flex items-center justify-between text-body-sm">
+<span class="font-title-md text-title-md text-primary font-semibold flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-base text-primary">group</span>
+                User Seat Allocations
+              </span>
+<span class="font-label-code text-label-code text-error font-bold">
+                10 of 10 Seats Occupied (100%)
+              </span>
+</div>
+<!-- Progress Meter -->
+<div class="w-full bg-surface-container h-3 rounded-full overflow-hidden p-0.5">
+<div class="bg-amber-500 h-full rounded-full transition-all duration-500" style="width: 100%;"></div>
+</div>
+<!-- Seat Alert Badge / Upgrade CTA -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm p-space-md rounded-lg bg-amber-50 text-amber-900">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-amber-700 text-lg">warning</span>
+<span class="font-body-md text-body-md">
+<strong>Seat limit reached:</strong> Your team cannot invite additional operators without adding capacity.
+                </span>
+</div>
+<button class="px-space-md py-1 rounded bg-amber-700 text-on-primary font-title-md text-body-sm hover:bg-amber-800 transition-colors shadow-sm shrink-0" onclick="openSeatModal()">
+                + Add 5 Seats ($500/mo)
+              </button>
+</div>
+</div>
+</div>
+<!-- Self-Service Lifecycle Actions Footer -->
+<div class="pt-gutter flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex flex-wrap items-center gap-space-sm">
+<button class="px-space-md py-space-sm rounded bg-primary-container text-on-primary font-title-md text-body-sm hover:bg-primary transition-colors shadow-sm flex items-center gap-space-xs" onclick="openSeatModal()">
+<span class="material-symbols-outlined text-base">tune</span>
+<span>Manage Add-ons &amp; Seats</span>
+</button>
+<div class="relative group inline-block">
+<button class="px-space-md py-space-sm rounded bg-surface-container text-primary font-title-md text-body-sm hover:bg-surface-container-high transition-colors" onclick="openPauseModal()">
+<span class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-base">pause_circle</span>
+<span>Pause Subscription</span>
+</span>
+</button>
+<div class="absolute bottom-full left-0 mb-2 hidden group-hover:block w-64 p-space-sm bg-inverse-surface text-inverse-on-surface text-body-sm rounded shadow-lg z-20">
+                Based on your MSA, you can pause billing and retain encrypted data snapshots for up to 30 calendar days per fiscal year.
+              </div>
+</div>
+</div>
+<!-- Cancellation with terms note -->
+<div class="flex items-center gap-space-sm">
+<button class="px-space-md py-space-sm rounded text-error hover:bg-error-container/40 font-title-md text-body-sm transition-colors flex items-center gap-space-xs" onclick="openCancelModal()">
+<span class="material-symbols-outlined text-base">block</span>
+<span>Cancel or Early Close</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right Bento Column: Service Health & SLA Guarantee (4 cols) -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-xl shadow-sm p-margin-md sm:p-gutter-lg flex flex-col justify-between space-y-gutter">
+<div class="space-y-space-md">
+<div class="flex items-center justify-between">
+<h3 class="font-title-md text-title-md text-primary font-bold">Instance Provisioning</h3>
+<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-label-caps text-label-caps font-semibold">99.98% UPTIME</span>
+</div>
+<!-- SVG Visual Donut Meter: Resource Usage -->
+<div class="p-space-md bg-surface-container-low rounded-xl flex items-center justify-around gap-space-md">
+<div class="relative w-24 h-24 flex items-center justify-center shrink-0">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<!-- Background circle -->
+<circle class="text-surface-container" cx="18" cy="18" fill="none" r="15.9155" stroke="currentColor" stroke-width="3"></circle>
+<!-- Filled circle 72% -->
+<circle class="text-secondary" cx="18" cy="18" fill="none" r="15.9155" stroke="currentColor" stroke-dasharray="72, 100" stroke-linecap="round" stroke-width="3"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="font-label-num-lg text-body-lg font-bold text-primary">72%</span>
+<span class="font-label-caps text-[9px] text-on-surface-variant">API QUOTA</span>
+</div>
+</div>
+<div class="space-y-space-xs font-body-sm text-body-sm">
+<div>
+<span class="text-on-surface-variant block">Sync Operations:</span>
+<span class="font-label-code text-label-code text-primary font-bold">720,192 / 1.0M calls</span>
+</div>
+<div>
+<span class="text-on-surface-variant block">Database Storage:</span>
+<span class="font-label-code text-label-code text-primary font-bold">48.2 GB of 250 GB</span>
+</div>
+<div>
+<span class="text-on-surface-variant block">Cluster Node:</span>
+<span class="font-label-code text-label-code text-secondary font-bold">US-East-Primary-A</span>
+</div>
+</div>
+</div>
+<!-- Account Manager Mini Profile -->
+<div class="p-space-md bg-surface-container rounded-lg space-y-space-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Dedicated Success Engineer</span>
+<div class="flex items-center gap-space-sm pt-1">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm shrink-0" data-alt="Corporate headshot of Marcus Vance, a professional account lead with warm lighting and deep navy executive attire in a modern tech office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSHMOt_n105GFBG8_601g--38gmdPOlrBs-wH8tT9eoXqeyaRb99vHz-i1ZRv5RCB9LDrzrxHgjh2EUCtEigNyzj8561PuDiCcdfL3oLtakYakkyOeIddXGZ-n6MG_Ik1XwmbiD1ejYzcM24qgx3HYRC1JbNucxSuJCl7D0LwWK1KFZkFvwhW51Jqp6FqA0svbGC0aCnJqKJHovrp0fhG_mwnCy29hfhn2Uv8D6GQ"/>
+<div>
+<span class="font-title-md text-title-md text-primary font-semibold block leading-tight">Marcus Vance</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Client Principal &amp; Account Lead</span>
+</div>
+</div>
+<div class="pt-space-xs flex items-center justify-between text-body-sm">
+<span class="font-label-code text-label-code text-on-surface-variant">m.vance@brightloop.io</span>
+<a class="text-secondary font-title-md text-body-sm hover:underline" href="mailto:m.vance@brightloop.io">Direct Email</a>
+</div>
+</div>
+</div>
+<div class="pt-space-sm text-on-surface-variant font-body-sm text-body-sm space-y-1">
+<p class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-secondary">verified_user</span>
+            SOC2 Type II &amp; ISO 27001 Compliant Tenant
+          </p>
+<p class="text-xs text-outline-variant">Brightloop Vault Token #TOKN-8919-APPX</p>
+</div>
+</div>
+</div>
+<!-- 3. Self-Service Modifiers & Feature Add-ons Grid -->
+<div class="space-y-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary">Available Add-ons &amp; Self-Service Modifiers</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Instant activation and pro-rated billing applied directly to your monthly statement without support tickets.</p>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant self-start sm:self-center">Pro-rated Daily • Cancel Anytime</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Add-on Card 1: Active -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-gutter flex flex-col justify-between relative overflow-hidden">
+<div class="space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-label-caps text-label-caps font-bold">
+<span class="material-symbols-outlined text-xs">check</span> CURRENTLY ACTIVE
+              </span>
+<span class="font-label-code text-label-code text-primary font-bold">$200.00 / mo</span>
+</div>
+<h3 class="font-title-md text-title-md text-primary font-bold">Advanced Subscription Analytics</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              Deep cohort retention, revenue recognition forecasts, dynamic cohort waterfalls, and automated ERP reconciliation exports.
+            </p>
+<div class="pt-space-xs">
+<div class="font-label-code text-body-sm text-on-surface-variant bg-surface-container-low px-2 py-1 rounded inline-block">
+                Auto-renews Nov 14, 2024
+              </div>
+</div>
+</div>
+<div class="pt-gutter flex items-center justify-between">
+<button class="font-title-md text-body-sm text-secondary hover:underline" onclick="alert('Configuring Advanced Analytics filters...')">
+              Configure Settings
+            </button>
+<button class="px-space-md py-1 rounded bg-surface-container text-on-surface-variant hover:bg-error-container/40 hover:text-error font-title-md text-body-sm transition-colors" onclick="confirmDeactivate('Advanced Subscription Analytics')">
+              Deactivate
+            </button>
+</div>
+</div>
+<!-- Add-on Card 2: Inactive (Upsell) -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-gutter flex flex-col justify-between relative overflow-hidden hover:shadow-md transition-shadow">
+<div class="space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-caps text-label-caps font-medium">
+                AVAILABLE OPTION
+              </span>
+<span class="font-label-code text-label-code text-primary font-bold">$150.00 / mo</span>
+</div>
+<h3 class="font-title-md text-title-md text-primary font-bold">Dedicated 24/7 Cloud Support</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              Round-the-clock priority escalation, guaranteed 15-minute SLA response for Sev-1 outages, and dedicated Slack Connect channels.
+            </p>
+<ul class="pt-space-xs space-y-1 font-body-sm text-body-sm text-on-surface-variant">
+<li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-xs text-secondary">check_circle</span> 15-min emergency response</li>
+<li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-xs text-secondary">check_circle</span> Shared private Slack/Teams bridge</li>
+</ul>
+</div>
+<div class="pt-gutter">
+<button class="w-full py-2 rounded bg-primary text-on-primary hover:bg-primary-container font-title-md text-body-sm transition-colors flex items-center justify-center gap-space-xs shadow-sm" onclick="confirmActivate('Dedicated 24/7 Cloud Support', 150)">
+<span class="material-symbols-outlined text-base">add</span>
+<span>Add to Plan ($150/mo)</span>
+</button>
+</div>
+</div>
+<!-- Add-on Card 3: Active Sandbox Seats -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-gutter flex flex-col justify-between relative overflow-hidden">
+<div class="space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-label-caps text-label-caps font-bold">
+<span class="material-symbols-outlined text-xs">check</span> ACTIVE (INCLUDED)
+              </span>
+<span class="font-label-code text-label-code text-primary font-bold">Included</span>
+</div>
+<h3 class="font-title-md text-title-md text-primary font-bold">Sandbox Developer Seats</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              Staging environments mirroring your live schema with synthetic dataset generators for regression integration testing.
+            </p>
+<div class="pt-space-xs font-body-sm text-body-sm">
+<div class="flex items-center justify-between mb-1">
+<span class="text-on-surface-variant">Current Dev Licenses:</span>
+<span class="font-label-code text-label-code font-bold text-primary">3 of 3 Assigned</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 100%;"></div>
+</div>
+</div>
+</div>
+<div class="pt-gutter flex items-center justify-between gap-space-sm">
+<button class="font-title-md text-body-sm text-secondary hover:underline" onclick="alert('Viewing developer API keys and sandbox tokens...')">
+              API Keys
+            </button>
+<button class="px-space-md py-1 rounded bg-surface-container-low text-primary hover:bg-surface-container font-title-md text-body-sm transition-colors" onclick="openDevSeatModal()">
+              + Add Dev Seats ($40/ea)
+            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- 4. Invoices & Billing History Section -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-margin-md sm:p-gutter-lg space-y-gutter">
+<!-- Top controls & search -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-gutter">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary">Billing History &amp; Invoices</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">View itemized fiscal receipts, reconciliation audit logs, and download official PDF tax invoices.</p>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm">
+<!-- Year filter pill -->
+<div class="flex items-center bg-surface-container-low rounded-lg p-1">
+<button class="px-space-md py-1 rounded bg-surface-container-lowest text-primary font-title-md text-body-sm shadow-sm">2024</button>
+<button class="px-space-md py-1 rounded text-on-surface-variant hover:text-on-surface font-title-md text-body-sm">2023</button>
+<button class="px-space-md py-1 rounded text-on-surface-variant hover:text-on-surface font-title-md text-body-sm">All</button>
+</div>
+<!-- Download All Button -->
+<button class="inline-flex items-center gap-space-xs px-space-md py-space-sm rounded bg-surface-container-low text-primary font-title-md text-body-sm hover:bg-surface-container transition-colors" onclick="downloadAllInvoices()">
+<span class="material-symbols-outlined text-base">folder_zip</span>
+<span>Download All Invoices (ZIP)</span>
+</button>
+</div>
+</div>
+<!-- High-Density Invoice Table -->
+<div class="overflow-x-auto -mx-margin-md sm:mx-0">
+<table class="w-full text-left border-collapse min-w-[760px]">
+<thead>
+<tr class="bg-surface-container-low/60 text-on-surface-variant font-label-caps text-label-caps">
+<th class="py-space-md px-space-md">Invoice #</th>
+<th class="py-space-md px-space-md">Billing Period</th>
+<th class="py-space-md px-space-md">Issue Date</th>
+<th class="py-space-md px-space-md text-right">Amount (USD)</th>
+<th class="py-space-md px-space-md">Status</th>
+<th class="py-space-md px-space-md text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container font-body-md text-body-md">
+<!-- Row 1: Overdue / Action Needed -->
+<tr class="hover:bg-amber-50/40 transition-colors bg-amber-50/20">
+<td class="py-space-md px-space-md font-label-code text-label-code font-bold text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-600 text-sm">priority_high</span>
+                INV-2024-1029
+              </td>
+<td class="py-space-md px-space-md text-on-surface">
+                Oct 14, 2024 – Nov 13, 2024
+              </td>
+<td class="py-space-md px-space-md text-on-surface-variant">
+                Oct 14, 2024
+              </td>
+<td class="py-space-md px-space-md text-right font-label-code text-label-num-lg font-bold text-primary">
+                $1,450.00
+              </td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-amber-100 text-amber-900 font-label-caps text-label-caps font-bold">
+                  Action Needed / Due
+                </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="px-space-md py-1 rounded bg-primary text-on-primary font-title-md text-body-sm hover:bg-primary-container transition-colors shadow-sm flex items-center gap-1" onclick="openPaymentModal()">
+<span class="material-symbols-outlined text-xs">bolt</span>
+<span>Pay Now</span>
+</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" onclick="downloadPdf('INV-2024-1029')" title="Download PDF">
+<span class="material-symbols-outlined text-base">download</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Paid -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-space-md px-space-md font-label-code text-label-code font-bold text-primary">
+                INV-2024-0912
+              </td>
+<td class="py-space-md px-space-md text-on-surface">
+                Sep 14, 2024 – Oct 13, 2024
+              </td>
+<td class="py-space-md px-space-md text-on-surface-variant">
+                Sep 14, 2024
+              </td>
+<td class="py-space-md px-space-md text-right font-label-code text-title-md font-bold text-primary">
+                $1,450.00
+              </td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-emerald-50 text-emerald-800 font-label-caps text-label-caps font-semibold">
+<span class="material-symbols-outlined text-xs">done</span> Paid
+                </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="px-space-sm py-1 rounded text-on-surface-variant hover:text-primary font-title-md text-body-sm hover:bg-surface-container transition-colors" onclick="viewReceipt('INV-2024-0912')">
+                    Receipt
+                  </button>
+<button class="inline-flex items-center gap-1 px-space-sm py-1 rounded bg-surface-container-low text-primary font-title-md text-body-sm hover:bg-surface-container transition-colors" onclick="downloadPdf('INV-2024-0912')">
+<span class="material-symbols-outlined text-xs">picture_as_pdf</span>
+<span>PDF</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Paid -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-space-md px-space-md font-label-code text-label-code font-bold text-primary">
+                INV-2024-0785
+              </td>
+<td class="py-space-md px-space-md text-on-surface">
+                Aug 14, 2024 – Sep 13, 2024
+              </td>
+<td class="py-space-md px-space-md text-on-surface-variant">
+                Aug 14, 2024
+              </td>
+<td class="py-space-md px-space-md text-right font-label-code text-title-md font-bold text-primary">
+                $1,450.00
+              </td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-emerald-50 text-emerald-800 font-label-caps text-label-caps font-semibold">
+<span class="material-symbols-outlined text-xs">done</span> Paid
+                </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="px-space-sm py-1 rounded text-on-surface-variant hover:text-primary font-title-md text-body-sm hover:bg-surface-container transition-colors" onclick="viewReceipt('INV-2024-0785')">
+                    Receipt
+                  </button>
+<button class="inline-flex items-center gap-1 px-space-sm py-1 rounded bg-surface-container-low text-primary font-title-md text-body-sm hover:bg-surface-container transition-colors" onclick="downloadPdf('INV-2024-0785')">
+<span class="material-symbols-outlined text-xs">picture_as_pdf</span>
+<span>PDF</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Paid -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-space-md px-space-md font-label-code text-label-code font-bold text-primary">
+                INV-2024-0650
+              </td>
+<td class="py-space-md px-space-md text-on-surface">
+                Jul 14, 2024 – Aug 13, 2024
+              </td>
+<td class="py-space-md px-space-md text-on-surface-variant">
+                Jul 14, 2024
+              </td>
+<td class="py-space-md px-space-md text-right font-label-code text-title-md font-bold text-primary">
+                $1,450.00
+              </td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-emerald-50 text-emerald-800 font-label-caps text-label-caps font-semibold">
+<span class="material-symbols-outlined text-xs">done</span> Paid
+                </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="px-space-sm py-1 rounded text-on-surface-variant hover:text-primary font-title-md text-body-sm hover:bg-surface-container transition-colors" onclick="viewReceipt('INV-2024-0650')">
+                    Receipt
+                  </button>
+<button class="inline-flex items-center gap-1 px-space-sm py-1 rounded bg-surface-container-low text-primary font-title-md text-body-sm hover:bg-surface-container transition-colors" onclick="downloadPdf('INV-2024-0650')">
+<span class="material-symbols-outlined text-xs">picture_as_pdf</span>
+<span>PDF</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination & Summary Footer -->
+<div class="pt-space-sm flex flex-col sm:flex-row items-center justify-between gap-space-sm text-body-sm text-on-surface-variant">
+<span>Showing 4 of 14 fiscal periods for Apex Retail Inc</span>
+<div class="flex items-center gap-space-xs">
+<button class="px-3 py-1 rounded bg-surface-container-low text-on-surface-variant disabled:opacity-50" disabled="">Previous</button>
+<span class="px-2 font-label-code text-label-code text-primary font-bold">Page 1 of 4</span>
+<button class="px-3 py-1 rounded bg-surface-container-low text-primary hover:bg-surface-container">Next</button>
+</div>
+</div>
+</div>
+<!-- 5. Stored Payment Methods & Auto-Pay Bento Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg" id="payment-methods-section">
+<!-- Stored Cards (8 cols) -->
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-xl shadow-sm p-margin-md sm:p-gutter-lg space-y-gutter">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary">Stored Payment Methods</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Encrypted payment instruments linked to automatic subscription renewal.</p>
+</div>
+<button class="inline-flex items-center gap-space-xs px-space-md py-space-sm rounded bg-surface-container-low text-primary font-title-md text-body-sm hover:bg-surface-container transition-colors" onclick="openAddPaymentModal()">
+<span class="material-symbols-outlined text-base">add_card</span>
+<span>Add Payment Method</span>
+</button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter">
+<!-- Primary Card -->
+<div class="p-gutter rounded-xl bg-gradient-to-br from-surface-container-lowest via-surface-container-low to-surface-container relative shadow-sm space-y-space-md">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-space-sm">
+<!-- Chip / Card Brand Icon -->
+<div class="w-10 h-7 rounded bg-primary flex items-center justify-center text-on-primary font-label-caps text-xs font-black tracking-wider">
+                  VISA
+                </div>
+<div>
+<span class="font-title-md text-title-md text-primary font-bold block">•••• 4242</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Exp 08/27 • Alex Chen</span>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded bg-primary text-on-primary font-label-caps text-label-caps font-bold">
+                DEFAULT
+              </span>
+</div>
+<div class="flex items-center justify-between pt-space-xs text-body-sm">
+<span class="text-emerald-700 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">verified</span> Ready for auto-renewal
+              </span>
+<button class="font-title-md text-body-sm text-secondary hover:underline" onclick="alert('Editing Visa ending in 4242 details...')">
+                Edit Card
+              </button>
+</div>
+</div>
+<!-- Backup Bank Account -->
+<div class="p-gutter rounded-xl bg-surface-container-low space-y-space-md relative">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-7 rounded bg-surface-container-high flex items-center justify-center text-primary font-label-caps text-xs font-black">
+                  ACH
+                </div>
+<div>
+<span class="font-title-md text-title-md text-primary font-bold block">Silicon Valley Bank</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Checking •••• 9821</span>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-caps text-label-caps font-medium">
+                BACKUP
+              </span>
+</div>
+<div class="flex items-center justify-between pt-space-xs text-body-sm">
+<span class="text-on-surface-variant">Direct Debit Verified</span>
+<button class="font-title-md text-body-sm text-secondary hover:underline" onclick="setAsDefault('ACH 9821')">
+                Set as Default
+              </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Auto-Pay Preferences & Invoicing Address (4 cols) -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-xl shadow-sm p-margin-md sm:p-gutter-lg flex flex-col justify-between space-y-gutter">
+<div class="space-y-gutter">
+<div>
+<h3 class="font-title-md text-title-md text-primary font-bold">Auto-Pay Preferences</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Control automated monthly debits</p>
+</div>
+<!-- Switch Widget -->
+<div class="p-space-md bg-surface-container-low rounded-xl flex items-center justify-between gap-space-sm">
+<div>
+<span class="font-title-md text-title-md text-primary font-semibold block">Automatic Charges</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Debits default card on invoice due date</span>
+</div>
+<!-- Toggle -->
+<label class="relative inline-flex items-center cursor-pointer shrink-0">
+<input checked="" class="sr-only peer" id="autopay-toggle" onchange="toggleAutopay(this)" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+<!-- Billing entity details -->
+<div class="space-y-space-xs text-body-sm">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Fiscal Tax Entity</span>
+<p class="font-title-md text-body-sm font-semibold text-primary">Apex Retail Inc (US Delaware C-Corp)</p>
+<p class="text-on-surface-variant leading-relaxed">
+              EIN: 12-9842109<br/>
+              742 Market Street, Suite 900<br/>
+              San Francisco, CA 94103
+            </p>
+</div>
+</div>
+<button class="w-full py-2 rounded bg-surface-container-low text-primary hover:bg-surface-container font-title-md text-body-sm transition-colors text-center" onclick="openBillingContactsModal()">
+          Update Tax Address / EIN
+        </button>
+</div>
+</div>
+<!-- 6. Customer Support & Knowledge Quick Help -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-margin-md sm:p-gutter-lg space-y-gutter">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary">Self-Help Center &amp; Direct Support</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Resolve common subscription questions without waiting for an email reply.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Knowledge card 1 -->
+<a class="block p-gutter rounded-xl bg-surface-container-low hover:bg-surface-container transition-all group" href="#help-invite" onclick="alert('Viewing guide: Inviting team members to Brightloop ERP')">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary mb-space-sm group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined">person_add</span>
+</div>
+<h3 class="font-title-md text-title-md text-primary font-bold group-hover:text-secondary transition-colors">How to Invite Team Members</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+            Step-by-step walkthrough to assign roles, provision SSO seats, and manage RBAC access credentials.
+          </p>
+<span class="inline-flex items-center gap-1 font-title-md text-body-sm text-secondary mt-space-sm">
+            Read Guide <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</span>
+</a>
+<!-- Knowledge card 2 -->
+<a class="block p-gutter rounded-xl bg-surface-container-low hover:bg-surface-container transition-all group" href="#help-tax" onclick="alert('Viewing guide: Understanding your tax breakdown')">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary mb-space-sm group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined">receipt_long</span>
+</div>
+<h3 class="font-title-md text-title-md text-primary font-bold group-hover:text-secondary transition-colors">Understanding Tax &amp; Pro-rations</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+            Learn how state sales tax, EU VAT reverse charges, and mid-cycle seat additions are calculated.
+          </p>
+<span class="inline-flex items-center gap-1 font-title-md text-body-sm text-secondary mt-space-sm">
+            Read Breakdown <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</span>
+</a>
+<!-- Custom contract lead card -->
+<div class="p-gutter rounded-xl bg-gradient-to-br from-primary-container to-primary text-on-primary flex flex-col justify-between">
+<div class="space-y-space-xs">
+<span class="font-label-caps text-label-caps text-on-primary-container uppercase font-semibold">Special Contract Request?</span>
+<h3 class="font-title-md text-title-md text-on-primary font-bold">Custom Enterprise Terms</h3>
+<p class="font-body-sm text-body-sm text-surface-container-high leading-relaxed">
+              Need custom MSA revisions, annual PO prepayment terms, or custom DPA addendums? Marcus is on standby.
+            </p>
+</div>
+<div class="pt-gutter">
+<a class="w-full py-2 px-space-md rounded bg-surface-container-lowest text-primary hover:bg-surface-bright font-title-md text-body-sm text-center block transition-colors shadow-sm" href="mailto:m.vance@brightloop.io?subject=Apex%20Retail%20-%20Custom%20MSA%20Inquiry">
+              Contact Marcus Vance
+            </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive Modal 1: Pay Balance Modal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-primary/40 backdrop-blur-sm hidden" id="payment-modal">
+<div class="bg-surface-container-lowest rounded-xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+<div class="p-gutter bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-xl">payments</span>
+<h3 class="font-title-md text-title-md text-primary font-bold">Pay Invoice INV-2024-1029</h3>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1" onclick="closePaymentModal()">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+<div class="p-gutter space-y-gutter">
+<div class="bg-surface-container-low/60 p-space-md rounded-lg flex items-center justify-between">
+<div>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Outstanding Total Due</span>
+<span class="font-headline-md text-headline-md text-primary font-bold">$1,450.00 USD</span>
+</div>
+<span class="px-2 py-1 rounded bg-amber-100 text-amber-900 font-label-caps text-label-caps font-bold">
+            DUE NOW
+          </span>
+</div>
+<div class="space-y-space-sm">
+<label class="font-body-sm text-body-sm text-on-surface-variant font-medium block">Select Payment Method</label>
+<div class="space-y-space-xs">
+<label class="flex items-center justify-between p-space-md rounded-lg bg-surface-container-low cursor-pointer border border-transparent has-[:checked]:border-secondary">
+<div class="flex items-center gap-space-sm">
+<input checked="" class="text-secondary focus:ring-secondary" name="pay-method" type="radio"/>
+<span class="font-title-md text-body-sm text-primary font-semibold">Visa ending in 4242 (Default)</span>
+</div>
+<span class="font-label-code text-label-code text-on-surface-variant">Exp 08/27</span>
+</label>
+<label class="flex items-center justify-between p-space-md rounded-lg bg-surface-container-low cursor-pointer border border-transparent has-[:checked]:border-secondary">
+<div class="flex items-center gap-space-sm">
+<input class="text-secondary focus:ring-secondary" name="pay-method" type="radio"/>
+<span class="font-title-md text-body-sm text-primary font-semibold">ACH Silicon Valley Bank (••9821)</span>
+</div>
+<span class="font-label-code text-label-code text-on-surface-variant">Checking</span>
+</label>
+</div>
+</div>
+<div class="text-body-sm text-on-surface-variant text-xs">
+          A PDF payment receipt will be generated automatically and emailed to <strong>alex.chen@apexretail.com</strong>.
+        </div>
+</div>
+<div class="p-gutter bg-surface-container-low/40 flex items-center justify-end gap-space-sm">
+<button class="px-space-md py-2 rounded text-on-surface-variant hover:text-on-surface font-title-md text-body-sm" onclick="closePaymentModal()">
+          Cancel
+        </button>
+<button class="px-space-lg py-2 rounded bg-primary text-on-primary hover:bg-primary-container font-title-md text-body-sm transition-colors shadow-sm flex items-center gap-space-xs" id="pay-confirm-btn" onclick="executePayment()">
+<span class="material-symbols-outlined text-base">lock</span>
+<span>Authorize $1,450.00</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Interactive Modal 2: Add Capacity / Seats Modal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-primary/40 backdrop-blur-sm hidden" id="seat-modal">
+<div class="bg-surface-container-lowest rounded-xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+<div class="p-gutter bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-xl">group_add</span>
+<h3 class="font-title-md text-title-md text-primary font-bold">Add Enterprise Seats</h3>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1" onclick="closeSeatModal()">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+<div class="p-gutter space-y-gutter">
+<p class="font-body-md text-body-md text-on-surface-variant">
+          Additional team licenses are billed at <strong>$100.00 per user/mo</strong>, pro-rated to your Nov 14, 2024 renewal date.
+        </p>
+<div class="p-space-md bg-surface-container-low rounded-lg space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-body-sm text-primary font-semibold">Seat Quantity:</span>
+<div class="flex items-center gap-space-sm">
+<button class="w-8 h-8 rounded bg-surface-container-lowest shadow-sm flex items-center justify-center text-primary font-bold text-lg" onclick="changeSeatQty(-1)">-</button>
+<span class="font-label-num-lg text-label-num-lg text-primary font-bold w-8 text-center" id="seat-qty-display">5</span>
+<button class="w-8 h-8 rounded bg-surface-container-lowest shadow-sm flex items-center justify-center text-primary font-bold text-lg" onclick="changeSeatQty(1)">+</button>
+</div>
+</div>
+<div class="pt-space-xs flex items-center justify-between text-body-sm text-on-surface-variant">
+<span>Additional monthly cost:</span>
+<span class="font-label-code text-label-code text-primary font-bold" id="seat-cost-display">+$500.00 / mo</span>
+</div>
+<div class="flex items-center justify-between text-body-sm text-on-surface-variant">
+<span>Today's pro-rated charge:</span>
+<span class="font-label-code text-label-code text-secondary font-bold" id="seat-prorated-display">$266.67 USD</span>
+</div>
+</div>
+<div class="p-space-sm bg-emerald-50 text-emerald-900 rounded font-body-sm text-body-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-base text-emerald-700">check_circle</span>
+<span>New invite links will unlock immediately upon authorization.</span>
+</div>
+</div>
+<div class="p-gutter bg-surface-container-low/40 flex items-center justify-end gap-space-sm">
+<button class="px-space-md py-2 rounded text-on-surface-variant hover:text-on-surface font-title-md text-body-sm" onclick="closeSeatModal()">
+          Cancel
+        </button>
+<button class="px-space-lg py-2 rounded bg-primary text-on-primary hover:bg-primary-container font-title-md text-body-sm transition-colors shadow-sm" onclick="confirmSeatPurchase()">
+          Confirm Seat Allocation
+        </button>
+</div>
+</div>
+</div>
+<script>
+    function scrollToElement(id) {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function openPaymentModal() {
+      document.getElementById('payment-modal').classList.remove('hidden');
+    }
+
+    function closePaymentModal() {
+      document.getElementById('payment-modal').classList.add('hidden');
+    }
+
+    function executePayment() {
+      const btn = document.getElementById('pay-confirm-btn');
+      btn.innerHTML = `<span class="material-symbols-outlined text-base animate-spin">refresh</span> Processing...`;
+      btn.disabled = true;
+
+      setTimeout(() => {
+        alert('Payment of $1,450.00 successful via Visa ••4242! Receipt INV-2024-1029 generated.');
+        closePaymentModal();
+        const banner = document.getElementById('alert-banner');
+        if (banner) banner.remove();
+        btn.innerHTML = `<span class="material-symbols-outlined text-base">lock</span><span>Authorize $1,450.00</span>`;
+        btn.disabled = false;
+      }, 1200);
+    }
+
+    let seatCount = 5;
+    function openSeatModal() {
+      document.getElementById('seat-modal').classList.remove('hidden');
+    }
+
+    function closeSeatModal() {
+      document.getElementById('seat-modal').classList.add('hidden');
+    }
+
+    function changeSeatQty(delta) {
+      seatCount = Math.max(1, seatCount + delta);
+      document.getElementById('seat-qty-display').innerText = seatCount;
+      const monthly = seatCount * 100;
+      const prorated = (monthly * (16 / 30)).toFixed(2);
+      document.getElementById('seat-cost-display').innerText = `+$${monthly}.00 / mo`;
+      document.getElementById('seat-prorated-display').innerText = `$${prorated} USD`;
+    }
+
+    function confirmSeatPurchase() {
+      alert(`Successfully added ${seatCount} new seats to Enterprise ERP Suite. Invitations are now unlocked.`);
+      closeSeatModal();
+    }
+
+    function openPauseModal() {
+      const confirmPause = confirm(
+        "Pause Subscription: As per contract terms, you can pause for up to 30 days. Your data will be preserved securely. Would you like to schedule a pause beginning next billing cycle?"
+      );
+      if (confirmPause) {
+        alert("Subscription pause scheduled for Nov 14, 2024. You may unpause at any time from this portal.");
+      }
+    }
+
+    function openCancelModal() {
+      const confirmClose = confirm(
+        "Contract Notice: Early closure requires 30-day notice per Master Services Agreement Section 8.4. Would you like to review offboarding terms and download a full export archive?"
+      );
+      if (confirmClose) {
+        alert("Offboarding ticket initiated. A data migration archive link and formal closure documents have been sent to Alex Chen.");
+      }
+    }
+
+    function toggleAutopay(input) {
+      if (!input.checked) {
+        alert("Auto-pay turned OFF. Future invoices will require manual settlement within net-15 terms.");
+      } else {
+        alert("Auto-pay turned ON. Next recurring billing will debit Visa ending in 4242 on Nov 14, 2024.");
+      }
+    }
+
+    function confirmActivate(addonName, cost) {
+      if (confirm(`Add "${addonName}" for $${cost}.00/month? Pro-rated charges will apply immediately.`)) {
+        alert(`"${addonName}" activated! Provisioning automated services now.`);
+      }
+    }
+
+    function confirmDeactivate(addonName) {
+      if (confirm(`Deactivate "${addonName}"? Features will remain accessible until the end of the current billing cycle (Nov 14, 2024).`)) {
+        alert(`"${addonName}" set to expire on Nov 14, 2024.`);
+      }
+    }
+
+    function downloadPdf(invoiceId) {
+      alert(`Generating official VAT tax receipt PDF for ${invoiceId}...`);
+    }
+
+    function viewReceipt(invoiceId) {
+      alert(`Opening web receipt summary for ${invoiceId}...`);
+    }
+
+    function downloadAllInvoices() {
+      alert("Bundling all 2024 statement PDFs into Apex_Retail_Invoices_2024.zip...");
+    }
+
+    function openUpgradeModal() {
+      alert("Plan Upgrade Request: Our RevOps team will prepare custom custom licensing tiers (e.g. 50+ seats, dedicated multi-region failover). Marcus Vance will follow up in 2 hours.");
+    }
+
+    function openBillingContactsModal() {
+      alert("Billing Contacts: Currently sending statements to alex.chen@apexretail.com and accounting@apexretail.com. Edit contacts in Account Settings.");
+    }
+
+    function openAddPaymentModal() {
+      alert("Launching PCI-compliant Brightloop Secure Vault to connect a new Credit Card or ACH Corporate Account...");
+    }
+
+    function setAsDefault(instrument) {
+      alert(`${instrument} is now configured as your default auto-pay payment method.`);
+    }
+
+    function openDevSeatModal() {
+      alert("Developer Sandbox Seat Addition: +1 Seat for $40/mo. Staging schema replication will spin up in 5 minutes.");
+    }
+  </script>
+</div></main><footer class="w-full bg-surface-container-low py-space-lg shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="max-w-7xl mx-auto px-margin-lg flex flex-col md:flex-row items-center justify-between gap-space-md text-on-surface-variant font-body-sm text-body-sm"><div class="flex items-center gap-space-md"><span class="font-title-md text-title-md text-primary font-bold">Brightloop</span><span>© 2024 Brightloop Technologies, Inc. Enterprise Billing Engine.</span></div><div class="flex items-center gap-space-lg"><span class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-secondary"></span><span>API v2.4 Status: Operational</span></span><a class="hover:text-on-surface transition-colors" href="#">Audit Logs</a><a class="hover:text-on-surface transition-colors" href="#">Security &amp; Compliance</a><a class="hover:text-on-surface transition-colors" href="#">Support Desk</a></div></div></footer></body></html>

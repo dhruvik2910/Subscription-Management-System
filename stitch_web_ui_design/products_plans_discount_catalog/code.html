@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primary-fixed-variant": "#3a4667", "surface-container-highest": "#d3e4fe", "on-error-container": "#93000a", "secondary-fixed-dim": "#6bd8cb", "surface-variant": "#d3e4fe", "on-primary-fixed": "#0d1a39", "outline": "#76777f", "secondary": "#006a61", "primary-fixed": "#dae2ff", "on-tertiary-fixed-variant": "#005137", "secondary-container": "#86f2e4", "surface-container": "#e5eeff", "on-tertiary": "#ffffff", "on-tertiary-fixed": "#002114", "tertiary-fixed-dim": "#68dba9", "surface-container-lowest": "#ffffff", "inverse-surface": "#213145", "tertiary-fixed": "#85f8c4", "inverse-on-surface": "#eaf1ff", "on-secondary-container": "#006f66", "primary-fixed-dim": "#bac5ee", "primary-container": "#1e2a4a", "secondary-fixed": "#89f5e7", "on-background": "#0b1c30", "on-primary-container": "#8691b7", "tertiary-container": "#003220", "error-container": "#ffdad6", "background": "#f8f9ff", "tertiary": "#001b10", "on-secondary-fixed": "#00201d", "outline-variant": "#c6c6cf", "surface-bright": "#f8f9ff", "inverse-primary": "#bac5ee", "surface-dim": "#cbdbf5", "error": "#ba1a1a", "surface-container-low": "#eff4ff", "on-error": "#ffffff", "on-secondary": "#ffffff", "surface": "#f8f9ff", "surface-tint": "#525d80", "on-primary": "#ffffff", "on-surface": "#0b1c30", "on-secondary-fixed-variant": "#005049", "on-surface-variant": "#45464e", "surface-container-high": "#dce9ff", "on-tertiary-container": "#27a577", "primary": "#081534" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "gutter": "1rem", "space-sm": "0.5rem", "space-lg": "1.25rem", "margin": "1rem", "margin-md": "1.5rem", "space-xs": "0.25rem", "space-md": "0.75rem", "gutter-lg": "1.5rem", "space-xl": "1.75rem", "margin-lg": "2rem" }, "fontFamily": { "headline-lg-mobile": ["Inter"], "headline-sm": ["Inter"], "label-num-lg": ["JetBrains Mono"], "headline-md": ["Inter"], "title-md": ["Inter"], "label-code": ["JetBrains Mono"], "body-lg": ["Inter"], "headline-lg": ["Inter"], "label-caps": ["Inter"], "display": ["Inter"], "body-md": ["Inter"], "body-sm": ["Inter"] }, "fontSize": { "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}], "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}], "label-num-lg": ["20px", {"lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600"}], "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}], "title-md": ["15px", {"lineHeight": "20px", "letterSpacing": "-0.005em", "fontWeight": "600"}], "label-code": ["12px", {"lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500"}], "body-lg": ["15px", {"lineHeight": "22px", "fontWeight": "400"}], "headline-lg": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600"}], "label-caps": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}], "display": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700"}], "body-md": ["13px", {"lineHeight": "18px", "fontWeight": "400"}], "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}] } } } }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-margin-lg flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-md shrink-0"><img alt="Brightloop Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XVTGyl8tojox9o2Pj_Gw52ui8m4Qc6BsoNXjEeBbigeneWvaLD4xi_AEHZs6_KYy5yHtLKYrZ1p0N1lDO4gL0HnsjsEl8Qa95kM5WQU-hKaS4g6q8dNaJjxFoFeCNE3Evqk5hNUfcD51trh1fdN0Xy4pYRghZqfdBaIlVwhdpAPW0E5XHuSDYECML6Jr9H063kLfzJxRYa3C-DhTq9bmTIHyCNAdXnUv6ULonArA_2"/><span class="font-title-md text-title-md text-primary font-bold">Brightloop</span><div class="hidden xl:flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-code text-label-code"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span>Production • Billing Month: Oct 2024</span></div></div><nav class="hidden lg:flex items-center gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-title-md"><a class="px-space-md py-space-sm rounded-lg font-title-md text-title-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="revenue-operations" href="#">Revenue &amp; Operations</a><a class="px-space-md py-space-sm rounded-lg font-title-md text-title-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="subscriptions-quotes" href="#">Subscriptions &amp; Quotes</a><a class="px-space-md py-space-sm rounded-lg font-title-md text-title-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="billing-invoices" href="#">Billing &amp; Invoices</a><a aria-current="page" class="px-space-md py-space-sm rounded-lg transition-all bg-primary-container text-on-primary-container font-title-md" data-path="products-plans" href="#">Products &amp; Plans</a><a class="px-space-md py-space-sm rounded-lg font-title-md text-title-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="customer-portal" href="#">Customer Portal</a></nav><div class="flex items-center gap-space-md shrink-0"><div class="hidden md:flex items-center bg-surface-container-low px-space-md py-space-xs rounded-lg gap-space-xs w-64 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><span class="material-symbols-outlined text-outline text-lg">search</span><span class="font-body-sm text-body-sm text-outline flex-1 truncate">Jump to...</span><kbd class="font-label-code text-label-code bg-surface-container px-space-xs py-0.5 rounded text-on-surface-variant">Cmd+K</kbd></div><button class="inline-flex items-center gap-space-xs bg-primary-container text-on-primary px-space-md py-space-xs rounded-lg font-title-md text-title-md hover:bg-primary transition-colors shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><span class="material-symbols-outlined text-base">add</span><span>New Quote</span></button><div class="relative flex items-center justify-center p-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors cursor-pointer"><span class="material-symbols-outlined text-xl">notifications</span><span class="absolute -top-1 -right-1 bg-error text-on-error font-label-caps text-label-caps px-1 py-0.5 rounded-full ring-2 ring-surface">3</span></div><div class="flex items-center gap-space-sm pl-space-xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-sy6hINsvVWcZrChfs2EgMvtB51ZaiWmmLxg0fGtDr-cgqIJmAxWlCT-dJskpeLrDboulyB_1odAlts-CRUrqosQU9PtVwZMAArMRsrlxRukaQkqY__Yo1-Jt6rD99xEO4dH_OBuNulETV5wRngsBHxufIitOT1Hm1gqcDp8vTCVdmyHNofVECXIJ9WvuQrCNrx1WKTAbHoP4RU6pyJTdQZ4hSvZXyuZQOBZ91Wg"/><div class="hidden 2xl:flex flex-col text-left"><span class="font-title-md text-title-md text-on-surface font-semibold leading-tight">Elena Rostova</span><span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Admin (Finance Lead)</span></div></div></div></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-80px)]"><div class="max-w-7xl mx-auto px-margin-lg py-margin-md"><div class="flex flex-col w-full">
+<!-- Top Metadata & Context Bar -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-margin-lg">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Enterprise Catalog Engine</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-code text-label-code font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+          Role: System Administrator
+        </span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Product Catalog, Billing Plans &amp; Discount Rules</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+        Manage master software products, multi-tenant brand pricing variants, recurring billing schedules, lifecycle expiration directives, and programmatic coupon validation matrices.
+      </p>
+</div>
+<!-- Quick Stats Metric Bento Strip -->
+<div class="grid grid-cols-3 gap-space-md shrink-0">
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between min-w-[130px]">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Active SKUs</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-label-num-lg text-label-num-lg text-primary">28</span>
+<span class="font-label-code text-label-code text-secondary">+4 Q3</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between min-w-[130px]">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Active Plans</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-label-num-lg text-label-num-lg text-primary">64</span>
+<span class="font-label-code text-label-code text-on-tertiary-container">98.2% Auto</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between min-w-[130px]">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Rule Budget</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-label-num-lg text-label-num-lg text-primary">$42.8k</span>
+<span class="font-label-code text-label-code text-outline">Spent</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Primary Subsystem Navigation Tabs -->
+<div class="bg-surface-container-low p-1.5 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-space-sm mb-margin-lg">
+<div class="flex items-center gap-space-xs overflow-x-auto">
+<button class="px-space-md py-space-sm rounded-lg bg-surface-container-lowest text-primary font-title-md text-title-md shadow-sm flex items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-lg text-secondary">cached</span>
+<span>Recurring Plans &amp; Cadences</span>
+<span class="ml-1 px-1.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-code text-label-code">14</span>
+</button>
+<button class="px-space-md py-space-sm rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors font-title-md text-title-md flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">widgets</span>
+<span>Products &amp; Brand Variants</span>
+</button>
+<button class="px-space-md py-space-sm rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors font-title-md text-title-md flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">percent</span>
+<span>Automated Discount Rules</span>
+</button>
+<button class="px-space-md py-space-sm rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors font-title-md text-title-md flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">account_balance</span>
+<span>Tax Rules Engine</span>
+</button>
+</div>
+<div class="flex items-center gap-space-xs pr-space-xs">
+<span class="font-label-code text-label-code text-on-surface-variant">Sync Target: Stripe • NetSuite</span>
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+</div>
+</div>
+<!-- Main 12-Column Split View: Configured Catalog vs Active Plan Builder -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-start mb-margin-lg">
+<!-- LEFT SIDE: Catalog & Active Plans (7 Cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- Anchor Product Details Card -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md relative overflow-hidden">
+<div class="absolute -right-8 -top-8 w-40 h-40 bg-surface-container rounded-full blur-2xl pointer-events-none opacity-50"></div>
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary flex items-center justify-center shadow-sm shrink-0">
+<span class="material-symbols-outlined text-2xl">dataset</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">Brightloop ERP Suite</h2>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-code text-label-code font-semibold">SaaS Core</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">SKU: <span class="font-label-code">BL-ERP-COR-01</span> • Internal ID: #prod_98932_v4</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="Export Ledger">
+<span class="material-symbols-outlined text-lg">download</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="Edit Master">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+</div>
+</div>
+<!-- Financial Fundamentals Strip -->
+<div class="grid grid-cols-3 gap-space-md p-space-md bg-surface-container-low rounded-xl">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Base Sales Price</span>
+<div class="font-label-num-lg text-label-num-lg text-primary font-bold mt-0.5">$1,000.00</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">per seat / term</span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">COGS Cost Price</span>
+<div class="font-label-num-lg text-label-num-lg text-on-surface mt-0.5">$120.00</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Infra + licensing</span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Gross Margin</span>
+<div class="font-label-num-lg text-label-num-lg text-secondary mt-0.5">88.0%</div>
+<span class="font-body-sm text-body-sm text-secondary font-medium">+$880.00 Net Spread</span>
+</div>
+</div>
+<!-- Brand Edition Variants Matrix -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md text-primary font-semibold">Active Brand Variants &amp; Markups</span>
+<span class="font-label-code text-label-code text-on-surface-variant">3 Matrix Profiles</span>
+</div>
+<div class="space-y-space-xs">
+<!-- Variant 1: Base -->
+<div class="flex items-center justify-between p-space-md bg-surface rounded-lg hover:bg-surface-container-high/40 transition-colors">
+<div class="flex items-center gap-space-md">
+<span class="w-2.5 h-2.5 rounded-full bg-outline"></span>
+<div>
+<div class="font-title-md text-title-md text-on-surface">Base Native Instance</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Standard Brightloop multi-tenant runtime environment</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-label-num-lg text-label-num-lg text-primary">$1,000.00</div>
+<div class="font-label-caps text-label-caps text-outline uppercase font-semibold">Standard Baseline</div>
+</div>
+</div>
+<!-- Variant 2: Odoo Brand Edition -->
+<div class="flex items-center justify-between p-space-md bg-surface-container rounded-lg shadow-sm">
+<div class="flex items-center gap-space-md">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Odoo Brand Edition</span>
+<span class="px-1.5 py-0.2 bg-secondary-container text-on-secondary-container rounded font-label-caps text-label-caps">High Demand</span>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Pre-mapped RPC hooks, automated inventory &amp; tax bridge</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-label-num-lg text-label-num-lg text-primary font-bold">$1,560.00</div>
+<div class="font-label-code text-label-code text-secondary font-semibold">+$560.00 Variant Markup</div>
+</div>
+</div>
+<!-- Variant 3: SAP Bridge Edition -->
+<div class="flex items-center justify-between p-space-md bg-surface rounded-lg hover:bg-surface-container-high/40 transition-colors">
+<div class="flex items-center gap-space-md">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+<div>
+<div class="font-title-md text-title-md text-on-surface">SAP Bridge Edition</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">IDoc connector, dual GL sync, certified BAPI runtime</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-label-num-lg text-label-num-lg text-primary">$1,850.00</div>
+<div class="font-label-code text-label-code text-primary font-semibold">+$850.00 Variant Markup</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Catalog Notes -->
+<div class="p-space-sm bg-surface-container-high/60 rounded-lg flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-outline text-base mt-0.5">info</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+<span class="font-semibold text-on-surface">Admin Configuration Note:</span> Brand variant pricing feeds directly into the auto-quotation CPQ pipeline. Changes propagate instantly to unpublished draft proposals.
+          </p>
+</div>
+</div>
+<!-- Recurring Plans Ledger Header -->
+<div class="flex items-center justify-between mt-space-sm">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold">Active Cadences &amp; Plans</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">3 billing schedules configured for Brightloop ERP Suite</p>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-surface-container-highest text-on-surface-variant font-label-code text-label-code">
+          Engine: V2 Auto-Renew
+        </span>
+</div>
+<!-- Plan Cards Stack -->
+<div class="space-y-space-md">
+<!-- Plan 1: Enterprise Annual -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-shadow flex flex-col gap-space-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+<div class="flex items-center gap-space-sm">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<h4 class="font-title-md text-title-md text-primary font-bold">Enterprise Annual</h4>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface font-label-code text-label-code">BL-PLN-YR-ENT</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-on-primary-container uppercase">Cadence</span>
+<span class="font-title-md text-title-md text-primary font-semibold">Bills Yearly</span>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-space-sm py-space-xs text-on-surface-variant">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-outline">Minimum Order</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">5 Seats</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-outline">Window Available</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Jan 1 – Dec 31</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-outline">Closure Directives</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Can Pause / Close Early</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-outline">Renewal Policy</span>
+<span class="font-body-md text-body-md font-semibold text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">autorenew</span> Auto-Renews
+              </span>
+</div>
+</div>
+<div class="pt-space-xs flex items-center justify-between bg-surface-container-low px-space-md py-space-xs rounded-lg">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-sm">check_circle</span>
+<span class="font-label-code text-label-code text-on-surface-variant">Lifecycle: Renewable • Admin overrides unlocked</span>
+</div>
+<span class="font-label-code text-label-code text-primary font-semibold">314 Subscriptions Linked</span>
+</div>
+</div>
+<!-- Plan 2: Growth Monthly -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-shadow flex flex-col gap-space-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+<div class="flex items-center gap-space-sm">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<h4 class="font-title-md text-title-md text-primary font-bold">Growth Monthly</h4>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface font-label-code text-label-code">BL-PLN-MO-GRW</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-on-primary-container uppercase">Cadence</span>
+<span class="font-title-md text-title-md text-primary font-semibold">$149.00 / mo</span>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-space-sm py-space-xs text-on-surface-variant">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-outline">Minimum Order</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">1 Seat</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-outline">Window Available</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Evergreen (Always)</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-outline">Closure Directives</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Cancel / Pause Anytime</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-outline">Proration Engine</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Daily Mid-Month Accrual</span>
+</div>
+</div>
+<div class="pt-space-xs flex items-center justify-between bg-surface-container-low px-space-md py-space-xs rounded-lg">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-sm">schedule</span>
+<span class="font-label-code text-label-code text-on-surface-variant">Lifecycle: Flex-term rolling • 0 termination fee</span>
+</div>
+<span class="font-label-code text-label-code text-primary font-semibold">1,482 Subscriptions Linked</span>
+</div>
+</div>
+<!-- Plan 3: Flash Pilot 14-Day -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-shadow flex flex-col gap-space-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+<div class="flex items-center gap-space-sm">
+<span class="w-3 h-3 rounded-full bg-error"></span>
+<h4 class="font-title-md text-title-md text-primary font-bold">Flash Pilot 14-Day Sandbox</h4>
+<span class="px-2 py-0.5 rounded bg-error-container text-on-error-container font-label-code text-label-code font-semibold">Fixed Sunset</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-on-primary-container uppercase">Cadence</span>
+<span class="font-title-md text-title-md text-primary font-semibold">Daily Accrual ($0 Pilot)</span>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-space-sm py-space-xs text-on-surface-variant">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-outline">Minimum Order</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">1 Seat</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-outline">Window Available</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Trial Period Only</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-outline">Close Rule</span>
+<span class="font-body-md text-body-md font-semibold text-error">Auto-closes on end date</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-outline">Renewal Policy</span>
+<span class="font-body-md text-body-md font-semibold text-outline">No Auto-Renew</span>
+</div>
+</div>
+<div class="pt-space-xs flex items-center justify-between bg-error-container/30 px-space-md py-space-xs rounded-lg">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-error text-sm">lock_clock</span>
+<span class="font-label-code text-label-code text-on-surface-variant">Hard Termination: Day 14 at 23:59 UTC without conversion</span>
+</div>
+<span class="font-label-code text-label-code text-error font-semibold">Auto-Decommission Flag</span>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT SIDE: Configure New Product & Billing Plan Form (5 Cols) -->
+<div class="lg:col-span-5 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md sticky top-20">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-caps text-label-caps text-secondary uppercase font-semibold">Section 3 Spec Implementation</span>
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold">Configure New Product &amp; Plan</h3>
+</div>
+<div class="w-8 h-8 rounded-lg bg-surface-container-high text-on-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">tune</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        Define product attributes, additive brand multipliers, periodic schedules, and contract lifecycle rules.
+      </p>
+<!-- Form Inputs Group -->
+<form class="space-y-space-md" onsubmit="event.preventDefault();">
+<!-- Name & Type -->
+<div class="space-y-space-xs">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant">Product Master Name</label>
+<input class="w-full h-9 px-3 rounded bg-surface-container-low text-on-surface font-title-md text-title-md focus:outline-none focus:ring-2 focus:ring-secondary/40" type="text" value="Brightloop Analytics Suite v2"/>
+</div>
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="space-y-space-xs">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant">Product Type</label>
+<select class="w-full h-9 px-2 rounded bg-surface-container-low text-on-surface font-title-md text-title-md focus:outline-none focus:ring-2 focus:ring-secondary/40">
+<option selected="">Software SaaS</option>
+<option>Professional Service</option>
+<option>Platform Add-on</option>
+<option>Hardware Appliance</option>
+</select>
+</div>
+<div class="space-y-space-xs">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant">Revenue Ledger Code</label>
+<input class="w-full h-9 px-3 rounded bg-surface-container-low text-on-surface font-label-code text-label-code" type="text" value="REV-40010-SaaS"/>
+</div>
+</div>
+<!-- Sales Price & Cost Price -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="space-y-space-xs">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant">Sales Base Price</label>
+<div class="relative flex items-center">
+<span class="absolute left-2.5 font-label-code text-label-code text-outline">$</span>
+<input class="w-full h-9 pl-6 pr-3 rounded bg-surface-container-low text-on-surface font-label-num-lg text-label-num-lg font-bold text-right" type="text" value="1,000.00"/>
+</div>
+</div>
+<div class="space-y-space-xs">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant">Cost Price (COGS)</label>
+<div class="relative flex items-center">
+<span class="absolute left-2.5 font-label-code text-label-code text-outline">$</span>
+<input class="w-full h-9 pl-6 pr-3 rounded bg-surface-container-low text-on-surface font-label-num-lg text-label-num-lg text-right" type="text" value="120.00"/>
+</div>
+</div>
+</div>
+<!-- Variant Builder (The Odoo Brand Rule from spec) -->
+<div class="p-space-sm bg-surface-container-low rounded-xl space-y-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-primary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-secondary">layers</span>
+              Brand Variant Configuration
+            </span>
+<button class="font-label-code text-label-code text-secondary font-semibold hover:underline" type="button">+ Add Attribute</button>
+</div>
+<div class="bg-surface-container-lowest p-space-xs rounded-lg flex items-center justify-between gap-space-xs">
+<div class="flex items-center gap-2 flex-1">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">Brand:</span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface font-label-code text-label-code">Odoo Edition</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="font-label-code text-label-code text-secondary font-bold">+$560.00</span>
+<span class="font-body-sm text-body-sm text-outline">markup</span>
+<button class="ml-1 text-outline hover:text-error" type="button">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant pt-1">
+<span class="font-body-sm text-body-sm">Calculated Variant Shelf Total:</span>
+<span class="font-label-num-lg text-label-num-lg text-primary font-bold">$1,560.00</span>
+</div>
+</div>
+<!-- Plan Cadence Selector -->
+<div class="space-y-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant">Recurring Billing Cadence</label>
+<span class="font-label-code text-label-code text-outline">Cycle trigger</span>
+</div>
+<div class="grid grid-cols-4 gap-1.5 p-1 bg-surface-container-low rounded-lg">
+<button class="py-1.5 text-center rounded font-title-md text-title-md text-on-surface-variant hover:text-on-surface" type="button">Daily</button>
+<button class="py-1.5 text-center rounded font-title-md text-title-md text-on-surface-variant hover:text-on-surface" type="button">Weekly</button>
+<button class="py-1.5 text-center rounded bg-primary-container text-on-primary font-title-md text-title-md font-bold shadow-sm" type="button">Monthly</button>
+<button class="py-1.5 text-center rounded font-title-md text-title-md text-on-surface-variant hover:text-on-surface" type="button">Yearly</button>
+</div>
+</div>
+<!-- Minimum Quantity & Dates -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="space-y-space-xs">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant">Minimum Quantity</label>
+<input class="w-full h-9 px-3 rounded bg-surface-container-low text-on-surface font-title-md text-title-md" type="number" value="5"/>
+</div>
+<div class="space-y-space-xs">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant">Availability Window</label>
+<input class="w-full h-9 px-3 rounded bg-surface-container-low text-on-surface font-label-code text-label-code" type="text" value="Jan 1 - Dec 31"/>
+</div>
+</div>
+<!-- Lifecycle Rules Toggles (From Spec: close on own, pause, close early) -->
+<div class="space-y-space-xs pt-1">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant block">Lifecycle &amp; Closure Directives</span>
+<div class="space-y-2">
+<!-- Toggle 1 -->
+<label class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-lg">fast_forward</span>
+<div>
+<div class="font-title-md text-title-md text-on-surface leading-tight">Allow Early Closure</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Customer or admin can terminate prior to term end</div>
+</div>
+</div>
+<input checked="" class="w-4 h-4 accent-secondary rounded" type="checkbox"/>
+</label>
+<!-- Toggle 2 -->
+<label class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-lg">pause_circle</span>
+<div>
+<div class="font-title-md text-title-md text-on-surface leading-tight">Allow Contract Pause</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Hold invoicing without destroying provisioned assets</div>
+</div>
+</div>
+<input checked="" class="w-4 h-4 accent-secondary rounded" type="checkbox"/>
+</label>
+<!-- Toggle 3 -->
+<label class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-outline text-lg">timer_off</span>
+<div>
+<div class="font-title-md text-title-md text-on-surface leading-tight">Auto-close when ends</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">De-provision automatically; strictly non-renewable</div>
+</div>
+</div>
+<input class="w-4 h-4 accent-secondary rounded" type="checkbox"/>
+</label>
+</div>
+</div>
+<!-- Internal Notes -->
+<div class="space-y-space-xs">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant">Internal Admin Audit Notes</label>
+<textarea class="w-full p-2.5 rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/40" placeholder="e.g. Approved under Fiscal 2025 RevOps expansion charter..." rows="2"></textarea>
+</div>
+<!-- Action CTA -->
+<div class="pt-space-xs flex items-center justify-end gap-space-sm">
+<button class="px-space-md py-2 rounded-lg bg-surface text-on-surface-variant hover:bg-surface-container font-title-md text-title-md transition-colors" type="button">
+            Reset Matrix
+          </button>
+<button class="px-space-lg py-2 rounded-lg bg-primary-container text-on-primary font-title-md text-title-md font-semibold hover:bg-primary transition-colors flex items-center gap-2 shadow-sm" type="submit">
+<span class="material-symbols-outlined text-lg">publish</span>
+<span>Publish Plan to Catalog</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+<!-- BOTTOM SECTION: Discount Rules Manager (Directly implements 'A customer asks for a better price') -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md pb-space-xs">
+<div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-2xl">loyalty</span>
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">Discount Rules Engine &amp; Price Concessions</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+          Programmatic guardrails for percentage and fixed amount discounts. Enforces quantity thresholds, usage limits, and strict calendar expiration.
+        </p>
+</div>
+<div class="flex items-center gap-space-sm shrink-0">
+<div class="flex items-center bg-surface-container-low px-3 py-1.5 rounded-lg gap-2">
+<span class="material-symbols-outlined text-outline text-base">filter_list</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Filter by Scope</span>
+</div>
+<button class="inline-flex items-center gap-2 bg-primary-container text-on-primary px-space-md py-2 rounded-lg font-title-md text-title-md font-semibold hover:bg-primary transition-colors shadow-sm">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+<span>Create Discount Rule</span>
+</button>
+</div>
+</div>
+<!-- High-Density Discount Rules Ledger -->
+<div class="overflow-x-auto rounded-xl">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low">
+<th class="py-2.5 px-3 font-label-caps text-label-caps uppercase text-on-surface-variant">Rule Code &amp; Directive</th>
+<th class="py-2.5 px-3 font-label-caps text-label-caps uppercase text-on-surface-variant">Discount Type</th>
+<th class="py-2.5 px-3 font-label-caps text-label-caps uppercase text-on-surface-variant">Threshold / Qualifier</th>
+<th class="py-2.5 px-3 font-label-caps text-label-caps uppercase text-on-surface-variant">Applied Scope</th>
+<th class="py-2.5 px-3 font-label-caps text-label-caps uppercase text-on-surface-variant">Validity Window</th>
+<th class="py-2.5 px-3 font-label-caps text-label-caps uppercase text-on-surface-variant">Usage Consumption</th>
+<th class="py-2.5 px-3 font-label-caps text-label-caps uppercase text-on-surface-variant text-right">Status</th>
+<th class="py-2.5 px-3 font-label-caps text-label-caps uppercase text-on-surface-variant text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Row 1: BULK-SEATS-15 -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<span class="font-label-code text-label-code text-primary font-bold bg-surface-container px-2 py-0.5 rounded">BULK-SEATS-15</span>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Enterprise Tier Volume Invoicing</div>
+</td>
+<td class="py-3 px-3">
+<div class="font-label-num-lg text-label-num-lg text-secondary font-bold">15.0%</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Percentage Base</div>
+</td>
+<td class="py-3 px-3">
+<div class="font-title-md text-title-md text-on-surface">Min Qty: 8 Seats</div>
+<div class="font-body-sm text-body-sm text-outline">Cumulative line total</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-label-code text-label-code">
+<span class="material-symbols-outlined text-xs">extension</span>
+                Product (ERP Core)
+              </span>
+</td>
+<td class="py-3 px-3">
+<div class="font-body-md text-body-md text-on-surface font-medium">Oct 1 – Dec 31, 2024</div>
+<div class="font-label-code text-label-code text-on-surface-variant">Auto-expires at midnight</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-secondary h-2 rounded-full" style="width: 42%;"></div>
+</div>
+<span class="font-label-code text-label-code font-bold text-on-surface">42 / 100</span>
+</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant mt-0.5">58 redemptions remain</div>
+</td>
+<td class="py-3 px-3 text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-caps text-label-caps font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                Active (Auto-applies)
+              </span>
+</td>
+<td class="py-3 px-3 text-right">
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: WELCOME-100 -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<span class="font-label-code text-label-code text-primary font-bold bg-surface-container px-2 py-0.5 rounded">WELCOME-100</span>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">New Account Onboarding Credit</div>
+</td>
+<td class="py-3 px-3">
+<div class="font-label-num-lg text-label-num-lg text-primary font-bold">$100.00</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Fixed Monetary Cut</div>
+</td>
+<td class="py-3 px-3">
+<div class="font-title-md text-title-md text-on-surface">Min Spend: $500.00</div>
+<div class="font-body-sm text-body-sm text-outline">Cart total prerequisite</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-label-code text-label-code">
+<span class="material-symbols-outlined text-xs">receipt_long</span>
+                Whole Subscription
+              </span>
+</td>
+<td class="py-3 px-3">
+<div class="font-body-md text-body-md text-on-surface font-medium">Jan 1 – Dec 31, 2024</div>
+<div class="font-label-code text-label-code text-on-surface-variant">Rolling fiscal schedule</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-primary h-2 rounded-full" style="width: 89%;"></div>
+</div>
+<span class="font-label-code text-label-code font-bold text-on-surface">89 / 100</span>
+</div>
+<div class="font-label-caps text-label-caps text-error uppercase font-semibold mt-0.5">11 left • Low stock</div>
+</td>
+<td class="py-3 px-3 text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-caps text-label-caps font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                Active
+              </span>
+</td>
+<td class="py-3 px-3 text-right">
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: EARLY-BIRD-2024 (Auto Expired per Spec) -->
+<tr class="hover:bg-surface-container-low/40 transition-colors opacity-75">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<span class="font-label-code text-label-code text-outline font-bold bg-surface-container-high px-2 py-0.5 rounded">EARLY-BIRD-2024</span>
+</div>
+<div class="font-body-sm text-body-sm text-outline mt-0.5">Pre-release Q1 Incentivization Program</div>
+</td>
+<td class="py-3 px-3">
+<div class="font-label-num-lg text-label-num-lg text-outline font-bold">25.0%</div>
+<div class="font-label-caps text-label-caps text-outline uppercase">Percentage Base</div>
+</td>
+<td class="py-3 px-3">
+<div class="font-title-md text-title-md text-outline">Min Qty: 2 Seats</div>
+<div class="font-body-sm text-body-sm text-outline">Contract term &gt;= 1 yr</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-outline font-label-code text-label-code">
+<span class="material-symbols-outlined text-xs">dataset</span>
+                Suite Platform Add-ons
+              </span>
+</td>
+<td class="py-3 px-3">
+<div class="font-body-md text-body-md text-outline line-through">Jan 1 – Mar 31, 2024</div>
+<div class="font-label-code text-label-code text-error font-semibold">Stopped automatically without intervention</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<div class="w-24 bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-outline h-2 rounded-full" style="width: 100%;"></div>
+</div>
+<span class="font-label-code text-label-code font-bold text-outline">50 / 50</span>
+</div>
+<div class="font-label-caps text-label-caps text-outline uppercase mt-0.5">Ceiling exhausted</div>
+</td>
+<td class="py-3 px-3 text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-high text-outline font-label-caps text-label-caps font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                Expired
+              </span>
+</td>
+<td class="py-3 px-3 text-right">
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Clone Rule">
+<span class="material-symbols-outlined text-lg">content_copy</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Rule Engine Audit Footer Banner -->
+<div class="p-space-md bg-surface-container-low rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-lg bg-surface-container text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">format_image_left</span>
+</div>
+<div>
+<div class="font-title-md text-title-md text-primary font-bold">RevOps Protection Engine Armed</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Non-admin users cannot override price thresholds below the $120.00 COGS floor. All discretionary dealer markdowns require automated dual-signoff.
+          </p>
+</div>
+</div>
+<div class="flex items-center gap-space-md shrink-0">
+<span class="font-label-code text-label-code text-on-surface-variant">Audit Stream ID: #ev_bl_882910</span>
+<button class="font-title-md text-title-md text-secondary font-semibold hover:underline">View Rule Logs →</button>
+</div>
+</div>
+</div>
+</div></div></main><footer class="w-full bg-surface-container-low py-space-lg shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="max-w-7xl mx-auto px-margin-lg flex flex-col md:flex-row items-center justify-between gap-space-md text-on-surface-variant font-body-sm text-body-sm"><div class="flex items-center gap-space-md"><span class="font-title-md text-title-md text-primary font-bold">Brightloop</span><span>© 2024 Brightloop Technologies, Inc. Enterprise Billing Engine.</span></div><div class="flex items-center gap-space-lg"><span class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-secondary"></span><span>API v2.4 Status: Operational</span></span><a class="hover:text-on-surface transition-colors" href="#">Audit Logs</a><a class="hover:text-on-surface transition-colors" href="#">Security &amp; Compliance</a><a class="hover:text-on-surface transition-colors" href="#">Support Desk</a></div></div></footer></body></html>
