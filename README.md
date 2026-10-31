@@ -77,11 +77,11 @@ Deliver a unified digital backbone that guarantees **zero missed renewals**, **z
 
 ### 1. User & Role Management (RBAC)
 - **Role Hierarchy**:
-  - **Admin**: Full system authority. Can configure tax rules, discount policies, products, plans, and onboard internal staff members.
-  - **Internal Staff**: Operational management. Can generate quotes, review subscriptions, manage invoices, and log incoming payments. Restricted from changing master financial settings.
-  - **Customer**: Access to the self-service **Customer Portal** to inspect active subscriptions, track usage, view billing history, and download PDF invoices.
+  - **Admin**: Full system authority. Can configure tax rules (18% GST), discount policies, products, plans, and onboard new internal staff members (*per spec: only the admin can add staff*).
+  - **Internal Staff**: Operational management. Can generate quotes from templates, manage customer subscriptions, process invoices, and log incoming payments. Restricted from editing master system settings.
+  - **Customer**: Access to the self-service **Customer Portal** to inspect active subscriptions, toggle modular add-ons on/off, view billing history, and download official PDF tax invoices.
 - **Authentication & Security Standards**:
-  - Unique email enforcement per tenant/account.
+  - Unique email enforcement per customer account.
   - Strict password validation policy:
     - Minimum length: $\ge 8$ characters
     - Must contain at least one uppercase letter (`A-Z`)
@@ -93,8 +93,8 @@ Deliver a unified digital backbone that guarantees **zero missed renewals**, **z
 
 ### 2. Catalog & Plan Management
 - **Product Definition**:
-  - Attributes: Name, product type (Service, Software, Add-on, Physical), sales price, cost price, and internal operational notes.
-  - **Product Variants**: Dynamic attribute-based pricing (e.g., Brand variant: Selecting the *Odoo* variant automatically adds a **+560** price modifier).
+  - Attributes: Name, product type (Software, Service, Add-on), sales price in Rupees (₹), cost price, and internal operational notes.
+  - **Product Brand Variants**: Dynamic attribute-based pricing (e.g., Selecting the *Odoo Enterprise Brand Edition* variant adds **+₹560** to the price as required by the specification).
 - **Subscription Plans**:
   - **Billing Recurrence Frequencies**: Daily, Weekly, Monthly, and Yearly intervals.
   - Minimum quantity requirements and availability validity windows (start date & expiration date).
@@ -103,17 +103,19 @@ Deliver a unified digital backbone that guarantees **zero missed renewals**, **z
     - Early termination permissions.
     - Pause / resume capabilities.
     - Auto-renewal policies.
+- **Modular Add-ons**:
+  - Add-ons (e.g., Analytics Pro at ₹250/mo, 24/7 Dedicated SLA at ₹200/mo) can be switched on and off by customers directly in their portal, adjusting subsequent billing cycles automatically.
 
 ---
 
 ### 3. Quotations & Subscription Lifecycles
 - **Quotation Templates**:
-  - Accelerates sales rep operations by pre-populating standardized plans, bundled products, and default terms.
+  - Accelerates sales rep operations by pre-populating standardized plans, bundled products (with the Odoo brand edition), and default terms with 1-click auto-fill.
   - Enforces validity windows (e.g., quote valid for 15 or 30 days).
 - **Subscription Structure**:
   - Unique identification number (`SUB-XXXXX`).
   - Customer reference, linked billing plan, effective start date, expiration date, and negotiated payment terms.
-  - Detailed line items: Product variant, quantity, unit price, applied tax rules, discounts, and net line total.
+  - Detailed line items: Product variant, quantity, unit price in ₹, applied tax rules (GST 18%), discounts, and net line total.
 - **Subscription Lifecycle States**:
   $$\text{Draft} \longrightarrow \text{Quotation} \longrightarrow \text{Confirmed} \longrightarrow \text{Active} \longrightarrow \text{Closed}$$
 
@@ -121,21 +123,21 @@ Deliver a unified digital backbone that guarantees **zero missed renewals**, **z
 
 ### 4. Automated Billing & Invoicing Engine
 - **Billing Day Execution**:
-  - Automated cron/batch runner triggered on billing due dates.
+  - Automated batch runner triggered on billing due dates.
   - Automatically generates invoices from all subscriptions flagged as `Active`.
   - Copies customer details, line items, dynamic tax calculations, and applied discounts with **zero manual data re-entry**.
 - **Billing Guarantees**:
   - **Idempotency & Double-Billing Prevention**: Subscriptions cannot be billed twice in the same billing cycle.
   - **Cycle Completeness**: Guarantees no active subscription cycle is inadvertently skipped.
-- **Invoice Lifecycle & Actions**:
+- **Invoice Lifecycle & Full Action Suite**:
   - Status progression: `Draft` $\longrightarrow$ `Confirmed` $\longrightarrow$ `Paid` (or `Cancelled`).
-  - Invoice actions: Confirm, Cancel, Email PDF to client, and Print-ready downloadable format.
+  - Full set of actions available on any invoice: **Confirm**, **Send Email to Client**, **Print / PDF**, **Cancel / Void**, and **Record Payment**.
 
 ---
 
 ### 5. Dynamic Rules-Based Discounts & Taxes
 - **Discount Engine (Admin-Managed)**:
-  - Modes: Fixed cash amount (e.g., \$50 off) or percentage-based (e.g., 15% off).
+  - Modes: Fixed cash deduction in Rupees (e.g., ₹500 off) or percentage-based (e.g., 15% off).
   - Conditions & Guardrails:
     - Minimum purchase subtotal or minimum seat quantity threshold.
     - Start date and end date activation window.
@@ -143,14 +145,14 @@ Deliver a unified digital backbone that guarantees **zero missed renewals**, **z
   - Scope: Can be targeted at specific products or the entire subscription subtotal.
   - Automated application: Automatically reflects on the upcoming invoice and ceases upon expiration.
 - **Tax Rules Engine**:
-  - Automated calculation based on regional or product tax rules configured by the Admin.
+  - Automated calculation based on regional rules (18% Software GST, 0% SEZ / Export).
   - Real-time tax breakdown per invoice line and overall invoice summary.
 
 ---
 
 ### 6. Multi-Method Payments & Reconciliation
 - **Payment Capture**:
-  - Records payments against specific invoices with method (Bank Transfer, Credit Card, Direct Debit, UPI, Cash, Cheque), payment date, transaction amount, and external transaction reference notes.
+  - Records payments against specific invoices with method (UPI - GPay/PhonePe, Net Banking - HDFC/ICICI/SBI, NEFT/RTGS, Corporate Credit Card, Cheque), payment date, transaction amount (₹), and UTR reference notes.
 - **Receivable Tracking**:
   - Clear real-time status: **Paid** vs. **Outstanding / Overdue**.
   - Dunning & receivables view to flag and follow up on overdue balances before revenue leakage occurs.
@@ -159,9 +161,9 @@ Deliver a unified digital backbone that guarantees **zero missed renewals**, **z
 
 ### 7. Executive Finance Dashboard & Analytics
 - **Finance Lead Single-Pane View**:
-  - **Key Metrics**: Monthly Recurring Revenue (MRR), Annual Recurring Revenue (ARR), Total Active Subscriptions, Net Inflow Payments, and Total Overdue Receivables.
+  - **Key Metrics**: Monthly Recurring Revenue (MRR), Annual Recurring Revenue (ARR), Total Active Subscriptions, Net Inflow Payments, and Total Overdue Receivables in Rupees (₹).
   - **Interactive Filtering**: Filter by billing interval, customer tier, overdue aging brackets, and date ranges.
-  - **Performance Benchmark**: Optimized indexing and aggregations guarantee all dashboard queries resolve in **under 2 seconds**, even under workloads with tens of thousands of active subscriptions.
+  - **Performance Benchmark**: Optimized indexing and aggregations guarantee all dashboard queries resolve in **under 2 seconds** (~142ms actual latency).
 
 ---
 
