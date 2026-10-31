@@ -74,7 +74,7 @@ window.closeSubscription = (subId) => {
   }
 };
 
-window.createRenewalQuote = (subId) => {
+window.createRenewalQuote = async (subId) => {
   const state = store.getState();
   const sub = state.subscriptions.find(s => s.id === subId);
   if (!sub) return;
@@ -93,9 +93,17 @@ window.createRenewalQuote = (subId) => {
   store.addSubscription(renewalSub);
   setSelectedSubscription(renewalSub.id);
   showToast(`Renewal Quote ${newSubNumber} created in Quotation stage!`, 'success');
+
+  if (state.isServerConnected) {
+    try {
+      await fetch(`http://localhost:3001/api/subscriptions/${subId}/renew`, { method: 'POST' });
+    } catch (e) {
+      console.warn('Server renewal error:', e);
+    }
+  }
 };
 
-window.generateNextInvoiceForSub = (subId) => {
+window.generateNextInvoiceForSub = async (subId) => {
   const state = store.getState();
   const sub = state.subscriptions.find(s => s.id === subId);
   if (!sub) return;
@@ -116,12 +124,15 @@ window.generateNextInvoiceForSub = (subId) => {
     subscriptionId: sub.id,
     customerName: sub.customerName,
     customerEmail: sub.customerEmail,
+    invoiceDate: now,
     issueDate: now,
     dueDate: dueDate,
     status: 'confirmed',
     subtotal: subtotal,
     taxRate: 18.0,
+    gstRate: 18.0,
     taxAmount: taxTotal,
+    gstAmount: taxTotal,
     discountAmount: discountTotal,
     totalAmount: grandTotal,
     amountPaid: 0.00,
@@ -139,6 +150,14 @@ window.generateNextInvoiceForSub = (subId) => {
   store.addInvoice(newInv);
   showToast(`Invoice ${nextInvNum} generated for ${sub.customerName}!`, 'success');
   window.appNavigate('billing-invoices');
+
+  if (state.isServerConnected) {
+    try {
+      await fetch(`http://localhost:3001/api/subscriptions/${subId}/generate-invoice`, { method: 'POST' });
+    } catch (e) {
+      console.warn('Server invoice generation error:', e);
+    }
+  }
 };
 
 // Batch Billing Run
@@ -207,7 +226,11 @@ window.switchCatalogTab = (tab) => {
 
 // Customer Portal: Modular Add-on Toggling
 window.toggleAddon = (addonKey) => {
-  const sub = store.getState().subscriptions.find(s => s.customerEmail === 'aarav@apexretail.in') || store.getState().subscriptions[0];
+  const state = store.getState();
+  const customerEmail = state.currentUser?.customer?.email || 'aarav@apexretail.in';
+  const sub = state.subscriptions.find(s => s.customerEmail === customerEmail) || 
+              state.subscriptions.find(s => s.customerEmail === 'aarav@apexretail.in') || 
+              state.subscriptions[0];
   if (sub) {
     store.toggleCustomerAddon(sub.id, addonKey);
     showToast(`Add-on ${addonKey === 'analytics' ? 'Developer API' : '24/7 Support SLA'} updated!`, 'success');
@@ -379,13 +402,13 @@ window.handleCreateQuoteSubmit = (e) => {
   window.appNavigate('subscriptions-quotes');
 };
 
-window.handleRecordPaymentSubmit = (e, invoiceNumber) => {
+window.handleRecordPaymentSubmit = async (e, invoiceNumber) => {
   e.preventDefault();
   const amount = parseFloat(document.getElementById('paymentAmount').value);
   const method = document.getElementById('paymentMethod').value;
   const note = document.getElementById('paymentNote').value;
 
-  const success = store.recordPayment({ invoiceNumber, amount, method, note });
+  const success = await store.recordPayment({ invoiceNumber, amount, method, note });
   if (success) {
     closeModal();
     showToast(`Payment of ₹${amount.toFixed(2)} recorded for ${invoiceNumber}!`, 'success');
@@ -543,7 +566,7 @@ window.exportReportCSV = () => {
   const state = store.getState();
   const rows = [
     ['Subscription Number', 'Customer', 'Plan', 'Status', 'MRR / Invoiced (INR)'],
-    ...state.subscriptions.map(s => [s.subscriptionNumber, s.customerName, s.planName, s.status, s.grandTotal])
+    ...state.subscriptions.map(s => [s.subscriptionNumber || s.subscription_number, s.customerName || s.customer_name, s.planName || s.plan_name, s.status, (s.grandTotal !== undefined ? s.grandTotal : (s.totalAmount || s.total_amount || 0))])
   ];
   downloadCSV('Brightloop_Revenue_Report.csv', rows);
 };
@@ -552,7 +575,7 @@ window.exportLedgerCSV = () => {
   const state = store.getState();
   const rows = [
     ['Invoice Number', 'Customer', 'Issue Date', 'Due Date', 'Status', 'Total (INR)', 'Balance Due (INR)'],
-    ...state.invoices.map(i => [i.invoiceNumber, i.customerName, i.issueDate, i.dueDate, i.status, i.totalAmount, i.balanceDue])
+    ...state.invoices.map(i => [i.invoiceNumber || i.invoice_number, i.customerName || i.customer_name, i.issueDate || i.invoiceDate || i.invoice_date || '', i.dueDate || i.due_date || '', i.status, (i.totalAmount !== undefined ? i.totalAmount : (i.total_amount || 0)), (i.balanceDue !== undefined ? i.balanceDue : (i.balance_due || 0))])
   ];
   downloadCSV('Brightloop_Invoices_Ledger.csv', rows);
 };

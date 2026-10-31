@@ -188,6 +188,8 @@ apiRouter.get('/subscriptions/:id', (req, res) => {
 apiRouter.post('/subscriptions', (req, res) => {
   try {
     const {
+      id: customId,
+      subscriptionNumber: customSubNum,
       customerName,
       customerEmail,
       customerCompany,
@@ -197,29 +199,44 @@ apiRouter.post('/subscriptions', (req, res) => {
       billingPeriod,
       lines = [],
       tier = 'Standard',
-      autoRenew = true
+      autoRenew = true,
+      status: customStatus
     } = req.body;
 
-    if (!customerName || !customerEmail || !planId) {
+    const finalPlanId = planId || req.body.plan_id;
+    if (!customerName || !customerEmail || !finalPlanId) {
       return res.status(400).json({ success: false, error: 'Customer Name, Email, and Plan are required.' });
     }
 
-    const nextNum = 'SUB-' + Math.floor(1000 + Math.random() * 9000);
-    const subId = 'sub-' + Date.now();
+    const finalBillingPeriod = billingPeriod || req.body.billing_period || 'monthly';
+    const finalPlanName = planName || req.body.plan_name || 'Monthly Professional Plan';
+    const rawLines = (lines && lines.length > 0) ? lines : (req.body.items || []);
+
+    const nextNum = customSubNum || ('SUB-' + Math.floor(1000 + Math.random() * 9000));
+    const subId = customId || ('sub-' + Date.now());
     const today = new Date().toISOString().split('T')[0];
     
-    // Calculate total
+    // Calculate total supporting both camelCase and snake_case properties
     let totalAmount = 0;
-    lines.forEach(l => {
-      totalAmount += (l.unitPrice || 0) * (l.quantity || 1) * (1 - (l.discountPercent || 0) / 100);
+    rawLines.forEach(l => {
+      const up = l.unitPrice !== undefined ? l.unitPrice : (l.unit_price || 0);
+      const qty = l.quantity !== undefined ? l.quantity : (l.qty || 1);
+      const disc = l.discountPercent !== undefined ? l.discountPercent : (l.discount_percent || 0);
+      totalAmount += up * qty * (1 - disc / 100);
     });
+
+    if (totalAmount === 0 && (req.body.totalAmount || req.body.total_amount)) {
+      totalAmount = parseFloat(req.body.totalAmount || req.body.total_amount) || 0;
+    }
+
+    const initialStatus = customStatus || 'quotation';
 
     const insertSub = db.prepare(`
       INSERT INTO subscriptions (
         id, subscription_number, customer_name, customer_email, customer_company, customer_gstin,
         plan_id, plan_name, billing_period, start_date, next_billing_date, status, is_paused,
         auto_renew, tier, total_amount, addons_json
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'quotation', 0, ?, ?, ?, '{}')
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, '{}')
     `);
 
     const insertLine = db.prepare(`
@@ -236,37 +253,62 @@ apiRouter.post('/subscriptions', (req, res) => {
         customerEmail,
         customerCompany || customerName,
         customerGstin || '',
-        planId,
-        planName || 'Monthly Professional Plan',
-        billingPeriod || 'monthly',
+        finalPlanId,
+        finalPlanName,
+        finalBillingPeriod,
         today,
         today, // Due initially
+        initialStatus,
         autoRenew ? 1 : 0,
         tier,
         totalAmount
       );
 
-      lines.forEach((l, idx) => {
-        const subtotal = (l.unitPrice || 0) * (l.quantity || 1) * (1 - (l.discountPercent || 0) / 100);
+      if (rawLines.length > 0) {
+        rawLines.forEach((l, idx) => {
+          const up = l.unitPrice !== undefined ? l.unitPrice : (l.unit_price || 0);
+          const qty = l.quantity !== undefined ? l.quantity : (l.qty || 1);
+          const disc = l.discountPercent !== undefined ? l.discountPercent : (l.discount_percent || 0);
+          const subtotal = l.subtotal !== undefined ? l.subtotal : (l.total !== undefined ? l.total : (up * qty * (1 - disc / 100)));
+          insertLine.run(
+            l.id || `sline-${Date.now()}-${idx}`,
+            subId,
+            l.productName || l.product_name || 'Software Service',
+            l.variantName || l.variant_name || 'Standard Edition',
+            qty,
+            up,
+            disc,
+            subtotal
+          );
+        });
+      } else {
         insertLine.run(
-          `sline-${Date.now()}-${idx}`,
+          `sline-${Date.now()}-0`,
           subId,
-          l.productName || 'Software Service',
-          l.variantName || 'Standard Edition',
-          l.quantity || 1,
-          l.unitPrice || 0,
-          l.discountPercent || 0,
-          subtotal
+          finalPlanName,
+          'Standard Edition',
+          1,
+          totalAmount,
+          0,
+          totalAmount
         );
-      });
+      }
     });
 
     createTransaction();
 
+    const created = db.prepare('SELECT * FROM subscriptions WHERE id = ?').get(subId);
+    const createdLines = db.prepare('SELECT * FROM subscription_lines WHERE subscription_id = ?').all(subId);
+
     res.status(201).json({
       success: true,
       message: `Quotation ${nextNum} generated with 30 days validity.`,
-      data: { id: subId, subscriptionNumber: nextNum }
+      data: {
+        ...created,
+        subscriptionNumber: created.subscription_number,
+        totalAmount: created.total_amount,
+        lines: createdLines
+      }
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -411,12 +453,19 @@ apiRouter.post('/subscriptions/:id/generate-invoice', (req, res) => {
       );
 
       const lines = db.prepare('SELECT * FROM subscription_lines WHERE subscription_id = ?').all(sub.id);
-      lines.forEach((l, idx) => {
+      if (lines.length > 0) {
+        lines.forEach((l, idx) => {
+          db.prepare(`
+            INSERT INTO invoice_lines (id, invoice_id, description, sac_code, quantity, unit_price, amount)
+            VALUES (?, ?, ?, '998313', ?, ?, ?)
+          `).run(`iline-${Date.now()}-${idx}`, invId, `${l.product_name} (${l.variant_name || 'Standard'})`, l.quantity, l.unit_price, l.subtotal);
+        });
+      } else {
         db.prepare(`
           INSERT INTO invoice_lines (id, invoice_id, description, sac_code, quantity, unit_price, amount)
-          VALUES (?, ?, ?, '998313', ?, ?, ?)
-        `).run(`iline-${Date.now()}-${idx}`, invId, `${l.product_name} (${l.variant_name || 'Standard'})`, l.quantity, l.unit_price, l.subtotal);
-      });
+          VALUES (?, ?, ?, '998313', 1, ?, ?)
+        `).run(`iline-${Date.now()}-0`, invId, `${sub.plan_name || 'SaaS Subscription'} (${sub.billing_period || 'monthly'})`, sub.total_amount, sub.total_amount);
+      }
 
       // Advance subscription next_billing_date
       const advancedBillingDate = advanceBillingDate(sub.next_billing_date || today, sub.billing_period);
@@ -704,14 +753,32 @@ apiRouter.post('/invoices/:id/payments', (req, res) => {
       return res.status(400).json({ success: false, error: 'Valid payment amount is required.' });
     }
 
+    // Normalize payment method to satisfy DB CHECK constraint
+    let normalizedMethod = paymentMethod || 'UPI';
+    const lower = normalizedMethod.toLowerCase().replace(/[\s\-_]/g, '');
+    if (lower === 'upi') normalizedMethod = 'UPI';
+    else if (lower.includes('netbank') || lower.includes('banking')) normalizedMethod = 'Net Banking';
+    else if (lower.includes('card')) normalizedMethod = 'Credit/Debit Card';
+    else if (lower.includes('neft') || lower.includes('rtgs')) normalizedMethod = 'NEFT/RTGS';
+    else if (lower.includes('cheque') || lower.includes('check')) normalizedMethod = 'Cheque';
+    else normalizedMethod = 'UPI';
+
+    const today = new Date().toISOString().split('T')[0];
     const newAmountPaid = inv.amount_paid + paymentAmount;
     const newBalanceDue = Math.max(0, inv.total_amount - newAmountPaid);
-    const newStatus = newBalanceDue <= 0.01 ? 'paid' : 'confirmed';
+    
+    let newStatus = inv.status;
+    if (newBalanceDue <= 0.01) {
+      newStatus = 'paid';
+    } else if (inv.status === 'overdue' || (inv.due_date && inv.due_date < today)) {
+      newStatus = 'overdue';
+    } else {
+      newStatus = 'confirmed';
+    }
 
     const payId = 'pay-' + Date.now();
     const payNum = 'PAY-' + Math.floor(10000 + Math.random() * 90000);
-    const today = new Date().toISOString().split('T')[0];
-    const txnRef = transactionReference || `${paymentMethod}/TXN/${Date.now()}`;
+    const txnRef = transactionReference || `${normalizedMethod}/TXN/${Date.now()}`;
 
     const recordTransaction = db.transaction(() => {
       // 1. Insert payment record
@@ -727,10 +794,10 @@ apiRouter.post('/invoices/:id/payments', (req, res) => {
         inv.invoice_number,
         inv.customer_name,
         paymentAmount,
-        paymentMethod,
+        normalizedMethod,
         txnRef,
         today,
-        notes || `Payment received via ${paymentMethod}`
+        notes || `Payment received via ${normalizedMethod}`
       );
 
       // 2. Update invoice balance and status
@@ -897,13 +964,21 @@ apiRouter.post('/billing/run', (req, res) => {
 
         // Fetch sub lines to duplicate into invoice lines
         const lines = db.prepare('SELECT * FROM subscription_lines WHERE subscription_id = ?').all(sub.id);
-        lines.forEach((l, idx) => {
-          const lineId = `iline-${Date.now()}-${Math.random().toString(36).substring(2, 8)}-${idx}`;
+        if (lines.length > 0) {
+          lines.forEach((l, idx) => {
+            const lineId = `iline-${Date.now()}-${Math.random().toString(36).substring(2, 8)}-${idx}`;
+            db.prepare(`
+              INSERT INTO invoice_lines (id, invoice_id, description, sac_code, quantity, unit_price, amount)
+              VALUES (?, ?, ?, '998313', ?, ?, ?)
+            `).run(lineId, invId, `${l.product_name} (${l.variant_name || 'Standard'})`, l.quantity, l.unit_price, l.subtotal);
+          });
+        } else {
+          const lineId = `iline-${Date.now()}-${Math.random().toString(36).substring(2, 8)}-0`;
           db.prepare(`
             INSERT INTO invoice_lines (id, invoice_id, description, sac_code, quantity, unit_price, amount)
-            VALUES (?, ?, ?, '998313', ?, ?, ?)
-          `).run(lineId, invId, `${l.product_name} (${l.variant_name || 'Standard'})`, l.quantity, l.unit_price, l.subtotal);
-        });
+            VALUES (?, ?, ?, '998313', 1, ?, ?)
+          `).run(lineId, invId, `${sub.plan_name || 'SaaS Subscription'} (${sub.billing_period || 'monthly'})`, sub.total_amount, sub.total_amount);
+        }
 
         // Advance subscription next_billing_date automatically
         const nextDate = advanceBillingDate(sub.next_billing_date || today, sub.billing_period);
@@ -1246,7 +1321,7 @@ apiRouter.get('/staff', (req, res) => {
   }
 });
 
-apiRouter.post('/staff', (req, res) => {
+apiRouter.post(['/staff', '/admin/staff'], (req, res) => {
   try {
     const { name, email, roleTitle, department, addedBy = 'usr-admin' } = req.body;
     if (!name || !email || !roleTitle || !department) {

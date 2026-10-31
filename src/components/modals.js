@@ -478,14 +478,30 @@ function renderAuthModal() {
 // 6. Printable Official Tax Invoice in Rupees (₹)
 function renderPrintInvoiceModal(data) {
   const state = store.getState();
-  const inv = state.invoices.find(i => i.invoiceNumber === data.invoiceNumber) || state.invoices[0];
+  const searchKey = data.invoiceNumber || data.subscriptionId;
+  const inv = state.invoices.find(i => i.invoiceNumber === searchKey || i.id === searchKey) ||
+              state.subscriptions.find(s => s.subscriptionNumber === searchKey || s.id === searchKey) ||
+              state.invoices[0] || {};
+
+  const isQuotation = !inv.invoiceNumber && Boolean(inv.subscriptionNumber);
+  const docTitle = isQuotation ? 'Quotation' : 'Tax Invoice';
+  const docNumber = inv.invoiceNumber || inv.subscriptionNumber || 'DOC-2024-001';
+  const docDate = inv.issueDate || inv.invoiceDate || inv.startDate || new Date().toISOString().split('T')[0];
+  const docDueDate = inv.dueDate || inv.expiryDate || inv.nextBillingDate || '-';
+  const docStatus = inv.status || 'confirmed';
+
+  const lines = inv.lines || inv.items || [];
+  const subtotal = inv.subtotal !== undefined ? inv.subtotal : (inv.totalAmount || 0);
+  const discountAmount = inv.discountAmount !== undefined ? inv.discountAmount : (inv.discount_amount || 0);
+  const gstAmount = inv.gstAmount !== undefined ? inv.gstAmount : (inv.taxAmount !== undefined ? inv.taxAmount : (subtotal * 0.18));
+  const totalAmount = inv.totalAmount !== undefined ? inv.totalAmount : (inv.grandTotal || (subtotal + gstAmount));
 
   return `
     <div class="p-6 max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-4 border-b border-[#e2e8f0] no-print">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-xl text-[#081534]">receipt_long</span>
-          <span class="font-bold text-[#081534]">Tax Invoice • ${inv.invoiceNumber}</span>
+          <span class="font-bold text-[#081534]">${docTitle} • ${docNumber}</span>
         </div>
         <div class="flex items-center gap-2">
           <button onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-[#081534] text-white text-xs font-semibold hover:bg-[#1e2a4a] flex items-center gap-1">
@@ -509,26 +525,27 @@ function renderPrintInvoiceModal(data) {
             <p class="text-[#64748b] text-[11px] font-mono">GSTIN: 27AABCB1234F1Z0</p>
           </div>
           <div class="text-right">
-            <div class="text-xl font-bold font-mono text-[#081534]">${inv.invoiceNumber}</div>
-            <p class="font-mono text-[#64748b]">Date: ${inv.issueDate}</p>
-            <p class="font-mono text-[#ba1a1a] font-bold">Due Date: ${inv.dueDate}</p>
+            <div class="text-xl font-bold font-mono text-[#081534]">${docNumber}</div>
+            <p class="font-mono text-[#64748b]">Date: ${docDate}</p>
+            <p class="font-mono text-[#ba1a1a] font-bold">Due Date: ${docDueDate}</p>
             <span class="inline-block px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase mt-1 ${
-              inv.status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+              docStatus === 'paid' ? 'bg-emerald-100 text-emerald-800' : docStatus === 'overdue' ? 'bg-red-100 text-red-800' : 'bg-sky-100 text-sky-800'
             }">
-              STATUS: ${inv.status.toUpperCase()}
+              STATUS: ${docStatus.toUpperCase()}
             </span>
           </div>
         </div>
 
         <div class="p-3 bg-[#f8f9ff] rounded-lg border border-[#e2e8f0]">
           <span class="text-[10px] text-[#76777f] uppercase font-semibold block">Billed To:</span>
-          <div class="font-bold text-sm text-[#081534]">${inv.customerName}</div>
-          <div class="font-mono text-[#45464e]">${inv.customerEmail}</div>
+          <div class="font-bold text-sm text-[#081534]">${inv.customerName || 'Customer'}</div>
+          <div class="font-mono text-[#45464e]">${inv.customerEmail || ''}</div>
+          <div class="font-mono text-[11px] text-[#64748b] mt-0.5">GSTIN: ${inv.customerGstin || 'Unregistered'}</div>
         </div>
 
         <table class="w-full text-left text-xs">
           <thead>
-            <tr class="border-b border-[#cbd5e1] text-[#76777f] uppercase">
+            <tr class="border-b border-[#cbd5e1] text-[#76777f] uppercase font-semibold">
               <th class="py-2">Description</th>
               <th class="py-2 text-center">Qty</th>
               <th class="py-2 text-right">Unit Price</th>
@@ -536,35 +553,48 @@ function renderPrintInvoiceModal(data) {
             </tr>
           </thead>
           <tbody class="divide-y divide-[#f1f5f9]">
-            ${inv.lines.map(line => `
+            ${lines.length === 0 ? `
               <tr>
-                <td class="py-2 font-medium">${line.description}</td>
-                <td class="py-2 text-center font-mono">${line.qty}</td>
-                <td class="py-2 text-right font-mono">₹${line.unitPrice.toFixed(2)}</td>
-                <td class="py-2 text-right font-mono font-bold">₹${line.total.toFixed(2)}</td>
+                <td class="py-2 font-medium">${inv.planName || 'SaaS Subscription'}</td>
+                <td class="py-2 text-center font-mono">1</td>
+                <td class="py-2 text-right font-mono">₹${subtotal.toFixed(2)}</td>
+                <td class="py-2 text-right font-mono font-bold">₹${subtotal.toFixed(2)}</td>
               </tr>
-            `).join('')}
+            ` : lines.map(line => {
+              const desc = line.description || `${line.productName || line.product_name || 'Software'} (${line.variantName || line.variant_name || 'Standard'})`;
+              const qty = line.qty !== undefined ? line.qty : (line.quantity || 1);
+              const uPrice = line.unitPrice !== undefined ? line.unitPrice : (line.unit_price || 0);
+              const tot = line.total !== undefined ? line.total : (line.subtotal !== undefined ? line.subtotal : (uPrice * qty));
+              return `
+                <tr>
+                  <td class="py-2 font-medium">${desc}</td>
+                  <td class="py-2 text-center font-mono">${qty}</td>
+                  <td class="py-2 text-right font-mono">₹${uPrice.toFixed(2)}</td>
+                  <td class="py-2 text-right font-mono font-bold">₹${tot.toFixed(2)}</td>
+                </tr>
+              `;
+            }).join('')}
           </tbody>
         </table>
 
         <div class="border-t border-[#cbd5e1] pt-3 flex flex-col items-end gap-1 font-mono text-xs">
           <div class="flex justify-between w-60">
             <span>Subtotal:</span>
-            <span>₹${inv.subtotal.toFixed(2)}</span>
+            <span>₹${subtotal.toFixed(2)}</span>
           </div>
-          ${inv.discountAmount > 0 ? `
+          ${discountAmount > 0 ? `
             <div class="flex justify-between w-60 text-emerald-700">
               <span>Discount Applied:</span>
-              <span>-₹${inv.discountAmount.toFixed(2)}</span>
+              <span>-₹${discountAmount.toFixed(2)}</span>
             </div>
           ` : ''}
           <div class="flex justify-between w-60">
             <span>GST (18%):</span>
-            <span>+₹${inv.taxAmount.toFixed(2)}</span>
+            <span>+₹${gstAmount.toFixed(2)}</span>
           </div>
           <div class="flex justify-between w-60 text-sm font-bold border-t border-[#cbd5e1] pt-1.5 text-[#081534]">
             <span>Total Payable:</span>
-            <span>₹${inv.totalAmount.toFixed(2)}</span>
+            <span>₹${totalAmount.toFixed(2)}</span>
           </div>
         </div>
 

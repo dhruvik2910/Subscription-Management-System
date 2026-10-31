@@ -29,12 +29,12 @@ export function renderCustomerPortal() {
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-amber-600">error</span>
             <div class="text-xs">
-              <strong>Pending Invoice Due:</strong> Invoice <span class="font-mono font-bold">${pendingInvoice.invoiceNumber}</span> (₹${pendingInvoice.balanceDue.toFixed(2)}) is awaiting payment. Settle via UPI to keep services active.
+              <strong>Pending Invoice Due:</strong> Invoice <span class="font-mono font-bold">${pendingInvoice.invoiceNumber || pendingInvoice.invoice_number}</span> (₹${((pendingInvoice.balanceDue !== undefined ? pendingInvoice.balanceDue : (pendingInvoice.balance_due || 0))).toFixed(2)}) is awaiting payment. Settle via UPI to keep services active.
             </div>
           </div>
-          <button onclick="window.openRecordPaymentModal('${pendingInvoice.invoiceNumber}', ${pendingInvoice.balanceDue})" 
+          <button onclick="window.openRecordPaymentModal('${pendingInvoice.invoiceNumber || pendingInvoice.invoice_number}', ${pendingInvoice.balanceDue !== undefined ? pendingInvoice.balanceDue : (pendingInvoice.balance_due || 0)})" 
             class="px-3.5 py-1.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold shadow-sm transition-all shrink-0">
-            Pay Now (₹${pendingInvoice.balanceDue.toFixed(2)})
+            Pay Now (₹${((pendingInvoice.balanceDue !== undefined ? pendingInvoice.balanceDue : (pendingInvoice.balance_due || 0))).toFixed(2)})
           </button>
         </div>
       ` : `
@@ -64,7 +64,7 @@ export function renderCustomerPortal() {
         <div class="text-left sm:text-right">
           <div class="text-[11px] text-slate-400 uppercase tracking-wider">Current Plan</div>
           <div class="text-sm font-bold text-slate-800">${customerSub?.planName || 'Monthly Professional'}</div>
-          <div class="text-xs font-mono text-slate-500">₹${(customerSub?.totalAmount || 0).toFixed(2)} / month</div>
+          <div class="text-xs font-mono text-slate-500">₹${((customerSub?.totalAmount !== undefined ? customerSub.totalAmount : (customerSub?.total_amount || 0))).toFixed(2)} / month</div>
         </div>
       </div>
 
@@ -132,11 +132,11 @@ export function renderCustomerPortal() {
                 </tr>
               ` : customerInvoices.map(inv => `
                 <tr class="hover:bg-slate-50/70">
-                  <td class="py-3 px-3 font-mono font-semibold text-[#081534]">${inv.invoiceNumber}</td>
-                  <td class="py-3 px-3 font-mono text-slate-600">${inv.invoiceDate || inv.issueDate}</td>
-                  <td class="py-3 px-3 font-mono text-slate-600">${inv.dueDate}</td>
+                  <td class="py-3 px-3 font-mono font-semibold text-[#081534]">${inv.invoiceNumber || inv.invoice_number}</td>
+                  <td class="py-3 px-3 font-mono text-slate-600">${inv.invoiceDate || inv.issueDate || inv.invoice_date || '-'}</td>
+                  <td class="py-3 px-3 font-mono text-slate-600">${inv.dueDate || inv.due_date || '-'}</td>
                   <td class="py-3 px-3 text-right font-mono font-semibold text-slate-900">
-                    ₹${inv.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    ₹${((inv.totalAmount !== undefined ? inv.totalAmount : (inv.total_amount || 0))).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </td>
                   <td class="py-3 px-3">
                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium capitalize ${
@@ -148,12 +148,12 @@ export function renderCustomerPortal() {
                   </td>
                   <td class="py-3 px-3 text-right">
                     <div class="inline-flex items-center gap-1.5">
-                      <button onclick="window.previewInvoicePDF('${inv.invoiceNumber}')" 
+                      <button onclick="window.previewInvoicePDF('${inv.invoiceNumber || inv.invoice_number}')" 
                         class="px-2.5 py-1 rounded bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-medium transition-colors">
                         Tax Invoice
                       </button>
-                      ${inv.balanceDue > 0 ? `
-                        <button onclick="window.openRecordPaymentModal('${inv.invoiceNumber}', ${inv.balanceDue})" 
+                      ${(inv.balanceDue !== undefined ? inv.balanceDue : (inv.balance_due || 0)) > 0 ? `
+                        <button onclick="window.openRecordPaymentModal('${inv.invoiceNumber || inv.invoice_number}', ${inv.balanceDue !== undefined ? inv.balanceDue : (inv.balance_due || 0)})" 
                           class="px-2.5 py-1 rounded bg-teal-700 hover:bg-teal-800 text-white text-xs font-medium transition-colors">
                           Pay Now
                         </button>

@@ -13,22 +13,23 @@ export function renderRevenueOps() {
   
   // Real-time calculations in INR (₹)
   const totalActiveSubs = activeSubs.length;
-  const mrrInvoiced = state.invoices.reduce((acc, inv) => acc + (inv.status !== 'cancelled' ? inv.totalAmount : 0), 0);
-  const totalCollected = state.invoices.reduce((acc, inv) => acc + inv.amountPaid, 0);
+  const mrrInvoiced = state.invoices.reduce((acc, inv) => acc + (inv.status !== 'cancelled' ? (inv.totalAmount || inv.total_amount || 0) : 0), 0);
+  const totalCollected = state.invoices.reduce((acc, inv) => acc + (inv.amountPaid !== undefined ? inv.amountPaid : (inv.amount_paid || 0)), 0);
   
-  const overdueInvoices = state.invoices.filter(inv => inv.status === 'overdue' && inv.balanceDue > 0);
-  const overdueBalance = overdueInvoices.reduce((acc, inv) => acc + inv.balanceDue, 0);
+  const overdueInvoices = state.invoices.filter(inv => inv.status === 'overdue' && (inv.balanceDue !== undefined ? inv.balanceDue : (inv.balance_due || 0)) > 0);
+  const overdueBalance = overdueInvoices.reduce((acc, inv) => acc + (inv.balanceDue !== undefined ? inv.balanceDue : (inv.balance_due || 0)), 0);
 
   // Contract Breakdown calculations
-  const yearlySubs = activeSubs.filter(s => s.billingPeriod === 'yearly');
-  const monthlySubs = activeSubs.filter(s => s.billingPeriod === 'monthly');
+  const yearlySubs = activeSubs.filter(s => (s.billingPeriod || s.billing_period) === 'yearly');
+  const monthlySubs = activeSubs.filter(s => (s.billingPeriod || s.billing_period) === 'monthly');
   
-  const yearlySum = yearlySubs.reduce((acc, s) => acc + (s.totalAmount || 0), 0);
-  const monthlySum = monthlySubs.reduce((acc, s) => acc + (s.totalAmount || 0), 0);
+  const yearlySum = yearlySubs.reduce((acc, s) => acc + (s.totalAmount || s.total_amount || 0), 0);
+  const monthlySum = monthlySubs.reduce((acc, s) => acc + (s.totalAmount || s.total_amount || 0), 0);
   const addonSum = activeSubs.reduce((acc, s) => {
     let extra = 0;
-    if (s.addonsEnabled?.analytics) extra += 1250;
-    if (s.addonsEnabled?.support) extra += 2500;
+    const addons = s.addonsEnabled || s.addons || {};
+    if (addons.analytics) extra += 1250;
+    if (addons.support) extra += 2500;
     return acc + extra;
   }, 0);
   
@@ -365,17 +366,17 @@ export function renderRevenueOps() {
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
-                ${state.subscriptions.slice(0, 5).map(sub => `
+                ${(state.subscriptions || []).slice(0, 5).map(sub => `
                   <tr class="hover:bg-slate-50/70 cursor-pointer transition-colors" onclick="window.selectSubscriptionRecord('${sub.id}'); window.appNavigate('subscriptions-quotes');">
-                    <td class="py-3 px-3 font-mono font-medium text-slate-800">${sub.subscriptionNumber}</td>
+                    <td class="py-3 px-3 font-mono font-medium text-slate-800">${sub.subscriptionNumber || sub.subscription_number}</td>
                     <td class="py-3 px-3">
-                      <div class="font-semibold text-slate-900">${sub.customerName}</div>
-                      <div class="text-[11px] text-slate-500">${sub.planName}</div>
+                      <div class="font-semibold text-slate-900">${sub.customerName || sub.customer_name}</div>
+                      <div class="text-[11px] text-slate-500">${sub.planName || sub.plan_name}</div>
                     </td>
-                    <td class="py-3 px-3 capitalize text-slate-600">${sub.billingPeriod || 'monthly'}</td>
-                    <td class="py-3 px-3 font-mono text-slate-600">${sub.nextBillingDate}</td>
+                    <td class="py-3 px-3 capitalize text-slate-600">${sub.billingPeriod || sub.billing_period || 'monthly'}</td>
+                    <td class="py-3 px-3 font-mono text-slate-600">${sub.nextBillingDate || sub.next_billing_date || '-'}</td>
                     <td class="py-3 px-3 text-right font-mono font-semibold text-slate-900">
-                      ₹${(sub.totalAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      ₹${(sub.totalAmount || sub.total_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </td>
                   </tr>
                 `).join('')}
@@ -399,21 +400,21 @@ export function renderRevenueOps() {
           </div>
 
           <div class="space-y-3">
-            ${state.payments.slice(0, 4).map(pay => `
+            ${(state.payments || []).slice(0, 4).map(pay => `
               <div class="p-3 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between gap-3">
                 <div class="space-y-0.5">
-                  <div class="font-semibold text-xs text-slate-900">${pay.customerName}</div>
+                  <div class="font-semibold text-xs text-slate-900">${pay.customerName || pay.customer_name}</div>
                   <div class="text-[11px] text-slate-500 flex items-center gap-2">
-                    <span class="font-mono">${pay.invoiceNumber}</span>
+                    <span class="font-mono">${pay.invoiceNumber || pay.invoice_number}</span>
                     <span>•</span>
-                    <span class="text-teal-700 font-medium">${pay.method}</span>
+                    <span class="text-teal-700 font-medium">${pay.method || pay.payment_method || 'UPI'}</span>
                     <span>•</span>
-                    <span class="font-mono">${pay.date}</span>
+                    <span class="font-mono">${pay.date || pay.payment_date || ''}</span>
                   </div>
                 </div>
                 <div class="text-right shrink-0">
                   <div class="font-mono text-xs font-bold text-teal-700">
-                    +₹${pay.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    +₹${(pay.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </div>
                   <span class="text-[10px] text-slate-400 font-mono">Settled</span>
                 </div>

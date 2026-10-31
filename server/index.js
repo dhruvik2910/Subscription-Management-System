@@ -36,7 +36,9 @@ app.get('/health', (req, res) => {
 });
 
 // Start listening
-app.listen(PORT, () => {
+export const server = app.listen(PORT, () => {
   console.log(`⚡ Brightloop Backend Server running on http://localhost:${PORT}`);
   console.log(`📡 REST API ready at http://localhost:${PORT}/api`);
 });
+
+export { app };

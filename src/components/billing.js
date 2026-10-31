@@ -17,15 +17,17 @@ export function renderBilling() {
   
   const filteredInvoices = state.invoices.filter(inv => {
     const matchesFilter = invoiceFilter === 'all' || inv.status === invoiceFilter;
+    const invNum = inv.invoiceNumber || inv.invoice_number || '';
+    const custName = inv.customerName || inv.customer_name || '';
     const matchesSearch = !invoiceSearch || 
-      inv.invoiceNumber.toLowerCase().includes(invoiceSearch.toLowerCase()) ||
-      inv.customerName.toLowerCase().includes(invoiceSearch.toLowerCase());
+      invNum.toLowerCase().includes(invoiceSearch.toLowerCase()) ||
+      custName.toLowerCase().includes(invoiceSearch.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
-  const totalBilled = state.invoices.reduce((acc, inv) => acc + (inv.status !== 'cancelled' ? inv.totalAmount : 0), 0);
-  const totalCollected = state.invoices.reduce((acc, inv) => acc + inv.amountPaid, 0);
-  const totalOutstanding = state.invoices.reduce((acc, inv) => acc + (inv.status !== 'cancelled' ? inv.balanceDue : 0), 0);
+  const totalBilled = state.invoices.reduce((acc, inv) => acc + (inv.status !== 'cancelled' ? (inv.totalAmount || inv.total_amount || 0) : 0), 0);
+  const totalCollected = state.invoices.reduce((acc, inv) => acc + (inv.amountPaid !== undefined ? inv.amountPaid : (inv.amount_paid || 0)), 0);
+  const totalOutstanding = state.invoices.reduce((acc, inv) => acc + (inv.status !== 'cancelled' ? (inv.balanceDue !== undefined ? inv.balanceDue : (inv.balance_due || 0)) : 0), 0);
 
   return `
     <div class="flex flex-col gap-6 w-full animate-fade-in">

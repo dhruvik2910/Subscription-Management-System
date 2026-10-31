@@ -85,21 +85,21 @@ export function renderSubscriptions() {
                   <tr class="hover:bg-slate-50/80 cursor-pointer transition-colors ${isSelected ? 'bg-slate-50 font-medium' : ''}" 
                     onclick="window.selectSubscriptionRecord('${s.id}')">
                     <td class="py-3.5 px-4 font-mono font-semibold text-[#081534]">
-                      ${s.subscriptionNumber}
+                      ${s.subscriptionNumber || s.subscription_number}
                     </td>
                     <td class="py-3.5 px-4">
-                      <div class="font-semibold text-slate-900">${s.customerName}</div>
-                      <div class="text-[11px] text-slate-500 font-mono">${s.customerEmail}</div>
+                      <div class="font-semibold text-slate-900">${s.customerName || s.customer_name}</div>
+                      <div class="text-[11px] text-slate-500 font-mono">${s.customerEmail || s.customer_email}</div>
                     </td>
                     <td class="py-3.5 px-4">
-                      <div class="text-slate-800">${s.planName}</div>
-                      <div class="text-[11px] text-slate-500 capitalize">${s.billingPeriod || 'monthly'}</div>
+                      <div class="text-slate-800">${s.planName || s.plan_name}</div>
+                      <div class="text-[11px] text-slate-500 capitalize">${s.billingPeriod || s.billing_period || 'monthly'}</div>
                     </td>
                     <td class="py-3.5 px-4 font-mono text-slate-600">
-                      ${s.nextBillingDate}
+                      ${s.nextBillingDate || s.next_billing_date || '-'}
                     </td>
                     <td class="py-3.5 px-4 text-right font-mono font-semibold text-slate-900">
-                      ₹${(s.totalAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      ₹${((s.totalAmount !== undefined ? s.totalAmount : (s.total_amount || 0))).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </td>
                     <td class="py-3.5 px-4">
                       <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium capitalize ${
@@ -110,7 +110,7 @@ export function renderSubscriptions() {
                           : 'bg-slate-100 text-slate-700'
                       }">
                         <span class="w-1.5 h-1.5 rounded-full ${s.status === 'active' ? 'bg-emerald-500' : s.status === 'closed' ? 'bg-rose-500' : 'bg-slate-400'}"></span>
-                        ${s.status} ${s.isPaused ? '(Paused)' : ''}
+                        ${s.status} ${(s.isPaused || s.is_paused) ? '(Paused)' : ''}
                       </span>
                     </td>
                     <td class="py-3.5 px-4 text-right">
@@ -135,13 +135,13 @@ export function renderSubscriptions() {
           <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
             <div>
               <div class="flex items-center gap-3">
-                <span class="font-mono text-lg font-bold text-[#081534]">${sub.subscriptionNumber}</span>
+                <span class="font-mono text-lg font-bold text-[#081534]">${sub.subscriptionNumber || sub.subscription_number}</span>
                 <span class="text-xs text-slate-500">•</span>
-                <span class="font-semibold text-slate-800 text-sm">${sub.customerName}</span>
-                <span class="text-xs font-mono text-slate-400">(${sub.customerGstin || 'GSTIN on file'})</span>
+                <span class="font-semibold text-slate-800 text-sm">${sub.customerName || sub.customer_name}</span>
+                <span class="text-xs font-mono text-slate-400">(${sub.customerGstin || sub.customer_gstin || 'GSTIN on file'})</span>
               </div>
               <p class="text-xs text-slate-500 mt-0.5">
-                ${sub.planName} • Billed ${sub.billingPeriod || 'monthly'} • Renewal date: <span class="font-mono font-medium text-slate-800">${sub.nextBillingDate}</span>
+                ${sub.planName || sub.plan_name} • Billed ${sub.billingPeriod || sub.billing_period || 'monthly'} • Renewal date: <span class="font-mono font-medium text-slate-800">${sub.nextBillingDate || sub.next_billing_date || '-'}</span>
               </p>
             </div>
 
@@ -224,7 +224,7 @@ export function renderSubscriptions() {
                   <tr class="bg-slate-50/70 border-t border-slate-200 font-semibold">
                     <td colspan="4" class="py-2.5 px-3 text-right text-slate-600">Recurring Total:</td>
                     <td class="py-2.5 px-3 text-right font-mono text-slate-900 font-bold">
-                      ₹${(sub.totalAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      ₹${((sub.totalAmount !== undefined ? sub.totalAmount : (sub.total_amount || 0))).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </td>
                   </tr>
                 </tfoot>

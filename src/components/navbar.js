@@ -4,7 +4,7 @@ import { store } from '../store.js';
 export function renderNavbar() {
   const state = store.getState();
   const currentRole = state.currentRole;
-  const user = state.currentUser[currentRole];
+  const user = state.currentUser[currentRole] || state.currentUser['admin'] || { name: 'Admin User', avatar: '' };
   const activeRoute = state.activeRoute;
   const isCustomer = currentRole === 'customer';
   const isConnected = state.isServerConnected;

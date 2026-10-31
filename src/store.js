@@ -379,14 +379,15 @@ class Store {
       if (!res.ok) throw new Error('Backend offline');
       const overviewData = await res.json();
 
-      const [subsRes, invRes, staffRes, productsRes, plansRes, discountsRes, templatesRes] = await Promise.all([
+      const [subsRes, invRes, staffRes, productsRes, plansRes, discountsRes, templatesRes, paymentsRes] = await Promise.all([
         fetch(`${API_BASE}/subscriptions`).catch(() => null),
         fetch(`${API_BASE}/invoices`).catch(() => null),
         fetch(`${API_BASE}/staff`).catch(() => null),
         fetch(`${API_BASE}/products`).catch(() => null),
         fetch(`${API_BASE}/plans`).catch(() => null),
         fetch(`${API_BASE}/discounts`).catch(() => null),
-        fetch(`${API_BASE}/templates`).catch(() => null)
+        fetch(`${API_BASE}/templates`).catch(() => null),
+        fetch(`${API_BASE}/payments`).catch(() => null)
       ]);
 
       if (subsRes && subsRes.ok && invRes && invRes.ok) {
@@ -397,6 +398,7 @@ class Store {
         const plansData = plansRes && plansRes.ok ? await plansRes.json() : null;
         const discountsData = discountsRes && discountsRes.ok ? await discountsRes.json() : null;
         const templatesData = templatesRes && templatesRes.ok ? await templatesRes.json() : null;
+        const paymentsData = paymentsRes && paymentsRes.ok ? await paymentsRes.json() : null;
 
         // Map backend subscriptions with normalized dual-access properties
         if (subsData.data && subsData.data.length > 0) {
@@ -426,20 +428,33 @@ class Store {
             return {
               id: s.id,
               subscriptionNumber: s.subscription_number,
+              subscription_number: s.subscription_number,
               customerName: s.customer_name,
+              customer_name: s.customer_name,
               customerEmail: s.customer_email,
+              customer_email: s.customer_email,
               customerCompany: s.customer_company,
+              customer_company: s.customer_company,
               customerGstin: s.customer_gstin,
+              customer_gstin: s.customer_gstin,
               planId: s.plan_id,
+              plan_id: s.plan_id,
               planName: s.plan_name,
+              plan_name: s.plan_name,
               billingPeriod: s.billing_period,
+              billing_period: s.billing_period,
               startDate: s.start_date,
+              start_date: s.start_date,
               nextBillingDate: s.next_billing_date,
+              next_billing_date: s.next_billing_date,
               status: s.status,
               isPaused: Boolean(s.is_paused),
+              is_paused: Boolean(s.is_paused),
               autoRenew: Boolean(s.auto_renew),
+              auto_renew: Boolean(s.auto_renew),
               tier: s.tier || 'Standard',
               totalAmount: subtotal,
+              total_amount: subtotal,
               subtotal: subtotal,
               taxTotal: taxTotal,
               discountTotal: 0,
@@ -456,46 +471,90 @@ class Store {
           this.state.invoices = invData.data.map(i => ({
             id: i.id,
             invoiceNumber: i.invoice_number,
+            invoice_number: i.invoice_number,
             subscriptionId: i.subscription_id,
+            subscription_id: i.subscription_id,
             customerName: i.customer_name,
+            customer_name: i.customer_name,
             customerEmail: i.customer_email,
+            customer_email: i.customer_email,
             customerGstin: i.customer_gstin,
+            customer_gstin: i.customer_gstin,
             invoiceDate: i.invoice_date,
+            issueDate: i.invoice_date,
             dueDate: i.due_date,
+            due_date: i.due_date,
             status: i.status,
             subtotal: i.subtotal,
             discountAmount: i.discount_amount || 0,
+            discount_amount: i.discount_amount || 0,
             gstRate: i.gst_rate || 18.0,
             gstAmount: i.gst_amount,
+            taxAmount: i.gst_amount,
+            taxRate: i.gst_rate || 18.0,
             totalAmount: i.total_amount,
+            total_amount: i.total_amount,
             amountPaid: i.amount_paid || 0,
+            amount_paid: i.amount_paid || 0,
             balanceDue: i.balance_due,
+            balance_due: i.balance_due,
             paymentMethod: i.payment_method,
             cycleToken: i.cycle_token,
             lines: (i.lines || []).map(il => ({
               id: il.id,
               description: il.description,
               sacCode: il.sac_code || '998313',
+              sac_code: il.sac_code || '998313',
               quantity: il.quantity || 1,
               qty: il.quantity || 1,
               unitPrice: il.unit_price,
+              unit_price: il.unit_price,
               total: il.amount,
               amount: il.amount
             }))
           }));
         }
 
-        // Map recent payments
-        if (overviewData.data && overviewData.data.recentPayments) {
+        // Map payments (full table or fallback to recentPayments)
+        if (paymentsData && paymentsData.data && paymentsData.data.length > 0) {
+          this.state.payments = paymentsData.data.map(p => ({
+            id: p.id,
+            paymentNumber: p.payment_number,
+            payment_number: p.payment_number,
+            invoiceId: p.invoice_id,
+            invoice_id: p.invoice_id,
+            invoiceNumber: p.invoice_number,
+            invoice_number: p.invoice_number,
+            customerName: p.customer_name,
+            customer_name: p.customer_name,
+            amount: p.amount,
+            method: p.payment_method,
+            payment_method: p.payment_method,
+            date: p.payment_date,
+            payment_date: p.payment_date,
+            note: p.notes,
+            notes: p.notes,
+            status: p.status
+          }));
+        } else if (overviewData.data && overviewData.data.recentPayments) {
           this.state.payments = overviewData.data.recentPayments.map(p => ({
             id: p.id,
             paymentNumber: p.payment_number,
+            payment_number: p.payment_number,
+            invoiceId: p.invoice_id,
+            invoice_id: p.invoice_id,
             invoiceNumber: p.invoice_number,
+            invoice_number: p.invoice_number,
             customerName: p.customer_name,
+            customer_name: p.customer_name,
             amount: p.amount,
             method: p.payment_method,
+            payment_method: p.payment_method,
             date: p.payment_date,
-            note: p.notes
+            payment_date: p.payment_date,
+            note: p.notes,
+            notes: p.notes,
+            status: p.status
           }));
         }
 
@@ -903,6 +962,11 @@ class Store {
         this.setRole(user.role);
       }
       return user;
+    } else {
+      // Offline fallback
+      const role = email.includes('admin') ? 'admin' : email.includes('staff') ? 'staff' : 'customer';
+      this.setRole(role);
+      return { email, role };
     }
   }
 
@@ -1036,11 +1100,13 @@ class Store {
           customerName: sub.customerName,
           customerEmail: sub.customerEmail,
           invoiceDate: issueDate,
+          issueDate: issueDate,
           dueDate,
           status: 'confirmed',
           subtotal,
           gstRate: 18.0,
           gstAmount: gst,
+          taxAmount: gst,
           totalAmount: total,
           amountPaid: 0.00,
           balanceDue: total,
