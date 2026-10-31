@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brightloop • Subscription Management & Recurring Billing Platform</title>
+  <meta name="description" content="Centralized subscription management, automated billing cycles, brand edition variants, and financial reconciliation for Brightloop Software." />
+  
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: '#081534',
+            'primary-container': '#1e2a4a',
+            secondary: '#006a61',
+            'secondary-container': '#86f2e4',
+            surface: '#f8f9ff',
+            'surface-container': '#e5eeff',
+            'surface-container-low': '#eff4ff',
+            'surface-container-high': '#dce9ff',
+            'on-surface': '#0b1c30',
+            'on-surface-variant': '#45464e',
+            error: '#ba1a1a',
+            'error-container': '#ffdad6',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9ff;
+      color: #0b1c30;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scaleUp {
+      from { opacity: 0; transform: scale(0.97); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .animate-scale-up {
+      animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      header, #toast-container, nav {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#f8f9ff] text-[#0b1c30] flex flex-col selection:bg-[#86f2e4] selection:text-[#006f66]">
+  
+  <!-- Header Navbar Container -->
+  <div id="navbar-root"></div>
+
+  <!-- Main View Container -->
+  <main class="w-full pt-20 flex-1">
+    <div id="main-root" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"></div>
+  </main>
+
+  <!-- Interactive Modal Root -->
+  <div id="modal-root"></div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none *:pointer-events-auto"></div>
+
+  <!-- Script Entry Point -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
