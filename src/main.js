@@ -178,7 +178,7 @@ window.switchCatalogTab = (tab) => {
   renderApp();
 };
 
-// Customer Portal: Toggling Add-ons ("add-ons customers switch on and off" from PDF)
+// Customer Portal: Modular Add-on Toggling
 window.toggleCustomerAddonAction = (subId, addonType) => {
   store.toggleCustomerAddon(subId, addonType);
   showToast(`Add-on updated! Next billing cycle adjusted in real-time.`, 'success');
@@ -205,7 +205,7 @@ window.previewQuotationPrint = (subId) => {
   }
 };
 
-// 1-Click Quotation Template Auto-population (From PDF Scene 3)
+// Quotation Template Auto-population
 window.applyQuotationTemplate = (templateId) => {
   if (!templateId) return;
   const state = store.getState();
@@ -225,7 +225,7 @@ window.applyQuotationTemplate = (templateId) => {
   showToast(`Applied "${tpl.name}" template with Odoo Brand Edition lines!`, 'info');
 };
 
-// Admin Add Staff Member ("Only the admin can add a new member of staff")
+// Add Staff Member
 window.handleAddStaffSubmit = (e) => {
   e.preventDefault();
   const name = document.getElementById('newStaffName').value;
@@ -399,7 +399,7 @@ window.handleAddDiscountSubmit = (e) => {
   showToast(`Discount rule "${code}" created and active!`, 'success');
 };
 
-// Strict Password Validation Rule (Challenge Requirement: >8 chars, upper, lower, special)
+// Password Validation (8+ chars, uppercase, lowercase, special)
 window.validatePasswordStrength = (pwd) => {
   const hasLen = pwd.length > 8;
   const hasUpper = /[A-Z]/.test(pwd);

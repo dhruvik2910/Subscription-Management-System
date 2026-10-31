@@ -82,7 +82,7 @@ export function renderNavbar() {
             <kbd class="font-mono bg-white px-1.5 py-0.5 rounded text-[10px] text-[#45464e] border border-[#c6c6cf]">⌘K</kbd>
           </button>
 
-          <!-- Admin-Only Staff Management Button (PDF: "Only the admin can add a new member of staff") -->
+          <!-- Staff Management (Admin Only) -->
           ${currentRole === 'admin' ? `
             <button onclick="window.openStaffModal()" 
               class="inline-flex items-center gap-1.5 bg-white border border-[#cbd5e1] hover:bg-[#eff4ff] text-[#081534] px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-all"

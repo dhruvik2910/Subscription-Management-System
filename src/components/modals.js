@@ -73,7 +73,7 @@ export function renderModalContainer() {
   `;
 }
 
-// 1. New Quote Modal with 1-Click Quotation Template Selector (Scene 3 in PDF)
+// 1. New Quote Modal with 1-Click Quotation Template Selector
 function renderNewQuoteModal() {
   const state = store.getState();
   return `
@@ -90,7 +90,7 @@ function renderNewQuoteModal() {
 
       <form id="newQuoteForm" onsubmit="window.handleCreateQuoteSubmit(event)" class="space-y-4 mt-4 text-xs">
         
-        <!-- 1-Click Quotation Template Selector (From PDF) -->
+        <!-- 1-Click Quotation Template Selector -->
         <div class="p-3 bg-[#eff4ff] rounded-xl border border-[#dce9ff] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-[#006a61]">auto_stories</span>
@@ -194,7 +194,7 @@ function renderNewQuoteModal() {
   `;
 }
 
-// 2. Staff Management Modal ("Only the admin can add a new member of staff" from PDF)
+// 2. Staff Management Modal
 function renderStaffManagementModal() {
   const state = store.getState();
   return `
@@ -411,7 +411,7 @@ function renderAuthModal() {
       <div class="flex items-center justify-between pb-4 border-b border-[#e2e8f0]">
         <div>
           <h2 class="text-lg font-bold text-[#081534]">Customer Signup & Password Policy</h2>
-          <p class="text-xs text-[#64748b]">Per PDF: >8 chars, uppercase, lowercase & special character requirement</p>
+          <p class="text-xs text-[#64748b]">Security Standard: 8+ characters with uppercase, lowercase & special character</p>
         </div>
         <button onclick="window.closeModal()" class="text-[#76777f] hover:text-[#081534]">
           <span class="material-symbols-outlined">close</span>

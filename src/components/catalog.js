@@ -193,8 +193,8 @@ function renderProductsAndVariants(state, isAdmin) {
                         <td class="py-2.5 px-3">
                           <span class="font-semibold text-[#081534]">${v.name}</span>
                           ${v.name.includes('Odoo') ? `
-                            <span class="ml-2 px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                              Odoo Challenge Spec (+₹560)
+                            <span class="ml-2 px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
+                              Odoo Brand Edition (+₹560)
                             </span>
                           ` : ''}
                         </td>

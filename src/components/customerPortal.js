@@ -112,14 +112,14 @@ export function renderCustomerPortal() {
 
       </div>
 
-      <!-- Feature Highlight: Add-ons Customers Switch On and Off (From PDF) -->
+      <!-- Modular Add-ons Section -->
       <div class="bg-white rounded-xl border border-[#e2e8f0] p-6 shadow-sm flex flex-col gap-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#f1f5f9] pb-3">
           <div>
             <div class="flex items-center gap-2">
               <h2 class="text-base font-bold text-[#081534]">Modular Add-ons (Switch On / Off)</h2>
               <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
-                From PDF Business Model
+                Flexible Entitlements
               </span>
             </div>
             <p class="text-xs text-[#64748b]">Turn features on or off as your requirements change. Your next invoice updates automatically.</p>
