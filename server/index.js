@@ -55,10 +55,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// Start listening
-export const server = app.listen(PORT, () => {
-  console.log(`⚡ Brightloop Backend Server running on http://localhost:${PORT}`);
-  console.log(`📡 REST API ready at http://localhost:${PORT}/api`);
-});
+// Start listening (only when not running inside a serverless handler like Vercel)
+let server;
+if (!process.env.VERCEL) {
+  server = app.listen(PORT, () => {
+    console.log(`⚡ Brightloop Backend Server running on http://localhost:${PORT}`);
+    console.log(`📡 REST API ready at http://localhost:${PORT}/api`);
+  });
+}
 
-export { app };
+export { server, app };
+export default app;

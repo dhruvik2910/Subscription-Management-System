@@ -1,13 +1,18 @@
 // server/db/database.js - SQLite connection & seed initialization
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Ensure data folder exists
-const dataDir = path.join(__dirname, '..', 'data');
+// Ensure data folder exists (use /tmp on Vercel serverless to avoid EROFS read-only filesystem error)
+const isVercel = Boolean(process.env.VERCEL);
+const dataDir = isVercel 
+  ? os.tmpdir() 
+  : path.join(__dirname, '..', 'data');
+
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
@@ -43,7 +48,10 @@ db.pragma('foreign_keys = ON');
 
 // Initialize schema
 export function initDatabase() {
-  const schemaPath = path.join(__dirname, 'schema.sql');
+  let schemaPath = path.join(__dirname, 'schema.sql');
+  if (!fs.existsSync(schemaPath)) {
+    schemaPath = path.resolve('server/db/schema.sql');
+  }
   const schemaSql = fs.readFileSync(schemaPath, 'utf8');
   db.exec(schemaSql);
   seedInitialData();

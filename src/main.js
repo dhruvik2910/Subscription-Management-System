@@ -1,5 +1,5 @@
 // src/main.js - Application Controller & Bootstrap
-import { store } from './store.js';
+import { store, API_BASE } from './store.js';
 import { renderNavbar } from './components/navbar.js';
 import { renderRevenueOps } from './components/revenueOps.js';
 import { renderSubscriptions, setSelectedSubscription, setSubFilter } from './components/subscriptions.js';
@@ -96,7 +96,7 @@ window.createRenewalQuote = async (subId) => {
 
   if (state.isServerConnected) {
     try {
-      await fetch(`http://localhost:3001/api/subscriptions/${subId}/renew`, { method: 'POST' });
+      await fetch(`${API_BASE}/subscriptions/${subId}/renew`, { method: 'POST' });
     } catch (e) {
       console.warn('Server renewal error:', e);
     }
@@ -153,7 +153,7 @@ window.generateNextInvoiceForSub = async (subId) => {
 
   if (state.isServerConnected) {
     try {
-      await fetch(`http://localhost:3001/api/subscriptions/${subId}/generate-invoice`, { method: 'POST' });
+      await fetch(`${API_BASE}/subscriptions/${subId}/generate-invoice`, { method: 'POST' });
     } catch (e) {
       console.warn('Server invoice generation error:', e);
     }
@@ -517,7 +517,7 @@ window.sendResetPasswordLink = async () => {
   const email = document.getElementById('testAuthEmail')?.value?.trim() || 'aarav@apexretail.in';
   try {
     if (store.getState().isServerConnected) {
-      const res = await fetch('http://localhost:3001/api/auth/reset-password', {
+      const res = await fetch(`${API_BASE}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

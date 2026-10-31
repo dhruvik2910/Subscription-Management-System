@@ -2,7 +2,8 @@
 // Connected to Express + SQLite backend with seamless in-memory fallback
 
 const STORAGE_KEY = 'brightloop_billing_store_v2';
-const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) || 'http://localhost:3001/api';
+export const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) || 
+  (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? '/api' : 'http://localhost:3001/api');
 
 const INITIAL_DATA = {
   isServerConnected: false,
