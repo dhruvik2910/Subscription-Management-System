@@ -1,5 +1,4 @@
 // server/db/database.js - SQLite connection & seed initialization
-import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -14,7 +13,29 @@ if (!fs.existsSync(dataDir)) {
 }
 
 const dbPath = path.join(dataDir, 'subscriptions.db');
-export const db = new Database(dbPath);
+
+let dbInstance;
+try {
+  const { DatabaseSync } = await import('node:sqlite');
+  dbInstance = new DatabaseSync(dbPath);
+  dbInstance.pragma = (str) => dbInstance.exec('PRAGMA ' + str);
+  dbInstance.transaction = (fn) => (...args) => {
+    dbInstance.exec('BEGIN');
+    try {
+      const res = fn(...args);
+      dbInstance.exec('COMMIT');
+      return res;
+    } catch (err) {
+      dbInstance.exec('ROLLBACK');
+      throw err;
+    }
+  };
+} catch (e) {
+  const { default: BetterSqlite } = await import('better-sqlite3');
+  dbInstance = new BetterSqlite(dbPath);
+}
+
+export const db = dbInstance;
 
 // Enable WAL mode for concurrent read/write performance
 db.pragma('journal_mode = WAL');

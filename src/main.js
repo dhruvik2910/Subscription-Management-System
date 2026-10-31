@@ -104,6 +104,12 @@ window.generateNextInvoiceForSub = (subId) => {
   const now = new Date().toISOString().split('T')[0];
   const dueDate = new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0];
 
+  const subtotal = sub.subtotal !== undefined ? sub.subtotal : (sub.totalAmount || 0);
+  const taxTotal = sub.taxTotal !== undefined ? sub.taxTotal : (subtotal * 0.18);
+  const discountTotal = sub.discountTotal || 0;
+  const grandTotal = sub.grandTotal !== undefined ? sub.grandTotal : (subtotal - discountTotal + taxTotal);
+  const linesList = sub.lines || sub.items || [];
+
   const newInv = {
     id: 'inv-' + Date.now(),
     invoiceNumber: nextInvNum,
@@ -113,24 +119,24 @@ window.generateNextInvoiceForSub = (subId) => {
     issueDate: now,
     dueDate: dueDate,
     status: 'confirmed',
-    subtotal: sub.subtotal,
+    subtotal: subtotal,
     taxRate: 18.0,
-    taxAmount: sub.taxTotal,
-    discountAmount: sub.discountTotal,
-    totalAmount: sub.grandTotal,
+    taxAmount: taxTotal,
+    discountAmount: discountTotal,
+    totalAmount: grandTotal,
     amountPaid: 0.00,
-    balanceDue: sub.grandTotal,
+    balanceDue: grandTotal,
     daysOverdue: 0,
-    lines: sub.items.map(i => ({
-      description: `${i.productName} (${i.variantName || 'Standard'})`,
-      qty: i.quantity,
-      unitPrice: i.unitPrice,
-      total: i.total
+    lines: linesList.map(i => ({
+      description: `${i.product_name || i.productName || 'Software Service'} (${i.variant_name || i.variantName || 'Standard'})`,
+      qty: i.quantity || i.qty || 1,
+      quantity: i.quantity || i.qty || 1,
+      unitPrice: i.unit_price !== undefined ? i.unit_price : (i.unitPrice || 0),
+      total: i.subtotal !== undefined ? i.subtotal : (i.total || ((i.unit_price || 0) * (i.quantity || 1)))
     }))
   };
 
-  state.invoices.unshift(newInv);
-  store.saveState();
+  store.addInvoice(newInv);
   showToast(`Invoice ${nextInvNum} generated for ${sub.customerName}!`, 'success');
   window.appNavigate('billing-invoices');
 };
@@ -250,10 +256,18 @@ window.applyQuotationTemplate = (templateId) => {
   const qtyEl = document.getElementById('quoteQty');
   const validityEl = document.getElementById('quoteValidityDisplay');
 
-  if (planEl) planEl.value = tpl.planId;
-  if (variantEl && tpl.items[0]?.variantId) variantEl.value = tpl.items[0].variantId;
-  if (qtyEl && tpl.items[0]?.quantity) qtyEl.value = tpl.items[0].quantity;
-  if (validityEl) validityEl.value = `Valid for ${tpl.validityDays} calendar days (Template standard)`;
+  if (planEl && tpl.planId) planEl.value = tpl.planId;
+  const firstItem = (tpl.items && tpl.items[0]) || {};
+  if (variantEl) {
+    if (firstItem.variantId && Array.from(variantEl.options).some(o => o.value === firstItem.variantId)) {
+      variantEl.value = firstItem.variantId;
+    } else {
+      const odooOption = Array.from(variantEl.options).find(o => o.text.toLowerCase().includes('odoo'));
+      if (odooOption) odooOption.selected = true;
+    }
+  }
+  if (qtyEl && firstItem.quantity) qtyEl.value = firstItem.quantity;
+  if (validityEl) validityEl.value = `Valid for ${tpl.validityDays || 30} calendar days (Template standard)`;
 
   showToast(`Applied "${tpl.name}" template with Odoo Brand Edition lines!`, 'info');
 };
@@ -286,34 +300,61 @@ window.handleCreateQuoteSubmit = (e) => {
   const paymentTerms = document.getElementById('quotePaymentTerms').value;
 
   const state = store.getState();
-  const plan = state.plans.find(p => p.id === planId) || state.plans[0];
-  const product = state.products[0];
-  const variant = product.variants.find(v => v.id === variantId) || product.variants[0];
+  const plan = state.plans.find(p => p.id === planId) || state.plans[0] || { id: 'plan-monthly', name: 'Monthly Professional Plan' };
+  const product = state.products[0] || { id: 'prod-saas-core', name: 'Brightloop Core Suite', salesPrice: 3499, base_price: 3499, variants: [] };
+  const variant = (product.variants || []).find(v => v.id === variantId) || product.variants?.[0] || { id: 'var-core-odoo', name: 'Odoo Connected Edition', variant_name: 'Odoo Connected Edition', priceModifier: 560, extra_price: 560 };
 
-  const unitPrice = product.salesPrice + variant.priceModifier;
+  const basePrice = product.salesPrice !== undefined ? product.salesPrice : (product.base_price || 3499);
+  const extraPrice = variant.priceModifier !== undefined ? variant.priceModifier : (variant.extra_price || 0);
+  const unitPrice = basePrice + extraPrice;
   let lineTotal = unitPrice * qty;
   let discountAmount = 0;
 
-  if (discountCode === 'VOLUME500') {
+  if (discountCode === 'VOLUME500' || discountCode === 'STARTUP500') {
     discountAmount = 500.00;
   } else if (discountCode === 'FESTIVE15') {
     discountAmount = lineTotal * 0.15;
+  } else if (discountCode === 'DIWALI20') {
+    discountAmount = lineTotal * 0.20;
   }
 
   const subtotal = lineTotal;
-  const taxTotal = (subtotal - discountAmount) * 0.18;
-  const grandTotal = subtotal - discountAmount + taxTotal;
+  const taxTotal = Math.max(0, subtotal - discountAmount) * 0.18;
+  const grandTotal = Math.max(0, subtotal - discountAmount) + taxTotal;
 
   const newSubNumber = `SUB-2024-${Math.floor(2000 + Math.random() * 8000)}`;
+  const lineItem = {
+    id: 'li-' + Date.now(),
+    productId: product.id,
+    product_id: product.id,
+    productName: product.name,
+    product_name: product.name,
+    variantId: variant.id,
+    variant_id: variant.id,
+    variantName: variant.name || variant.variant_name || 'Standard Edition',
+    variant_name: variant.name || variant.variant_name || 'Standard Edition',
+    quantity: qty,
+    unitPrice: unitPrice,
+    unit_price: unitPrice,
+    taxRate: 18.0,
+    discountAmount: discountAmount,
+    discount_percent: discountAmount > 0 ? ((discountAmount / lineTotal) * 100) : 0,
+    total: lineTotal,
+    subtotal: lineTotal
+  };
+
   const newSub = {
     id: 'sub-' + Date.now(),
     subscriptionNumber: newSubNumber,
     customerName,
     customerEmail,
+    customerCompany: customerName,
+    customerGstin: '27AABCB1234F1Z0',
     crn: 'CIN: U' + Math.floor(100000000000 + Math.random() * 900000000000),
     tier: 'Enterprise Custom',
     planId: plan.id,
     planName: plan.name,
+    billingPeriod: plan.billing_period || plan.recurrence || 'monthly',
     startDate: new Date().toISOString().split('T')[0],
     expiryDate: new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
     nextBillingDate: new Date().toISOString().split('T')[0],
@@ -321,24 +362,14 @@ window.handleCreateQuoteSubmit = (e) => {
     autoRenew: true,
     status: 'draft',
     isPaused: false,
-    items: [
-      {
-        id: 'li-' + Date.now(),
-        productId: product.id,
-        productName: product.name,
-        variantId: variant.id,
-        variantName: variant.name,
-        quantity: qty,
-        unitPrice,
-        taxRate: 18.0,
-        discountAmount,
-        total: lineTotal
-      }
-    ],
-    subtotal,
-    taxTotal,
+    addonsEnabled: { analytics: true, support: true },
+    items: [lineItem],
+    lines: [lineItem],
+    totalAmount: subtotal,
+    subtotal: subtotal,
+    taxTotal: taxTotal,
     discountTotal: discountAmount,
-    grandTotal
+    grandTotal: grandTotal
   };
 
   store.addSubscription(newSub);
@@ -459,13 +490,28 @@ window.validatePasswordStrength = (pwd) => {
   return hasLen && hasUpper && hasLower && hasSpecial;
 };
 
-window.sendResetPasswordLink = () => {
-  const email = document.getElementById('testAuthEmail')?.value || 'aarav@apexretail.in';
+window.sendResetPasswordLink = async () => {
+  const email = document.getElementById('testAuthEmail')?.value?.trim() || 'aarav@apexretail.in';
+  try {
+    if (store.getState().isServerConnected) {
+      const res = await fetch('http://localhost:3001/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      alert(`A secure password reset link has been dispatched to: ${email}\nReset Token: ${data.token}`);
+      return;
+    }
+  } catch (e) {
+    console.warn('Reset password error:', e);
+  }
   alert(`A secure password reset link has been dispatched to: ${email}`);
 };
 
-window.simulateCustomerSignup = () => {
-  const email = document.getElementById('testAuthEmail')?.value;
+window.simulateCustomerSignup = async () => {
+  const email = document.getElementById('testAuthEmail')?.value?.trim();
   const pwd = document.getElementById('testAuthPassword')?.value || '';
   if (!email) {
     alert('Please enter a valid customer email.');
@@ -476,9 +522,21 @@ window.simulateCustomerSignup = () => {
     alert('Password does not satisfy strict policy:\n• Must be more than 8 characters\n• Must contain at least one uppercase letter\n• Must contain at least one lowercase letter\n• Must contain at least one special character');
     return;
   }
-  closeModal();
-  showToast(`Account created for ${email}! Switching to customer portal.`, 'success');
-  store.setRole('customer');
+  try {
+    const namePart = email.split('@')[0];
+    const customerName = namePart.charAt(0).toUpperCase() + namePart.slice(1) + ' Enterprise';
+    await store.registerCustomer({
+      name: customerName,
+      email,
+      password: pwd,
+      company: customerName,
+      phone: '+91 98000 12345'
+    });
+    closeModal();
+    showToast(`Account registered for ${email}! Welcome to your portal.`, 'success');
+  } catch (err) {
+    alert('Registration error: ' + err.message);
+  }
 };
 
 window.exportReportCSV = () => {

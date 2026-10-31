@@ -210,13 +210,13 @@ export function renderSubscriptions() {
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                  ${(sub.lines || []).map(line => `
+                  ${(sub.lines || sub.items || []).map(line => `
                     <tr>
-                      <td class="py-2.5 px-3 text-slate-900 font-medium">${line.product_name}</td>
-                      <td class="py-2.5 px-3 text-slate-600">${line.variant_name || 'Standard'}</td>
-                      <td class="py-2.5 px-3 text-center font-mono">${line.quantity || 1}</td>
-                      <td class="py-2.5 px-3 text-right font-mono">₹${(line.unit_price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                      <td class="py-2.5 px-3 text-right font-mono font-semibold text-slate-900">₹${(line.subtotal || line.unit_price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                      <td class="py-2.5 px-3 text-slate-900 font-medium">${line.product_name || line.productName || 'Software Service'}</td>
+                      <td class="py-2.5 px-3 text-slate-600">${line.variant_name || line.variantName || 'Standard'}</td>
+                      <td class="py-2.5 px-3 text-center font-mono">${line.quantity || line.qty || 1}</td>
+                      <td class="py-2.5 px-3 text-right font-mono">₹${(line.unit_price !== undefined ? line.unit_price : (line.unitPrice || 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                      <td class="py-2.5 px-3 text-right font-mono font-semibold text-slate-900">₹${(line.subtotal !== undefined ? line.subtotal : (line.total || 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                     </tr>
                   `).join('')}
                 </tbody>

@@ -4,13 +4,21 @@ import { store } from '../store.js';
 export function renderCustomerPortal() {
   const state = store.getState();
   
-  // Apex Retail customer
-  const customerEmail = 'aarav@apexretail.in';
-  const customerSub = state.subscriptions.find(s => s.customerEmail === customerEmail) || state.subscriptions[0];
+  // Dynamic current customer resolution with resilient fallback
+  const customerUser = state.currentUser?.customer || {
+    name: 'Aarav Patel',
+    title: 'Head of Operations • Apex Retail Pvt Ltd',
+    email: 'aarav@apexretail.in'
+  };
+  const customerEmail = customerUser.email || 'aarav@apexretail.in';
+  const customerSub = state.subscriptions.find(s => s.customerEmail === customerEmail) || state.subscriptions.find(s => s.customerEmail === 'aarav@apexretail.in') || state.subscriptions[0];
   const customerInvoices = state.invoices.filter(i => i.customerEmail === customerEmail);
   const pendingInvoice = customerInvoices.find(i => i.status === 'overdue' || (i.balanceDue > 0 && i.status !== 'cancelled'));
 
   const addons = customerSub?.addonsEnabled || { analytics: true, support: true };
+  const companyName = customerSub?.customerCompany || (customerUser.title?.includes('•') ? customerUser.title.split('•')[1].trim() : `${customerUser.name} Org`);
+  const leadName = customerSub?.customerName || customerUser.name;
+  const gstin = customerSub?.customerGstin || '24AAGCA1234N1Z5';
 
   return `
     <div class="flex flex-col gap-6 w-full animate-fade-in max-w-5xl mx-auto">
@@ -40,16 +48,16 @@ export function renderCustomerPortal() {
       <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div class="flex items-center gap-2 mb-1">
-            <h1 class="text-2xl font-bold text-[#081534] tracking-tight">Apex Retail Pvt Ltd</h1>
+            <h1 class="text-2xl font-bold text-[#081534] tracking-tight">${companyName}</h1>
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-medium border border-emerald-200">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
               Active
             </span>
           </div>
           <p class="text-xs text-slate-500 flex items-center gap-2 flex-wrap">
-            <span>Lead: <strong>Aarav Patel</strong> (Head of Operations)</span>
+            <span>Lead: <strong>${leadName}</strong></span>
             <span>•</span>
-            <span class="font-mono text-slate-400">GSTIN: 24AAGCA1234N1Z5</span>
+            <span class="font-mono text-slate-400">GSTIN: ${gstin}</span>
           </p>
         </div>
 

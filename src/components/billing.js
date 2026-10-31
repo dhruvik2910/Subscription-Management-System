@@ -138,13 +138,13 @@ export function renderBilling() {
                     <div class="font-semibold text-slate-900">${inv.customerName}</div>
                     <div class="text-[11px] text-slate-500 font-mono">${inv.customerEmail}</div>
                   </td>
-                  <td class="py-3.5 px-4 font-mono text-slate-600">${inv.invoiceDate || inv.issueDate}</td>
-                  <td class="py-3.5 px-4 font-mono text-slate-600">${inv.dueDate}</td>
+                  <td class="py-3.5 px-4 font-mono text-slate-600">${inv.invoiceDate || inv.issueDate || '-'}</td>
+                  <td class="py-3.5 px-4 font-mono text-slate-600">${inv.dueDate || '-'}</td>
                   <td class="py-3.5 px-4 text-right font-mono font-semibold text-slate-900">
-                    ₹${inv.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    ₹${(inv.totalAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </td>
-                  <td class="py-3.5 px-4 text-right font-mono font-semibold ${inv.balanceDue > 0 ? 'text-amber-700' : 'text-slate-400'}">
-                    ₹${inv.balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  <td class="py-3.5 px-4 text-right font-mono font-semibold ${(inv.balanceDue || 0) > 0 ? 'text-amber-700' : 'text-slate-400'}">
+                    ₹${(inv.balanceDue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </td>
                   <td class="py-3.5 px-4">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium capitalize ${

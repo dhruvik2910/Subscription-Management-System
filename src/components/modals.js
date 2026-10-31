@@ -152,9 +152,17 @@ function renderNewQuoteModal() {
             <div class="sm:col-span-2">
               <label class="block text-[#76777f] text-[11px] font-semibold mb-1">Brand Edition Variant</label>
               <select id="quoteVariant" class="w-full px-3 py-1.5 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono">
-                <option value="var-std">Standard Edition (₹1,000.00)</option>
-                <option value="var-odoo" selected>Odoo Enterprise Brand Edition (₹1,560.00 - adds +₹560)</option>
-                <option value="var-gov">High-Security Dedicated Cloud (₹2,200.00)</option>
+                ${((state.products[0]?.variants) || [
+                  { id: 'var-core-standard', name: 'Standard Cloud Edition', priceModifier: 0 },
+                  { id: 'var-core-odoo', name: 'Odoo Connected Edition (+₹560)', priceModifier: 560 },
+                  { id: 'var-core-enterprise', name: 'Enterprise Dedicated (+₹2,400)', priceModifier: 2400 }
+                ]).map(v => {
+                  const vId = v.id;
+                  const vName = v.name || v.variant_name || 'Standard Edition';
+                  const extra = v.priceModifier !== undefined ? v.priceModifier : (v.extra_price || 0);
+                  const isOdoo = vName.toLowerCase().includes('odoo');
+                  return `<option value="${vId}" ${isOdoo ? 'selected' : ''}>${vName} (+₹${extra.toFixed(2)})</option>`;
+                }).join('')}
               </select>
             </div>
             <div>
@@ -266,8 +274,8 @@ function renderStaffManagementModal() {
                 <tr class="hover:bg-[#f8f9ff]">
                   <td class="py-2.5 px-3 font-semibold text-[#081534]">${s.name}</td>
                   <td class="py-2.5 px-3 font-mono text-[#45464e]">${s.email}</td>
-                  <td class="py-2.5 px-3 text-[#45464e]">${s.role}</td>
-                  <td class="py-2.5 px-3 font-mono text-[#76777f]">${s.joined}</td>
+                  <td class="py-2.5 px-3 text-[#45464e]">${s.role_title || s.role || 'Billing Specialist'}${s.department ? ` • ${s.department}` : ''}</td>
+                  <td class="py-2.5 px-3 font-mono text-[#76777f]">${s.created_at ? s.created_at.substring(0, 10) : (s.joined || 'Today')}</td>
                   <td class="py-2.5 px-3 text-right">
                     <span class="px-2 py-0.5 rounded-full bg-[#86f2e4]/30 text-[#006f66] font-mono text-[10px] font-bold">Active</span>
                   </td>

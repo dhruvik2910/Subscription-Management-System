@@ -379,39 +379,76 @@ class Store {
       if (!res.ok) throw new Error('Backend offline');
       const overviewData = await res.json();
 
-      const [subsRes, invRes, staffRes] = await Promise.all([
-        fetch(`${API_BASE}/subscriptions`),
-        fetch(`${API_BASE}/invoices`),
-        fetch(`${API_BASE}/staff`)
+      const [subsRes, invRes, staffRes, productsRes, plansRes, discountsRes, templatesRes] = await Promise.all([
+        fetch(`${API_BASE}/subscriptions`).catch(() => null),
+        fetch(`${API_BASE}/invoices`).catch(() => null),
+        fetch(`${API_BASE}/staff`).catch(() => null),
+        fetch(`${API_BASE}/products`).catch(() => null),
+        fetch(`${API_BASE}/plans`).catch(() => null),
+        fetch(`${API_BASE}/discounts`).catch(() => null),
+        fetch(`${API_BASE}/templates`).catch(() => null)
       ]);
 
-      if (subsRes.ok && invRes.ok) {
+      if (subsRes && subsRes.ok && invRes && invRes.ok) {
         const subsData = await subsRes.json();
         const invData = await invRes.json();
-        const staffData = staffRes.ok ? await staffRes.json() : null;
+        const staffData = staffRes && staffRes.ok ? await staffRes.json() : null;
+        const productsData = productsRes && productsRes.ok ? await productsRes.json() : null;
+        const plansData = plansRes && plansRes.ok ? await plansRes.json() : null;
+        const discountsData = discountsRes && discountsRes.ok ? await discountsRes.json() : null;
+        const templatesData = templatesRes && templatesRes.ok ? await templatesRes.json() : null;
 
-        // Map backend subscriptions
+        // Map backend subscriptions with normalized dual-access properties
         if (subsData.data && subsData.data.length > 0) {
-          this.state.subscriptions = subsData.data.map(s => ({
-            id: s.id,
-            subscriptionNumber: s.subscription_number,
-            customerName: s.customer_name,
-            customerEmail: s.customer_email,
-            customerCompany: s.customer_company,
-            customerGstin: s.customer_gstin,
-            planId: s.plan_id,
-            planName: s.plan_name,
-            billingPeriod: s.billing_period,
-            startDate: s.start_date,
-            nextBillingDate: s.next_billing_date,
-            status: s.status,
-            isPaused: Boolean(s.is_paused),
-            autoRenew: Boolean(s.auto_renew),
-            tier: s.tier,
-            totalAmount: s.total_amount,
-            addonsEnabled: s.addons || { analytics: true, support: true },
-            lines: s.lines || []
-          }));
+          this.state.subscriptions = subsData.data.map(s => {
+            const rawLines = s.lines || [];
+            const normalizedLines = rawLines.map((l, idx) => ({
+              id: l.id || `sline-${s.id}-${idx}`,
+              productId: l.product_id || l.productId,
+              productName: l.product_name || l.productName || 'Software License',
+              product_name: l.product_name || l.productName || 'Software License',
+              variantId: l.variant_id || l.variantId,
+              variantName: l.variant_name || l.variantName || 'Standard Edition',
+              variant_name: l.variant_name || l.variantName || 'Standard Edition',
+              quantity: l.quantity || 1,
+              unitPrice: l.unit_price !== undefined ? l.unit_price : (l.unitPrice || 0),
+              unit_price: l.unit_price !== undefined ? l.unit_price : (l.unitPrice || 0),
+              discountPercent: l.discount_percent || l.discountPercent || 0,
+              discount_percent: l.discount_percent || l.discountPercent || 0,
+              subtotal: l.subtotal !== undefined ? l.subtotal : ((l.unit_price || 0) * (l.quantity || 1)),
+              total: l.subtotal !== undefined ? l.subtotal : ((l.unit_price || 0) * (l.quantity || 1))
+            }));
+
+            const subtotal = s.total_amount || 0;
+            const taxTotal = subtotal * 0.18;
+            const grandTotal = subtotal + taxTotal;
+
+            return {
+              id: s.id,
+              subscriptionNumber: s.subscription_number,
+              customerName: s.customer_name,
+              customerEmail: s.customer_email,
+              customerCompany: s.customer_company,
+              customerGstin: s.customer_gstin,
+              planId: s.plan_id,
+              planName: s.plan_name,
+              billingPeriod: s.billing_period,
+              startDate: s.start_date,
+              nextBillingDate: s.next_billing_date,
+              status: s.status,
+              isPaused: Boolean(s.is_paused),
+              autoRenew: Boolean(s.auto_renew),
+              tier: s.tier || 'Standard',
+              totalAmount: subtotal,
+              subtotal: subtotal,
+              taxTotal: taxTotal,
+              discountTotal: 0,
+              grandTotal: grandTotal,
+              addonsEnabled: s.addons || { analytics: true, support: true },
+              lines: normalizedLines,
+              items: normalizedLines
+            };
+          });
         }
 
         // Map backend invoices
@@ -427,14 +464,24 @@ class Store {
             dueDate: i.due_date,
             status: i.status,
             subtotal: i.subtotal,
-            discountAmount: i.discount_amount,
-            gstRate: i.gst_rate,
+            discountAmount: i.discount_amount || 0,
+            gstRate: i.gst_rate || 18.0,
             gstAmount: i.gst_amount,
             totalAmount: i.total_amount,
-            amountPaid: i.amount_paid,
+            amountPaid: i.amount_paid || 0,
             balanceDue: i.balance_due,
             paymentMethod: i.payment_method,
-            lines: i.lines || []
+            cycleToken: i.cycle_token,
+            lines: (i.lines || []).map(il => ({
+              id: il.id,
+              description: il.description,
+              sacCode: il.sac_code || '998313',
+              quantity: il.quantity || 1,
+              qty: il.quantity || 1,
+              unitPrice: il.unit_price,
+              total: il.amount,
+              amount: il.amount
+            }))
           }));
         }
 
@@ -452,8 +499,58 @@ class Store {
           }));
         }
 
-        if (staffData && staffData.data) {
+        if (staffData && staffData.data && staffData.data.length > 0) {
           this.state.staffMembers = staffData.data;
+        }
+
+        if (productsData && productsData.data && productsData.data.length > 0) {
+          this.state.products = productsData.data.map(p => ({
+            ...p,
+            salesPrice: p.base_price,
+            variants: (p.variants || []).map(v => ({
+              ...v,
+              name: v.variant_name,
+              priceModifier: v.extra_price
+            }))
+          }));
+        }
+
+        if (plansData && plansData.data && plansData.data.length > 0) {
+          this.state.plans = plansData.data.map(pl => ({
+            ...pl,
+            recurrence: pl.billing_period,
+            price: pl.base_price || 0
+          }));
+        }
+
+        if (discountsData && discountsData.data && discountsData.data.length > 0) {
+          this.state.discountRules = discountsData.data.map(d => ({
+            ...d,
+            name: d.description || d.code,
+            type: d.discount_type,
+            value: d.discount_value,
+            minSubtotal: d.min_purchase_amount
+          }));
+        }
+
+        if (templatesData && templatesData.data && templatesData.data.length > 0) {
+          this.state.quotationTemplates = templatesData.data.map(t => ({
+            id: t.id,
+            name: t.name,
+            validityDays: t.validity_days,
+            planId: t.default_plan_id,
+            description: t.description,
+            items: (t.items || []).map(ti => ({
+              id: ti.id,
+              productId: ti.product_id,
+              productName: ti.product_name,
+              variantId: ti.variant_id,
+              variantName: ti.variant_name,
+              quantity: ti.quantity || 1,
+              unitPrice: ti.unit_price,
+              discountPercent: ti.discount_percent || 0
+            }))
+          }));
         }
 
         this.state.isServerConnected = true;
@@ -603,11 +700,21 @@ class Store {
 
     sub.addonsEnabled[addonType] = !sub.addonsEnabled[addonType];
 
-    // Recalculate total
-    let total = 3499.00; // Base core
-    if (sub.addonsEnabled.analytics) total += 1250.00;
-    if (sub.addonsEnabled.support) total += 2500.00;
-    sub.totalAmount = total;
+    // Recalculate total dynamically based on base product lines and configured add-ons
+    const baseItemsTotal = (sub.lines || sub.items || []).reduce((acc, l) => {
+      const price = l.unit_price !== undefined ? l.unit_price : (l.unitPrice || 0);
+      const qty = l.quantity || l.qty || 1;
+      return acc + (price * qty);
+    }, 0) || 3499.00;
+
+    let extra = 0;
+    if (sub.addonsEnabled.analytics) extra += 1250.00;
+    if (sub.addonsEnabled.support) extra += 2500.00;
+    
+    sub.totalAmount = baseItemsTotal + extra;
+    sub.subtotal = sub.totalAmount;
+    sub.taxTotal = sub.totalAmount * 0.18;
+    sub.grandTotal = sub.totalAmount * 1.18;
 
     this.saveState();
 
@@ -621,6 +728,181 @@ class Store {
       } catch (e) {
         console.warn('Addon patch error:', e);
       }
+    }
+  }
+
+  // Catalog: Product Variant Management
+  async addProductVariant(productId, variantData) {
+    const product = this.state.products.find(p => p.id === productId);
+    if (!product) return null;
+
+    if (!product.variants) product.variants = [];
+    const priceModifier = variantData.priceModifier !== undefined ? variantData.priceModifier : (variantData.extra_price || 0);
+    const varName = variantData.name || variantData.variant_name || 'New Variant';
+    
+    const newVariant = {
+      id: variantData.id || 'var-' + Date.now(),
+      product_id: productId,
+      name: varName,
+      variant_name: varName,
+      priceModifier: priceModifier,
+      extra_price: priceModifier,
+      sku: variantData.sku || `BL-VAR-${Date.now().toString().slice(-4)}`,
+      is_active: 1
+    };
+    product.variants.push(newVariant);
+    this.saveState();
+
+    if (this.state.isServerConnected) {
+      try {
+        await fetch(`${API_BASE}/products/${productId}/variants`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            variantName: varName,
+            extraPrice: priceModifier,
+            sku: newVariant.sku
+          })
+        });
+      } catch (e) {
+        console.warn('Server variant add fallback:', e.message);
+      }
+    }
+    return newVariant;
+  }
+
+  // Catalog: Billing Cadence Plan Management
+  async addPlan(planData) {
+    const recurrence = planData.recurrence || planData.billing_period || 'monthly';
+    const newPlan = {
+      id: planData.id || 'plan-' + Date.now(),
+      name: planData.name,
+      billing_period: recurrence,
+      recurrence: recurrence,
+      interval_count: planData.interval_count || 1,
+      price: planData.price || 0,
+      base_price: planData.price || 0,
+      min_quantity: planData.minQuantity || planData.min_quantity || 1,
+      minQuantity: planData.minQuantity || planData.min_quantity || 1,
+      auto_close_days: planData.auto_close_days || (planData.autoClose ? 15 : 0),
+      autoClose: Boolean(planData.autoClose),
+      allow_pause: planData.allowPause !== undefined ? (planData.allowPause ? 1 : 0) : 1,
+      allowPause: planData.allowPause !== undefined ? Boolean(planData.allowPause) : true,
+      description: planData.description || `Configured ${recurrence} cadence.`,
+      is_active: 1
+    };
+
+    this.state.plans.push(newPlan);
+    this.saveState();
+
+    if (this.state.isServerConnected) {
+      try {
+        await fetch(`${API_BASE}/plans`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newPlan)
+        });
+      } catch (e) {
+        console.warn('Server plan add fallback:', e.message);
+      }
+    }
+    return newPlan;
+  }
+
+  // Catalog: Discount Rule Management
+  async addDiscountRule(discountData) {
+    const val = discountData.value !== undefined ? discountData.value : (discountData.discount_value || 0);
+    const minSub = discountData.minSubtotal !== undefined ? discountData.minSubtotal : (discountData.min_purchase_amount || 0);
+    const code = (discountData.code || '').toUpperCase();
+    const type = discountData.type || discountData.discount_type || 'fixed';
+
+    const newRule = {
+      id: discountData.id || 'disc-' + Date.now(),
+      code: code,
+      description: discountData.description || discountData.name || `Promotional rule ${code}`,
+      name: discountData.name || discountData.description || code,
+      discount_type: type,
+      type: type,
+      discount_value: val,
+      value: val,
+      min_purchase_amount: minSub,
+      minSubtotal: minSub,
+      valid_from: discountData.validFrom || discountData.valid_from || new Date().toISOString().split('T')[0],
+      valid_to: discountData.validTo || discountData.valid_to || '2026-12-31',
+      max_uses: discountData.maxUses || discountData.max_uses || 100,
+      used_count: discountData.currentUses || discountData.used_count || 0,
+      scope: discountData.scope || 'whole_subscription',
+      is_active: 1
+    };
+
+    this.state.discountRules.unshift(newRule);
+    this.saveState();
+
+    if (this.state.isServerConnected) {
+      try {
+        await fetch(`${API_BASE}/admin/discounts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newRule)
+        });
+      } catch (e) {
+        console.warn('Server discount add fallback:', e.message);
+      }
+    }
+    return newRule;
+  }
+
+  // Invoice persistence
+  addInvoice(newInv) {
+    this.state.invoices.unshift(newInv);
+    this.saveState();
+  }
+
+  // Authentication & Customer Onboarding
+  async registerCustomer({ name, email, password, company, phone }) {
+    if (this.state.isServerConnected) {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, company, phone })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error);
+      }
+    }
+
+    this.state.currentUser.customer = {
+      name: name || 'Valued Customer',
+      title: `${company || 'Customer'} • Account Lead`,
+      email: email,
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=128&q=80'
+    };
+    this.setRole('customer');
+  }
+
+  async login(email, password) {
+    if (this.state.isServerConnected) {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error);
+      }
+      const user = data.data;
+      if (user.role) {
+        this.state.currentUser[user.role] = {
+          name: user.name,
+          title: user.role === 'admin' ? 'Admin (Finance Lead)' : user.role === 'staff' ? 'Billing Operations' : `${user.company || 'Customer'}`,
+          email: user.email,
+          avatar: this.state.currentUser[user.role]?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80'
+        };
+        this.setRole(user.role);
+      }
+      return user;
     }
   }
 
