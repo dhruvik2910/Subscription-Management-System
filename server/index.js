@@ -1,6 +1,7 @@
 // server/index.js - Express API server for Brightloop
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import { apiRouter } from './routes/api.js';
 import './db/database.js'; // Ensures DB init and seed
 
@@ -10,6 +11,9 @@ const PORT = process.env.PORT || 3001;
 // Middlewares
 app.use(cors({ origin: '*' }));
 app.use(express.json());
+
+// Serve static frontend build if dist exists
+app.use(express.static('dist'));
 
 // Request logger
 app.use((req, res, next) => {
@@ -33,6 +37,16 @@ app.get('/health', (req, res) => {
     uptime: process.uptime(),
     timestamp: new Date().toISOString()
   });
+});
+
+// Single Page Application fallback
+app.use((req, res, next) => {
+  if (req.method === 'GET' && !req.path.startsWith('/api') && req.path !== '/health') {
+    return res.sendFile(path.resolve('dist/index.html'), err => {
+      if (err) next();
+    });
+  }
+  next();
 });
 
 // Start listening
