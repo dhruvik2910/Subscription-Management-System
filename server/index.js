@@ -1,4 +1,10 @@
 // server/index.js - Express API server for Brightloop
+try {
+  process.loadEnvFile();
+} catch {
+  // .env file is optional; defaults will be used
+}
+
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
