@@ -2,7 +2,7 @@
 import { store } from './store.js';
 import { renderNavbar } from './components/navbar.js';
 import { renderRevenueOps } from './components/revenueOps.js';
-import { renderSubscriptions, setSelectedSubscription } from './components/subscriptions.js';
+import { renderSubscriptions, setSelectedSubscription, setSubFilter } from './components/subscriptions.js';
 import { renderBilling, setInvoiceFilter, setInvoiceSearch } from './components/billing.js';
 import { renderCatalog, setCatalogTab } from './components/catalog.js';
 import { renderCustomerPortal } from './components/customerPortal.js';
@@ -136,16 +136,22 @@ window.generateNextInvoiceForSub = (subId) => {
 };
 
 // Batch Billing Run
-window.triggerBatchBillingRun = () => {
-  const runResult = store.runBatchBilling();
+window.triggerBatchBillingRun = async () => {
+  showToast('Executing automated recurring billing run...', 'info');
+  const runResult = await store.runBatchBilling();
   showModal('batchRun', runResult);
-  showToast(`Billing run complete: ${runResult.invoicesGenerated} invoices generated (0 duplicates)!`, 'success');
+  showToast(`Billing run complete: ${runResult.invoicesGenerated} invoices generated (${runResult.duplicatesPrevented} duplicates prevented)!`, 'success');
 };
 
 // Invoice Actions (Confirm, Cancel, Send, Print, Record Pay)
 window.confirmDraftInvoice = (invNum) => {
   store.confirmInvoice(invNum);
   showToast(`Invoice ${invNum} confirmed & moved to Confirmed!`, 'success');
+};
+
+window.confirmInvoiceAction = (invNum) => {
+  store.confirmInvoice(invNum);
+  showToast(`Invoice ${invNum} confirmed and recorded!`, 'success');
 };
 
 window.sendInvoiceAction = (invNum, clientName) => {
@@ -161,6 +167,21 @@ window.cancelInvoiceAction = (invNum) => {
 
 window.sendDunningNotice = (invNum, clientName) => {
   showToast(`Payment reminder dispatched to ${clientName} for invoice ${invNum}`, 'info');
+};
+
+window.setSubFilterTab = (filter) => {
+  setSubFilter(filter);
+  renderApp();
+};
+
+window.setInvoiceFilterTab = (filter) => {
+  setInvoiceFilter(filter);
+  renderApp();
+};
+
+window.handleInvoiceSearch = (term) => {
+  setInvoiceSearch(term);
+  renderApp();
 };
 
 window.filterInvoices = (filter) => {
@@ -179,9 +200,21 @@ window.switchCatalogTab = (tab) => {
 };
 
 // Customer Portal: Modular Add-on Toggling
+window.toggleAddon = (addonKey) => {
+  const sub = store.getState().subscriptions.find(s => s.customerEmail === 'aarav@apexretail.in') || store.getState().subscriptions[0];
+  if (sub) {
+    store.toggleCustomerAddon(sub.id, addonKey);
+    showToast(`Add-on ${addonKey === 'analytics' ? 'Developer API' : '24/7 Support SLA'} updated!`, 'success');
+  }
+};
+
 window.toggleCustomerAddonAction = (subId, addonType) => {
   store.toggleCustomerAddon(subId, addonType);
   showToast(`Add-on updated! Next billing cycle adjusted in real-time.`, 'success');
+};
+
+window.previewInvoicePDF = (invNum) => {
+  showModal('printInvoice', { invoiceNumber: invNum });
 };
 
 // Modal helpers

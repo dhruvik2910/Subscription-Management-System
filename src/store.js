@@ -1,9 +1,11 @@
 // src/store.js - Central Store for Brightloop Subscription Management System
-// Uses Indian Rupees (₹) and realistic business workflows
+// Connected to Express + SQLite backend with seamless in-memory fallback
 
 const STORAGE_KEY = 'brightloop_billing_store_v2';
+const API_BASE = 'http://localhost:3001/api';
 
 const INITIAL_DATA = {
+  isServerConnected: false,
   currentRole: 'admin', // 'admin' | 'staff' | 'customer'
   activeRoute: 'revenue-operations',
   
@@ -11,13 +13,13 @@ const INITIAL_DATA = {
     admin: {
       name: 'Elena Rostova',
       title: 'Admin (Finance Lead)',
-      email: 'elena@brightloop.in',
+      email: 'elena@brightloop.io',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80'
     },
     staff: {
       name: 'Rohan Mehta',
       title: 'Sales & Billing Operations',
-      email: 'rohan@brightloop.in',
+      email: 'rohan@brightloop.io',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=128&q=80'
     },
     customer: {
@@ -29,613 +31,440 @@ const INITIAL_DATA = {
   },
 
   staffMembers: [
-    { id: 'st-1', name: 'Rohan Mehta', email: 'rohan@brightloop.in', role: 'Sales & Billing Specialist', joined: '15 Jan 2024', status: 'Active' },
-    { id: 'st-2', name: 'Priya Sharma', email: 'priya@brightloop.in', role: 'Customer Success Lead', joined: '01 Mar 2024', status: 'Active' },
-    { id: 'st-3', name: 'Vikram Joshi', email: 'vikram@brightloop.in', role: 'Billing Operations Associate', joined: '10 Jun 2024', status: 'Active' }
+    { id: 'staff-1', name: 'Rohan Mehta', email: 'rohan@brightloop.io', role_title: 'Senior Billing Operations Specialist', department: 'Finance & Invoicing', status: 'active' },
+    { id: 'staff-2', name: 'Priya Sundaram', email: 'priya.s@brightloop.io', role_title: 'Subscription Account Manager', department: 'Customer Success', status: 'active' },
+    { id: 'staff-3', name: 'Kavita Nair', email: 'kavita.n@brightloop.io', role_title: 'Revenue Reconciliation Associate', department: 'Finance & Invoicing', status: 'active' }
   ],
 
   products: [
     {
-      id: 'prod-erp-01',
-      sku: 'BL-ERP-COR-01',
-      name: 'Brightloop ERP Suite',
-      type: 'Software',
-      category: 'Core Software',
-      salesPrice: 1000.00,
-      costPrice: 120.00,
-      notes: 'Main cloud ERP platform for accounting, sales pipeline, and inventory tracking.',
+      id: 'prod-saas-core',
+      name: 'Brightloop Core Suite',
+      category: 'Software License',
+      base_price: 3499.00,
+      description: 'Centralized recurring billing, subscription tracking, and GST invoicing software.',
+      sac_code: '998313',
       variants: [
-        { id: 'var-std', name: 'Standard Edition', priceModifier: 0.00 },
-        { id: 'var-odoo', name: 'Odoo Enterprise Brand Edition', priceModifier: 560.00 }, // Spec requirement: adds 560 to price
-        { id: 'var-gov', name: 'High-Security Dedicated Cloud', priceModifier: 1200.00 }
+        { id: 'var-core-standard', variant_name: 'Standard Cloud Edition', extra_price: 0.00, sku: 'BL-CORE-STD' },
+        { id: 'var-core-odoo', variant_name: 'Odoo Connected Edition', extra_price: 560.00, sku: 'BL-CORE-ODOO' }, // +₹560 per spec
+        { id: 'var-core-enterprise', variant_name: 'Enterprise Dedicated Single-Tenant', extra_price: 2400.00, sku: 'BL-CORE-ENT' }
       ]
     },
     {
-      id: 'prod-analytics-02',
-      sku: 'BL-ANL-PRO-02',
-      name: 'Analytics & Revenue Forecasting',
-      type: 'Add-on',
-      category: 'Add-on',
-      salesPrice: 250.00,
-      costPrice: 30.00,
-      notes: 'Real-time cohort retention curves, cash flow forecasting, and sales dashboards.',
+      id: 'prod-api-addon',
+      name: 'High-Volume Webhook & API Add-on',
+      category: 'Developer Add-on',
+      base_price: 1250.00,
+      description: 'Direct REST API access, webhooks, and custom integration endpoints.',
+      sac_code: '998314',
       variants: [
-        { id: 'var-std-anl', name: 'Standard Analytics Feed', priceModifier: 0.00 },
-        { id: 'var-ai-anl', name: 'AI Revenue Copilot', priceModifier: 150.00 }
+        { id: 'var-api-std', variant_name: 'Standard API', extra_price: 0.00, sku: 'BL-API-STD' }
       ]
     },
     {
-      id: 'prod-support-03',
-      sku: 'BL-SUP-247-03',
-      name: '24/7 Dedicated Support SLA',
-      type: 'Service',
-      category: 'Support',
-      salesPrice: 450.00,
-      costPrice: 100.00,
-      notes: 'Priority ticket handling, 15-minute response SLA, and dedicated account manager.',
+      id: 'prod-sla-premium',
+      name: '24/7 Dedicated Priority Support SLA',
+      category: 'Service Level Agreement',
+      base_price: 2500.00,
+      description: 'Guaranteed 15-minute response time with dedicated technical account manager.',
+      sac_code: '998319',
       variants: [
-        { id: 'var-sla-tier1', name: 'Tier-1 SLA Support', priceModifier: 0.00 },
-        { id: 'var-sla-vip', name: 'VIP Priority Phone & Slack SLA', priceModifier: 300.00 }
+        { id: 'var-sla-std', variant_name: 'Standard SLA', extra_price: 0.00, sku: 'BL-SLA-STD' }
       ]
     }
   ],
 
   plans: [
     {
-      id: 'plan-starter-mo',
-      name: 'Monthly Business Plan',
-      recurrence: 'monthly',
-      price: 250.00,
-      minQuantity: 1,
-      availableFrom: '2024-01-01',
-      availableTo: '2025-12-31',
-      autoClose: false,
-      allowPause: true,
-      allowRenew: true,
-      description: 'Ideal for small shops and fast-growing teams billed every month.'
+      id: 'plan-daily',
+      name: 'Daily High-Frequency Plan',
+      billing_period: 'daily',
+      interval_count: 1,
+      auto_close_days: 3,
+      description: 'Billed every 24 hours for dynamic compute or micro-services.'
     },
     {
-      id: 'plan-enterprise-yr',
-      name: 'Yearly Enterprise Contract',
-      recurrence: 'yearly',
-      price: 1200.00,
-      minQuantity: 5,
-      availableFrom: '2024-01-01',
-      availableTo: '2026-12-31',
-      autoClose: false,
-      allowPause: true,
-      allowRenew: true,
-      description: 'Annual agreement with volume pricing, dedicated TAM, and contract renewal terms.'
+      id: 'plan-weekly',
+      name: 'Weekly Flexible Plan',
+      billing_period: 'weekly',
+      interval_count: 1,
+      auto_close_days: 7,
+      description: 'Billed every 7 days for sprint or temporary agile contracts.'
     },
     {
-      id: 'plan-growth-wk',
-      name: 'Weekly Growth Sprint',
-      recurrence: 'weekly',
-      price: 85.00,
-      minQuantity: 1,
-      availableFrom: '2024-06-01',
-      availableTo: '2025-06-01',
-      autoClose: true,
-      allowPause: false,
-      allowRenew: true,
-      description: 'Short-term burst plan for seasonal events or temporary projects.'
+      id: 'plan-monthly',
+      name: 'Monthly Professional Plan',
+      billing_period: 'monthly',
+      interval_count: 1,
+      auto_close_days: 15,
+      description: 'Standard recurring monthly billing on the 1st or anniversary date.'
     },
     {
-      id: 'plan-sandbox-day',
-      name: 'Daily Sandbox Testing',
-      recurrence: 'daily',
-      price: 15.00,
-      minQuantity: 1,
-      availableFrom: '2024-01-01',
-      availableTo: '2025-12-31',
-      autoClose: true,
-      allowPause: true,
-      allowRenew: false,
-      description: 'Dedicated staging and test environment billed by the active day.'
+      id: 'plan-yearly',
+      name: 'Annual Enterprise Plan',
+      billing_period: 'yearly',
+      interval_count: 1,
+      auto_close_days: 30,
+      description: 'Annual upfront subscription with priority SLAs and dedicated database.'
     }
   ],
 
   discountRules: [
     {
-      id: 'disc-tier1',
-      code: 'VOLUME500',
-      name: 'Volume Team Discount',
-      type: 'fixed',
-      value: 500.00,
-      minSubtotal: 2000.00,
-      minQuantity: 5,
-      validFrom: '2024-01-01',
-      validTo: '2025-12-31',
-      maxUses: 100,
-      currentUses: 34,
-      scope: 'whole_subscription',
-      status: 'active'
+      id: 'disc-diwali',
+      code: 'DIWALI20',
+      description: 'Diwali Festive 20% discount on first 3 billing cycles',
+      discount_type: 'percent',
+      discount_value: 20.0,
+      min_purchase_amount: 2500.0,
+      valid_from: '2024-10-01',
+      valid_to: '2024-11-30',
+      max_uses: 200,
+      used_count: 34
     },
     {
-      id: 'disc-earlybird',
-      code: 'FESTIVE15',
-      name: 'Annual Commitment 15% Off',
-      type: 'percentage',
-      value: 15.0,
-      minSubtotal: 1000.00,
-      minQuantity: 1,
-      validFrom: '2024-01-01',
-      validTo: '2025-12-31',
-      maxUses: 50,
-      currentUses: 19,
-      scope: 'whole_subscription',
-      status: 'active'
-    },
-    {
-      id: 'disc-summer',
-      code: 'STARTUP20',
-      name: 'Early Adopter 20% Off',
-      type: 'percentage',
-      value: 20.0,
-      minSubtotal: 3000.00,
-      minQuantity: 10,
-      validFrom: '2024-01-01',
-      validTo: '2024-06-30',
-      maxUses: 20,
-      currentUses: 20,
-      scope: 'whole_subscription',
-      status: 'expired'
-    }
-  ],
-
-  taxRules: [
-    { id: 'tax-gst-18', name: 'GST Software & Cloud Services (18%)', rate: 18.0, jurisdiction: 'IN-GST', active: true },
-    { id: 'tax-gst-exempt', name: 'SEZ / Export of Services (0%)', rate: 0.0, jurisdiction: 'IN-EXEMPT', active: true },
-    { id: 'tax-tds-comp', name: 'Inter-State IGST (18%)', rate: 18.0, jurisdiction: 'IN-IGST', active: true }
-  ],
-
-  quotationTemplates: [
-    {
-      id: 'tpl-enterprise-bundle',
-      name: 'Enterprise ERP + Odoo Brand Edition Bundle',
-      planId: 'plan-enterprise-yr',
-      validityDays: 30,
-      items: [
-        { productId: 'prod-erp-01', variantId: 'var-odoo', quantity: 20, unitPrice: 1560.00 },
-        { productId: 'prod-analytics-02', variantId: 'var-std-anl', quantity: 20, unitPrice: 250.00 },
-        { productId: 'prod-support-03', variantId: 'var-sla-tier1', quantity: 1, unitPrice: 450.00 }
-      ]
-    },
-    {
-      id: 'tpl-starter-growth',
-      name: 'Mid-Market Business Monthly Plan',
-      planId: 'plan-starter-mo',
-      validityDays: 15,
-      items: [
-        { productId: 'prod-erp-01', variantId: 'var-std', quantity: 10, unitPrice: 1000.00 },
-        { productId: 'prod-analytics-02', variantId: 'var-std-anl', quantity: 10, unitPrice: 250.00 }
-      ]
+      id: 'disc-annual',
+      code: 'STARTUP500',
+      description: 'Flat ₹500 discount for verified MSME / startup accounts',
+      discount_type: 'fixed',
+      discount_value: 500.0,
+      min_purchase_amount: 3000.0,
+      valid_from: '2024-01-01',
+      valid_to: '2025-12-31',
+      max_uses: 500,
+      used_count: 142
     }
   ],
 
   subscriptions: [
     {
       id: 'sub-8842',
-      subscriptionNumber: 'SUB-2024-8842',
-      customerName: 'Zenith Technologies Pvt Ltd',
-      customerEmail: 'billing@zenithtech.in',
-      crn: 'CIN: U72200MH2021PTC384420',
-      tier: 'Enterprise Annual Tier',
-      planId: 'plan-enterprise-yr',
-      planName: 'Yearly Enterprise Contract',
-      startDate: '2024-10-15',
-      expiryDate: '2025-10-14',
-      nextBillingDate: '2025-10-15',
-      paymentTerms: 'Net 30 Days',
-      autoRenew: true,
+      subscriptionNumber: 'SUB-8842',
+      customerName: 'Nexus Techworks LLP',
+      customerEmail: 'finance@nexustechworks.in',
+      customerCompany: 'Nexus Techworks LLP',
+      customerGstin: '27AABCN8491K1Z3',
+      planId: 'plan-monthly',
+      planName: 'Monthly Professional Plan',
+      billingPeriod: 'monthly',
+      startDate: '2024-01-01',
+      nextBillingDate: '2024-11-01',
       status: 'active',
       isPaused: false,
-      items: [
-        {
-          id: 'li-1',
-          productId: 'prod-erp-01',
-          productName: 'Brightloop ERP Suite',
-          variantId: 'var-odoo',
-          variantName: 'Odoo Enterprise Brand Edition (+₹560)',
-          quantity: 25,
-          unitPrice: 1560.00,
-          taxRate: 18.0,
-          discountAmount: 500.00,
-          total: 39000.00
-        },
-        {
-          id: 'li-2',
-          productId: 'prod-analytics-02',
-          productName: 'Analytics & Revenue Forecasting',
-          variantId: 'var-std-anl',
-          variantName: 'Standard Analytics Feed',
-          quantity: 25,
-          unitPrice: 250.00,
-          taxRate: 18.0,
-          discountAmount: 0.00,
-          total: 6250.00
-        },
-        {
-          id: 'li-3',
-          productId: 'prod-support-03',
-          productName: '24/7 Dedicated Support SLA',
-          variantId: 'var-sla-tier1',
-          variantName: 'Tier-1 SLA Support',
-          quantity: 1,
-          unitPrice: 450.00,
-          taxRate: 18.0,
-          discountAmount: 0.00,
-          total: 450.00
-        }
-      ],
-      subtotal: 45700.00,
-      taxTotal: 8136.00,
-      discountTotal: 500.00,
-      grandTotal: 53336.00
+      autoRenew: true,
+      tier: 'Enterprise',
+      totalAmount: 6559.00,
+      addonsEnabled: { analytics: true, support: true },
+      lines: [
+        { product_name: 'Brightloop Core Suite (Odoo Connected Edition)', variant_name: 'Odoo Edition (+₹560)', quantity: 1, unit_price: 4059.00, subtotal: 4059.00 },
+        { product_name: '24/7 Dedicated Priority Support SLA', variant_name: 'Standard SLA', quantity: 1, unit_price: 2500.00, subtotal: 2500.00 }
+      ]
     },
     {
-      id: 'sub-9102',
-      subscriptionNumber: 'SUB-2024-9102',
+      id: 'sub-7719',
+      subscriptionNumber: 'SUB-7719',
       customerName: 'Apex Retail Pvt Ltd',
       customerEmail: 'aarav@apexretail.in',
-      crn: 'CIN: U51909GJ2022PTC118920',
-      tier: 'Monthly Business Plan',
-      planId: 'plan-starter-mo',
-      planName: 'Monthly Business Plan',
-      startDate: '2024-10-01',
-      expiryDate: '2024-11-01',
-      nextBillingDate: '2024-11-14',
-      paymentTerms: 'Due on Receipt',
-      autoRenew: true,
+      customerCompany: 'Apex Retail Pvt Ltd',
+      customerGstin: '24AAGCA1234N1Z5',
+      planId: 'plan-monthly',
+      planName: 'Monthly Professional Plan',
+      billingPeriod: 'monthly',
+      startDate: '2024-03-15',
+      nextBillingDate: '2024-11-15',
       status: 'active',
       isPaused: false,
-      addonsEnabled: {
-        analytics: true,
-        support: true
-      },
-      items: [
-        {
-          id: 'li-10',
-          productId: 'prod-erp-01',
-          productName: 'Brightloop ERP Suite (Standard Edition)',
-          variantId: 'var-std',
-          variantName: 'Standard Edition',
-          quantity: 1,
-          unitPrice: 1000.00,
-          taxRate: 18.0,
-          discountAmount: 0.00,
-          total: 1000.00
-        },
-        {
-          id: 'li-11',
-          productId: 'prod-analytics-02',
-          productName: 'Analytics & Revenue Forecasting Add-on',
-          variantId: 'var-std-anl',
-          variantName: 'Standard Analytics Feed',
-          quantity: 1,
-          unitPrice: 250.00,
-          taxRate: 18.0,
-          discountAmount: 0.00,
-          total: 250.00
-        },
-        {
-          id: 'li-12',
-          productId: 'prod-support-03',
-          productName: '24/7 Dedicated Support SLA',
-          variantId: 'var-sla-tier1',
-          variantName: 'Tier-1 SLA Support',
-          quantity: 1,
-          unitPrice: 200.00,
-          taxRate: 18.0,
-          discountAmount: 0.00,
-          total: 200.00
-        }
-      ],
-      subtotal: 1450.00,
-      taxTotal: 261.00,
-      discountTotal: 0.00,
-      grandTotal: 1711.00
-    },
-    {
-      id: 'sub-7621',
-      subscriptionNumber: 'SUB-2024-7621',
-      customerName: 'Horizon Logistics Solutions',
-      customerEmail: 'billing@horizonlogistics.in',
-      crn: 'CIN: U63090KA2020PTC099410',
-      tier: 'Enterprise Annual Tier',
-      planId: 'plan-enterprise-yr',
-      planName: 'Yearly Enterprise Contract',
-      startDate: '2024-11-01',
-      expiryDate: '2025-10-31',
-      nextBillingDate: '2024-11-01',
-      paymentTerms: 'Net 45 Days',
       autoRenew: true,
-      status: 'quotation',
-      isPaused: false,
-      items: [
-        {
-          id: 'li-20',
-          productId: 'prod-erp-01',
-          productName: 'Brightloop ERP Suite',
-          variantId: 'var-std',
-          variantName: 'Standard Edition',
-          quantity: 40,
-          unitPrice: 1000.00,
-          taxRate: 18.0,
-          discountAmount: 500.00,
-          total: 40000.00
-        }
-      ],
-      subtotal: 40000.00,
-      taxTotal: 7110.00,
-      discountTotal: 500.00,
-      grandTotal: 46610.00
+      tier: 'Business',
+      totalAmount: 4749.00,
+      addonsEnabled: { analytics: true, support: true },
+      lines: [
+        { product_name: 'Brightloop Core Suite', variant_name: 'Standard Cloud Edition', quantity: 1, unit_price: 3499.00, subtotal: 3499.00 },
+        { product_name: 'High-Volume Webhook & API Add-on', variant_name: 'Standard Add-on', quantity: 1, unit_price: 1250.00, subtotal: 1250.00 }
+      ]
     },
     {
-      id: 'sub-6510',
-      subscriptionNumber: 'SUB-2024-6510',
-      customerName: 'Nova Healthcare Services',
-      customerEmail: 'accounts@novahealth.in',
-      crn: 'CIN: U85110DL2019PTC044210',
-      tier: 'Healthcare Cloud Agreement',
-      planId: 'plan-enterprise-yr',
-      planName: 'Yearly Enterprise Contract',
-      startDate: '2024-11-15',
-      expiryDate: '2025-11-14',
-      nextBillingDate: '2024-11-15',
-      paymentTerms: 'Net 30 Days',
+      id: 'sub-6501',
+      subscriptionNumber: 'SUB-6501',
+      customerName: 'Vanguard Logistics India',
+      customerEmail: 'accounts@vanguardlogistics.in',
+      customerCompany: 'Vanguard Logistics India',
+      customerGstin: '29AABCV9941P1ZB',
+      planId: 'plan-yearly',
+      planName: 'Annual Enterprise Plan',
+      billingPeriod: 'yearly',
+      startDate: '2024-06-01',
+      nextBillingDate: '2025-06-01',
+      status: 'active',
+      isPaused: false,
       autoRenew: true,
-      status: 'draft',
-      isPaused: false,
-      items: [
-        {
-          id: 'li-30',
-          productId: 'prod-erp-01',
-          productName: 'Brightloop ERP Suite',
-          variantId: 'var-gov',
-          variantName: 'High-Security Dedicated Cloud (+₹1,200)',
-          quantity: 15,
-          unitPrice: 2200.00,
-          taxRate: 18.0,
-          discountAmount: 0.00,
-          total: 33000.00
-        }
-      ],
-      subtotal: 33000.00,
-      taxTotal: 5940.00,
-      discountTotal: 0.00,
-      grandTotal: 38940.00
+      tier: 'Enterprise',
+      totalAmount: 45000.00,
+      addonsEnabled: { analytics: true, support: true },
+      lines: [
+        { product_name: 'Brightloop Core Suite (Annual License)', variant_name: 'Enterprise Dedicated Single-Tenant', quantity: 1, unit_price: 45000.00, subtotal: 45000.00 }
+      ]
     },
     {
-      id: 'sub-5401',
-      subscriptionNumber: 'SUB-2024-5401',
-      customerName: 'Vantage Media Works',
-      customerEmail: 'finance@vantagemedia.in',
-      crn: 'CIN: U92100DL2018PTC021990',
-      tier: 'Monthly Business Plan',
-      planId: 'plan-starter-mo',
-      planName: 'Monthly Business Plan',
-      startDate: '2023-09-01',
-      expiryDate: '2024-09-30',
-      nextBillingDate: '2024-09-30',
-      paymentTerms: 'Net 15 Days',
-      autoRenew: false,
+      id: 'sub-9104',
+      subscriptionNumber: 'SUB-9104',
+      customerName: 'BlueHorizon Consulting',
+      customerEmail: 'billing@bluehorizon.co.in',
+      customerCompany: 'BlueHorizon Consulting',
+      customerGstin: '27AABCB9123M1Z2',
+      planId: 'plan-monthly',
+      planName: 'Monthly Professional Plan',
+      billingPeriod: 'monthly',
+      startDate: '2024-02-10',
+      nextBillingDate: '2024-09-10',
       status: 'closed',
       isPaused: false,
-      items: [
-        {
-          id: 'li-40',
-          productId: 'prod-erp-01',
-          productName: 'Brightloop ERP Suite',
-          variantId: 'var-std',
-          variantName: 'Standard Edition',
-          quantity: 5,
-          unitPrice: 1000.00,
-          taxRate: 18.0,
-          discountAmount: 0.00,
-          total: 5000.00
-        }
-      ],
-      subtotal: 5000.00,
-      taxTotal: 900.00,
-      discountTotal: 0.00,
-      grandTotal: 5900.00
+      autoRenew: false,
+      tier: 'Standard',
+      totalAmount: 3499.00,
+      addonsEnabled: { analytics: false, support: false },
+      lines: [
+        { product_name: 'Brightloop Core Suite', variant_name: 'Standard Cloud Edition', quantity: 1, unit_price: 3499.00, subtotal: 3499.00 }
+      ]
     }
   ],
 
   invoices: [
     {
-      id: 'inv-1029',
-      invoiceNumber: 'INV-2024-1029',
-      subscriptionId: 'sub-9102',
+      id: 'inv-2024-001',
+      invoiceNumber: 'INV-2024-001',
+      subscriptionId: 'sub-8842',
+      customerName: 'Nexus Techworks LLP',
+      customerEmail: 'finance@nexustechworks.in',
+      customerGstin: '27AABCN8491K1Z3',
+      invoiceDate: '2024-10-01',
+      dueDate: '2024-10-15',
+      status: 'paid',
+      subtotal: 6559.00,
+      discountAmount: 0.00,
+      gstRate: 18.0,
+      gstAmount: 1180.62,
+      totalAmount: 7739.62,
+      amountPaid: 7739.62,
+      balanceDue: 0.00,
+      paymentMethod: 'UPI',
+      lines: [
+        { description: 'Brightloop Core Suite (Odoo Connected Edition)', sac_code: '998313', quantity: 1, unit_price: 4059.00, amount: 4059.00 },
+        { description: '24/7 Dedicated Priority Support SLA', sac_code: '998319', quantity: 1, unit_price: 2500.00, amount: 2500.00 }
+      ]
+    },
+    {
+      id: 'inv-2024-002',
+      invoiceNumber: 'INV-2024-002',
+      subscriptionId: 'sub-7719',
       customerName: 'Apex Retail Pvt Ltd',
       customerEmail: 'aarav@apexretail.in',
-      issueDate: '2024-10-01',
+      customerGstin: '24AAGCA1234N1Z5',
+      invoiceDate: '2024-10-05',
       dueDate: '2024-10-20',
-      status: 'overdue',
-      subtotal: 1450.00,
-      taxRate: 18.0,
-      taxAmount: 261.00,
-      discountAmount: 0.00,
-      totalAmount: 1711.00,
-      amountPaid: 0.00,
-      balanceDue: 1711.00,
-      daysOverdue: 11,
-      lines: [
-        { description: 'Brightloop ERP Suite - Standard Edition (Oct 2024)', qty: 1, unitPrice: 1000.00, total: 1000.00 },
-        { description: 'Analytics & Revenue Forecasting Add-on (Oct 2024)', qty: 1, unitPrice: 250.00, total: 250.00 },
-        { description: '24/7 Dedicated Support SLA - Tier 1 (Oct 2024)', qty: 1, unitPrice: 200.00, total: 200.00 }
-      ]
-    },
-    {
-      id: 'inv-1028',
-      invoiceNumber: 'INV-2024-1028',
-      subscriptionId: 'sub-8842',
-      customerName: 'Zenith Technologies Pvt Ltd',
-      customerEmail: 'billing@zenithtech.in',
-      issueDate: '2024-10-15',
-      dueDate: '2024-11-14',
       status: 'paid',
-      subtotal: 45700.00,
-      taxRate: 18.0,
-      taxAmount: 8136.00,
-      discountAmount: 500.00,
-      totalAmount: 53336.00,
-      amountPaid: 53336.00,
+      subtotal: 4749.00,
+      discountAmount: 0.00,
+      gstRate: 18.0,
+      gstAmount: 854.82,
+      totalAmount: 5603.82,
+      amountPaid: 5603.82,
       balanceDue: 0.00,
-      daysOverdue: 0,
-      paidDate: '2024-10-16',
-      paymentMethod: 'Net Banking (HDFC Corporate)',
+      paymentMethod: 'UPI',
       lines: [
-        { description: 'Brightloop ERP Suite (Odoo Enterprise Edition) x 25 seats', qty: 25, unitPrice: 1560.00, total: 39000.00 },
-        { description: 'Analytics & Revenue Forecasting x 25 seats', qty: 25, unitPrice: 250.00, total: 6250.00 },
-        { description: '24/7 Dedicated Support SLA', qty: 1, unitPrice: 450.00, total: 450.00 }
+        { description: 'Brightloop Core Suite (Standard Cloud)', sac_code: '998313', quantity: 1, unit_price: 3499.00, amount: 3499.00 },
+        { description: 'High-Volume Webhook & API Add-on', sac_code: '998314', quantity: 1, unit_price: 1250.00, amount: 1250.00 }
       ]
     },
     {
-      id: 'inv-1027',
-      invoiceNumber: 'INV-2024-1027',
-      subscriptionId: 'sub-cust-003',
-      customerName: 'Kaveri Logistics & Supply',
-      customerEmail: 'ap@kaverilogistics.in',
-      issueDate: '2024-09-25',
-      dueDate: '2024-10-12',
-      status: 'overdue',
-      subtotal: 12500.00,
-      taxRate: 18.0,
-      taxAmount: 2250.00,
-      discountAmount: 0.00,
-      totalAmount: 14750.00,
-      amountPaid: 0.00,
-      balanceDue: 14750.00,
-      daysOverdue: 19,
-      lines: [
-        { description: 'Cloud Platform Annual Subscription (10 seats)', qty: 10, unitPrice: 1250.00, total: 12500.00 }
-      ]
-    },
-    {
-      id: 'inv-1026',
-      invoiceNumber: 'INV-2024-1026',
-      subscriptionId: 'sub-cust-004',
-      customerName: 'Global Pulse Systems India',
-      customerEmail: 'billing@globalpulse.in',
-      issueDate: '2024-10-10',
-      dueDate: '2024-11-09',
+      id: 'inv-2024-003',
+      invoiceNumber: 'INV-2024-003',
+      subscriptionId: 'sub-6501',
+      customerName: 'Vanguard Logistics India',
+      customerEmail: 'accounts@vanguardlogistics.in',
+      customerGstin: '29AABCV9941P1ZB',
+      invoiceDate: '2024-10-22',
+      dueDate: '2024-11-06',
       status: 'confirmed',
-      subtotal: 8400.00,
-      taxRate: 18.0,
-      taxAmount: 1512.00,
-      discountAmount: 400.00,
-      totalAmount: 9512.00,
+      subtotal: 45000.00,
+      discountAmount: 2250.00,
+      gstRate: 18.0,
+      gstAmount: 7695.00,
+      totalAmount: 50445.00,
       amountPaid: 0.00,
-      balanceDue: 9512.00,
-      daysOverdue: 0,
+      balanceDue: 50445.00,
+      paymentMethod: null,
       lines: [
-        { description: 'Quarterly Platform Subscription', qty: 8, unitPrice: 1050.00, total: 8400.00 }
-      ]
-    },
-    {
-      id: 'inv-1025',
-      invoiceNumber: 'INV-2024-1025',
-      subscriptionId: 'sub-cust-005',
-      customerName: 'Hyperion Cloud Technologies',
-      customerEmail: 'invoices@hyperioncloud.in',
-      issueDate: '2024-10-28',
-      dueDate: '2024-11-27',
-      status: 'draft',
-      subtotal: 4800.00,
-      taxRate: 18.0,
-      taxAmount: 864.00,
-      discountAmount: 0.00,
-      totalAmount: 5664.00,
-      amountPaid: 0.00,
-      balanceDue: 5664.00,
-      daysOverdue: 0,
-      lines: [
-        { description: 'Monthly Cloud Infrastructure Add-on', qty: 4, unitPrice: 1200.00, total: 4800.00 }
+        { description: 'Brightloop Core Suite (Annual Enterprise Contract)', sac_code: '998313', quantity: 1, unit_price: 45000.00, amount: 45000.00 }
       ]
     }
   ],
 
   payments: [
     {
-      id: 'pay-501',
-      invoiceNumber: 'INV-2024-1028',
-      customerName: 'Zenith Technologies Pvt Ltd',
-      amount: 53336.00,
-      method: 'Net Banking (HDFC Corporate)',
-      date: '2024-10-16',
-      note: 'Settlement via NEFT ref #HDFC0001928'
+      id: 'pay-2024-8842',
+      paymentNumber: 'PAY-2024-8842',
+      invoiceNumber: 'INV-2024-001',
+      customerName: 'Nexus Techworks LLP',
+      amount: 7739.62,
+      method: 'UPI',
+      date: '2024-10-05',
+      note: 'Cleared via UPI AutoPay (HDFC Bank)'
     },
     {
-      id: 'pay-500',
-      invoiceNumber: 'INV-2024-1020',
-      customerName: 'Kinetic Robotics India',
-      amount: 18200.00,
-      method: 'UPI (Corporate GPay)',
-      date: '2024-10-14',
-      note: 'UPI txn id: 428910293810@hdfcbank'
-    },
-    {
-      id: 'pay-499',
-      invoiceNumber: 'INV-2024-1018',
-      customerName: 'Solaria Energy Systems',
-      amount: 9400.00,
-      method: 'RTGS / Bank Transfer',
-      date: '2024-10-12',
-      note: 'SBI RTGS ref #SBIN20241012984'
+      id: 'pay-2024-7719',
+      paymentNumber: 'PAY-2024-7719',
+      invoiceNumber: 'INV-2024-002',
+      customerName: 'Apex Retail Pvt Ltd',
+      amount: 5603.82,
+      method: 'UPI',
+      date: '2024-10-31',
+      note: 'Settled via Google Pay UPI'
     }
   ],
 
   billingRuns: [
     {
       id: 'BR-2024-10-01',
-      date: '01 Oct 2024 00:01 AM IST',
+      date: '01 Oct 2024, 00:01 IST',
       status: 'Completed',
-      subscriptionsProcessed: 412,
-      invoicesGenerated: 412,
+      subscriptionsProcessed: 3,
+      invoicesGenerated: 3,
       duplicatesPrevented: 0,
       skippedCycles: 0,
-      executionTimeMs: 142,
-      totalBilled: 682410.00
+      executionTimeMs: 12,
+      totalBilled: 63788.44
     }
-  ],
-
-  notifications: [
-    { id: 1, type: 'warning', text: 'Invoice INV-2024-1029 (₹1,711.00) is 11 days overdue for Apex Retail Pvt Ltd.', time: '10 mins ago' },
-    { id: 2, type: 'success', text: 'Payment of ₹53,336.00 received via HDFC Net Banking from Zenith Technologies.', time: '1 hour ago' },
-    { id: 3, type: 'info', text: 'Auto-batch billing run successfully processed 412 active subscriptions.', time: '3 hours ago' }
   ]
 };
 
 class Store {
   constructor() {
     this.listeners = [];
+    this.state = JSON.parse(JSON.stringify(INITIAL_DATA));
     this.loadState();
+    this.initBackendSync();
   }
 
   loadState() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        this.state = JSON.parse(saved);
-      } else {
-        this.state = JSON.parse(JSON.stringify(INITIAL_DATA));
-        this.saveState();
+        const parsed = JSON.parse(saved);
+        // Retain fresh defaults while preserving custom route or role
+        this.state.currentRole = parsed.currentRole || 'admin';
+        this.state.activeRoute = parsed.activeRoute || 'revenue-operations';
       }
     } catch (e) {
-      console.warn('Failed to parse stored state, using initial', e);
-      this.state = JSON.parse(JSON.stringify(INITIAL_DATA));
+      console.warn('LocalStorage error', e);
     }
   }
 
   saveState() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        currentRole: this.state.currentRole,
+        activeRoute: this.state.activeRoute
+      }));
     } catch (e) {
       console.error('Failed to persist store', e);
     }
     this.notify();
+  }
+
+  // Sync with SQLite backend on startup
+  async initBackendSync() {
+    try {
+      const res = await fetch(`${API_BASE}/overview`, { signal: AbortSignal.timeout(2000) });
+      if (!res.ok) throw new Error('Backend offline');
+      const overviewData = await res.json();
+
+      const [subsRes, invRes, staffRes] = await Promise.all([
+        fetch(`${API_BASE}/subscriptions`),
+        fetch(`${API_BASE}/invoices`),
+        fetch(`${API_BASE}/staff`)
+      ]);
+
+      if (subsRes.ok && invRes.ok) {
+        const subsData = await subsRes.json();
+        const invData = await invRes.json();
+        const staffData = staffRes.ok ? await staffRes.json() : null;
+
+        // Map backend subscriptions
+        if (subsData.data && subsData.data.length > 0) {
+          this.state.subscriptions = subsData.data.map(s => ({
+            id: s.id,
+            subscriptionNumber: s.subscription_number,
+            customerName: s.customer_name,
+            customerEmail: s.customer_email,
+            customerCompany: s.customer_company,
+            customerGstin: s.customer_gstin,
+            planId: s.plan_id,
+            planName: s.plan_name,
+            billingPeriod: s.billing_period,
+            startDate: s.start_date,
+            nextBillingDate: s.next_billing_date,
+            status: s.status,
+            isPaused: Boolean(s.is_paused),
+            autoRenew: Boolean(s.auto_renew),
+            tier: s.tier,
+            totalAmount: s.total_amount,
+            addonsEnabled: s.addons || { analytics: true, support: true },
+            lines: s.lines || []
+          }));
+        }
+
+        // Map backend invoices
+        if (invData.data && invData.data.length > 0) {
+          this.state.invoices = invData.data.map(i => ({
+            id: i.id,
+            invoiceNumber: i.invoice_number,
+            subscriptionId: i.subscription_id,
+            customerName: i.customer_name,
+            customerEmail: i.customer_email,
+            customerGstin: i.customer_gstin,
+            invoiceDate: i.invoice_date,
+            dueDate: i.due_date,
+            status: i.status,
+            subtotal: i.subtotal,
+            discountAmount: i.discount_amount,
+            gstRate: i.gst_rate,
+            gstAmount: i.gst_amount,
+            totalAmount: i.total_amount,
+            amountPaid: i.amount_paid,
+            balanceDue: i.balance_due,
+            paymentMethod: i.payment_method,
+            lines: i.lines || []
+          }));
+        }
+
+        // Map recent payments
+        if (overviewData.data && overviewData.data.recentPayments) {
+          this.state.payments = overviewData.data.recentPayments.map(p => ({
+            id: p.id,
+            paymentNumber: p.payment_number,
+            invoiceNumber: p.invoice_number,
+            customerName: p.customer_name,
+            amount: p.amount,
+            method: p.payment_method,
+            date: p.payment_date,
+            note: p.notes
+          }));
+        }
+
+        if (staffData && staffData.data) {
+          this.state.staffMembers = staffData.data;
+        }
+
+        this.state.isServerConnected = true;
+        console.log('✓ Brightloop Frontend synchronized with SQLite backend.');
+        this.notify();
+      }
+    } catch (err) {
+      console.warn('Backend sync warning: Running with local memory state.', err.message);
+      this.state.isServerConnected = false;
+      this.notify();
+    }
   }
 
   subscribe(listener) {
@@ -676,48 +505,95 @@ class Store {
     this.saveState();
   }
 
-  // Staff Management (Admin Only requirement: "Only the admin can add a new member of staff")
-  addStaffMember({ name, email, role }) {
+  // Staff Management (Admin Only)
+  async addStaffMember({ name, email, roleTitle, department }) {
     if (this.state.currentRole !== 'admin') {
       throw new Error('Only the admin can add a new member of staff.');
     }
+
+    try {
+      if (this.state.isServerConnected) {
+        const res = await fetch(`${API_BASE}/staff`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, roleTitle, department })
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error);
+      }
+    } catch (e) {
+      console.warn('Server staff add fallback to local:', e.message);
+    }
+
     const newStaff = {
-      id: 'st-' + Date.now(),
+      id: 'staff-' + Date.now(),
       name,
       email,
-      role: role || 'Sales & Support Associate',
-      joined: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-      status: 'Active'
+      role_title: roleTitle || 'Billing Specialist',
+      department: department || 'Finance & Invoicing',
+      status: 'active'
     };
-    this.state.staffMembers.push(newStaff);
+    this.state.staffMembers.unshift(newStaff);
     this.saveState();
     return newStaff;
   }
 
-  // Subscriptions
-  updateSubscriptionStatus(subId, newStatus) {
+  // Subscriptions Lifecycle
+  async updateSubscriptionStatus(subId, newStatus) {
     const sub = this.state.subscriptions.find(s => s.id === subId);
     if (sub) {
       sub.status = newStatus;
       this.saveState();
+
+      if (this.state.isServerConnected) {
+        try {
+          await fetch(`${API_BASE}/subscriptions/${subId}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+          });
+        } catch (e) {
+          console.warn('Status patch error:', e);
+        }
+      }
     }
   }
 
-  toggleSubscriptionPause(subId) {
+  async toggleSubscriptionPause(subId) {
     const sub = this.state.subscriptions.find(s => s.id === subId);
     if (sub) {
       sub.isPaused = !sub.isPaused;
       this.saveState();
+
+      if (this.state.isServerConnected) {
+        try {
+          await fetch(`${API_BASE}/subscriptions/${subId}/toggle-pause`, { method: 'PATCH' });
+        } catch (e) {
+          console.warn('Pause toggle error:', e);
+        }
+      }
     }
   }
 
-  addSubscription(newSub) {
+  async addSubscription(newSub) {
     this.state.subscriptions.unshift(newSub);
     this.saveState();
+
+    if (this.state.isServerConnected) {
+      try {
+        await fetch(`${API_BASE}/subscriptions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newSub)
+        });
+      } catch (e) {
+        console.warn('Add sub error:', e);
+      }
+    }
   }
 
-  // Customer Portal: Toggling Add-ons ("add-ons customers switch on and off")
-  toggleCustomerAddon(subId, addonType) {
+  // Customer Add-on Toggle
+  async toggleCustomerAddon(subId, addonType) {
     const sub = this.state.subscriptions.find(s => s.id === subId);
     if (!sub) return;
 
@@ -727,64 +603,29 @@ class Store {
 
     sub.addonsEnabled[addonType] = !sub.addonsEnabled[addonType];
 
-    // Recalculate subscription line items and total
-    const baseProduct = this.state.products[0];
-    const items = [
-      {
-        id: 'li-core',
-        productId: baseProduct.id,
-        productName: `${baseProduct.name} (Standard Edition)`,
-        variantId: 'var-std',
-        variantName: 'Standard Edition',
-        quantity: 1,
-        unitPrice: 1000.00,
-        taxRate: 18.0,
-        discountAmount: 0.00,
-        total: 1000.00
-      }
-    ];
-
-    if (sub.addonsEnabled.analytics) {
-      items.push({
-        id: 'li-addon-anl',
-        productId: 'prod-analytics-02',
-        productName: 'Analytics & Revenue Forecasting Add-on',
-        variantId: 'var-std-anl',
-        variantName: 'Standard Analytics Feed',
-        quantity: 1,
-        unitPrice: 250.00,
-        taxRate: 18.0,
-        discountAmount: 0.00,
-        total: 250.00
-      });
-    }
-
-    if (sub.addonsEnabled.support) {
-      items.push({
-        id: 'li-addon-sup',
-        productId: 'prod-support-03',
-        productName: '24/7 Dedicated Support SLA',
-        variantId: 'var-sla-tier1',
-        variantName: 'Tier-1 SLA Support',
-        quantity: 1,
-        unitPrice: 200.00,
-        taxRate: 18.0,
-        discountAmount: 0.00,
-        total: 200.00
-      });
-    }
-
-    sub.items = items;
-    sub.subtotal = items.reduce((acc, i) => acc + i.total, 0);
-    sub.taxTotal = sub.subtotal * 0.18;
-    sub.grandTotal = sub.subtotal + sub.taxTotal;
+    // Recalculate total
+    let total = 3499.00; // Base core
+    if (sub.addonsEnabled.analytics) total += 1250.00;
+    if (sub.addonsEnabled.support) total += 2500.00;
+    sub.totalAmount = total;
 
     this.saveState();
-    return sub;
+
+    if (this.state.isServerConnected) {
+      try {
+        await fetch(`${API_BASE}/subscriptions/${subId}/addons`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ addonKey: addonType, enabled: sub.addonsEnabled[addonType] })
+        });
+      } catch (e) {
+        console.warn('Addon patch error:', e);
+      }
+    }
   }
 
-  // Invoices & Billing
-  recordPayment({ invoiceNumber, amount, method, note }) {
+  // Invoices & Payments
+  async recordPayment({ invoiceNumber, amount, method, note }) {
     const inv = this.state.invoices.find(i => i.invoiceNumber === invoiceNumber);
     if (!inv) return false;
 
@@ -794,51 +635,105 @@ class Store {
     
     if (inv.balanceDue <= 0.01) {
       inv.status = 'paid';
-      inv.paidDate = new Date().toISOString().split('T')[0];
       inv.paymentMethod = method;
-      inv.daysOverdue = 0;
     }
 
-    this.state.payments.unshift({
+    const newPayment = {
       id: 'pay-' + Date.now(),
+      paymentNumber: 'PAY-' + Math.floor(10000 + Math.random() * 90000),
       invoiceNumber: inv.invoiceNumber,
       customerName: inv.customerName,
       amount: payAmount,
-      method,
+      method: method || 'UPI',
       date: new Date().toISOString().split('T')[0],
-      note: note || 'Settled via ' + method
-    });
+      note: note || `Payment received via ${method}`
+    };
 
+    this.state.payments.unshift(newPayment);
     this.saveState();
+
+    if (this.state.isServerConnected) {
+      try {
+        await fetch(`${API_BASE}/invoices/${inv.id}/payments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: payAmount, paymentMethod: method, notes: note })
+        });
+      } catch (e) {
+        console.warn('Server payment error:', e);
+      }
+    }
     return true;
   }
 
-  confirmInvoice(invoiceNumber) {
+  async confirmInvoice(invoiceNumber) {
     const inv = this.state.invoices.find(i => i.invoiceNumber === invoiceNumber);
     if (inv && inv.status === 'draft') {
       inv.status = 'confirmed';
       this.saveState();
+
+      if (this.state.isServerConnected) {
+        try {
+          await fetch(`${API_BASE}/invoices/${inv.id}/confirm`, { method: 'POST' });
+        } catch (e) {
+          console.warn('Confirm invoice error:', e);
+        }
+      }
     }
   }
 
-  cancelInvoice(invoiceNumber) {
+  async cancelInvoice(invoiceNumber) {
     const inv = this.state.invoices.find(i => i.invoiceNumber === invoiceNumber);
     if (inv) {
       inv.status = 'cancelled';
       inv.balanceDue = 0.00;
       this.saveState();
+
+      if (this.state.isServerConnected) {
+        try {
+          await fetch(`${API_BASE}/invoices/${inv.id}/cancel`, { method: 'POST' });
+        } catch (e) {
+          console.warn('Cancel invoice error:', e);
+        }
+      }
     }
   }
 
-  runBatchBilling() {
+  // Batch automated recurring billing run
+  async runBatchBilling() {
+    let result = null;
+
+    if (this.state.isServerConnected) {
+      try {
+        const res = await fetch(`${API_BASE}/billing/run`, { method: 'POST' });
+        const json = await res.json();
+        if (json.success) {
+          result = json.data;
+          // Refresh invoices and overview from backend
+          await this.initBackendSync();
+          return {
+            id: result.runId,
+            date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+            subscriptionsProcessed: result.subscriptionsScanned,
+            invoicesGenerated: result.invoicesGenerated,
+            duplicatesPrevented: result.duplicatesPrevented,
+            executionTimeMs: result.durationMs,
+            totalBilled: result.totalBilled
+          };
+        }
+      } catch (e) {
+        console.warn('Backend billing run failed, using local simulation:', e);
+      }
+    }
+
+    // Local fallback simulation
     const activeSubs = this.state.subscriptions.filter(s => s.status === 'active' && !s.isPaused);
     let createdCount = 0;
+    let totalRunAmount = 0;
     const now = new Date();
     const cycleToken = `RUN-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    let totalRunAmount = 0;
 
     activeSubs.forEach((sub, idx) => {
-      // Idempotency check: see if invoice already generated for this cycle
       const alreadyBilled = this.state.invoices.some(
         inv => inv.subscriptionId === sub.id && inv.cycleToken === cycleToken
       );
@@ -847,6 +742,9 @@ class Store {
         const nextInvNum = `INV-2024-${1030 + this.state.invoices.length}`;
         const issueDate = now.toISOString().split('T')[0];
         const dueDate = new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0];
+        const subtotal = sub.totalAmount;
+        const gst = subtotal * 0.18;
+        const total = subtotal + gst;
 
         const newInv = {
           id: 'inv-' + Date.now() + '-' + idx,
@@ -855,71 +753,39 @@ class Store {
           cycleToken,
           customerName: sub.customerName,
           customerEmail: sub.customerEmail,
-          issueDate,
+          invoiceDate: issueDate,
           dueDate,
           status: 'confirmed',
-          subtotal: sub.subtotal,
-          taxRate: 18.0,
-          taxAmount: sub.taxTotal,
-          discountAmount: sub.discountTotal,
-          totalAmount: sub.grandTotal,
+          subtotal,
+          gstRate: 18.0,
+          gstAmount: gst,
+          totalAmount: total,
           amountPaid: 0.00,
-          balanceDue: sub.grandTotal,
-          daysOverdue: 0,
-          lines: sub.items.map(item => ({
-            description: `${item.productName} (${item.variantName || 'Standard'})`,
-            qty: item.quantity,
-            unitPrice: item.unitPrice,
-            total: item.total
-          }))
+          balanceDue: total,
+          lines: sub.lines || []
         };
 
         this.state.invoices.unshift(newInv);
-        totalRunAmount += sub.grandTotal;
+        totalRunAmount += total;
         createdCount++;
       }
     });
 
     const runRecord = {
       id: `BR-${Date.now().toString().slice(-6)}`,
-      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
       status: 'Completed',
       subscriptionsProcessed: activeSubs.length,
       invoicesGenerated: createdCount,
       duplicatesPrevented: activeSubs.length - createdCount,
       skippedCycles: 0,
-      executionTimeMs: Math.floor(Math.random() * 80) + 110,
+      executionTimeMs: 14,
       totalBilled: totalRunAmount
     };
 
     this.state.billingRuns.unshift(runRecord);
     this.saveState();
     return runRecord;
-  }
-
-  // Catalog
-  addProductVariant(productId, variant) {
-    const product = this.state.products.find(p => p.id === productId);
-    if (product) {
-      if (!product.variants) product.variants = [];
-      product.variants.push(variant);
-      this.saveState();
-    }
-  }
-
-  addPlan(plan) {
-    this.state.plans.push(plan);
-    this.saveState();
-  }
-
-  addDiscountRule(rule) {
-    this.state.discountRules.push(rule);
-    this.saveState();
-  }
-
-  resetToInitial() {
-    this.state = JSON.parse(JSON.stringify(INITIAL_DATA));
-    this.saveState();
   }
 }
 

@@ -1,7 +1,7 @@
-// src/components/billing.js - Automated Billing Day Console & Invoices Workbench
+// src/components/billing.js - Clean, Human Invoices & Automated Billing Console
 import { store } from '../store.js';
 
-let invoiceFilter = 'all'; // 'all' | 'draft' | 'confirmed' | 'paid' | 'overdue' | 'cancelled'
+let invoiceFilter = 'all'; // 'all' | 'confirmed' | 'paid' | 'overdue' | 'draft'
 let invoiceSearch = '';
 
 export function setInvoiceFilter(filter) {
@@ -14,15 +14,7 @@ export function setInvoiceSearch(term) {
 
 export function renderBilling() {
   const state = store.getState();
-  const latestRun = state.billingRuns[0] || {
-    id: 'BR-2024-10-01',
-    date: '01 Oct 2024 00:01 AM IST',
-    subscriptionsProcessed: 412,
-    duplicatesPrevented: 0,
-    skippedCycles: 0,
-    executionTimeMs: 142
-  };
-
+  
   const filteredInvoices = state.invoices.filter(inv => {
     const matchesFilter = invoiceFilter === 'all' || inv.status === invoiceFilter;
     const matchesSearch = !invoiceSearch || 
@@ -33,229 +25,162 @@ export function renderBilling() {
 
   const totalBilled = state.invoices.reduce((acc, inv) => acc + (inv.status !== 'cancelled' ? inv.totalAmount : 0), 0);
   const totalCollected = state.invoices.reduce((acc, inv) => acc + inv.amountPaid, 0);
+  const totalOutstanding = state.invoices.reduce((acc, inv) => acc + (inv.status !== 'cancelled' ? inv.balanceDue : 0), 0);
 
   return `
     <div class="flex flex-col gap-6 w-full animate-fade-in">
       
-      <!-- Top Operational Banner & Automated Run Status -->
-      <div class="relative overflow-hidden rounded-xl bg-[#eff4ff] border border-[#dce9ff] shadow-sm">
-        <div class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-[#86f2e4]/15 blur-3xl pointer-events-none"></div>
-        <div class="p-6 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
-          <div class="flex items-start gap-3.5">
-            <div class="w-10 h-10 rounded-lg bg-[#006a61] text-white flex items-center justify-center shrink-0 shadow-sm">
-              <span class="material-symbols-outlined text-2xl">task_alt</span>
-            </div>
-            <div>
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="text-base font-semibold text-[#0b1c30]">Automated Billing Run #${latestRun.id} Complete</span>
-                <span class="px-2 py-0.5 rounded text-[#006f66] bg-[#86f2e4]/30 text-xs font-mono font-semibold">${latestRun.date}</span>
-                <span class="px-2 py-0.5 rounded bg-[#dce9ff] text-[#006a61] text-[10px] font-mono uppercase tracking-wider font-bold">Zero Duplicate Protection</span>
-              </div>
-              <p class="text-xs text-[#45464e] mt-1">
-                <span class="font-semibold text-[#0b1c30]">${latestRun.subscriptionsProcessed} active contracts checked</span> on scheduled billing date. 
-                <span class="text-[#006a61] font-semibold">${latestRun.duplicatesPrevented} duplicates prevented</span>, <span class="text-[#006a61] font-semibold">${latestRun.skippedCycles} skipped</span>. Applicable GST calculated automatically.
-              </p>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-3 w-full xl:w-auto shrink-0 justify-end">
-            <div class="hidden sm:flex flex-col text-right">
-              <span class="text-[10px] text-[#76777f] uppercase tracking-wider font-semibold">Engine Speed</span>
-              <span class="text-xs font-mono text-[#0b1c30] font-semibold">${latestRun.executionTimeMs}ms (target &lt; 2.0s)</span>
-            </div>
-            <button onclick="window.triggerBatchBillingRun()" 
-              class="inline-flex items-center gap-2 bg-[#081534] hover:bg-[#1e2a4a] text-white px-4 py-2.5 rounded-lg text-xs font-semibold shadow-md transition-all group">
-              <span class="material-symbols-outlined text-base transition-transform group-hover:rotate-180">autorenew</span>
-              <span>Run Billing Day Cycle</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Header & Metrics -->
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+      <!-- Top Header & Primary Actions -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
         <div>
-          <div class="flex items-center gap-1.5 mb-1 text-xs font-mono text-[#006a61] font-semibold uppercase tracking-wider">
-            <span>Recurring Invoices & Receivables</span>
-          </div>
-          <h1 class="text-2xl font-bold text-[#081534] tracking-tight">Billing & Invoices Workbench</h1>
-          <p class="text-xs text-[#64748b]">Review, confirm, send, cancel, print, and collect payments on customer invoices</p>
+          <h1 class="text-2xl font-bold text-[#081534] tracking-tight">Billing & Invoices</h1>
+          <p class="text-xs text-slate-500 mt-1">
+            Automated recurring billing cycles, GST tax invoices, and real-time payment reconciliation.
+          </p>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2.5">
+          <button onclick="window.triggerBatchBillingRun()" 
+            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#081534] hover:bg-[#1e2a4a] text-white text-xs font-semibold shadow-sm transition-all">
+            <span class="material-symbols-outlined text-sm">autorenew</span>
+            <span>Run Billing Cycle</span>
+          </button>
+
           <button onclick="window.exportLedgerCSV()" 
-            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white text-[#081534] text-xs font-semibold border border-[#cbd5e1] hover:bg-[#eff4ff] shadow-sm transition-all">
-            <span class="material-symbols-outlined text-sm">download</span>
-            <span>Export Invoices (CSV)</span>
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white text-slate-700 hover:bg-slate-50 text-xs font-medium border border-slate-200 shadow-sm transition-all">
+            <span class="material-symbols-outlined text-sm text-slate-500">download</span>
+            <span>Export CSV</span>
           </button>
         </div>
       </div>
 
-      <!-- Quick Metrics Bento -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="p-4 rounded-xl bg-white border border-[#e2e8f0] shadow-sm">
-          <span class="text-xs text-[#76777f] font-medium uppercase">Total Invoiced (This Month)</span>
-          <div class="font-mono text-2xl font-bold text-[#081534] mt-1">₹${totalBilled.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
-          <div class="w-full bg-[#eff4ff] h-1.5 rounded-full mt-2.5 overflow-hidden">
-            <div class="bg-[#006a61] h-full" style="width: ${totalBilled > 0 ? (totalCollected / totalBilled) * 100 : 0}%"></div>
-          </div>
-          <div class="flex justify-between text-[11px] font-mono text-[#64748b] mt-1.5">
-            <span>Collected: ₹${totalCollected.toLocaleString('en-IN', { minimumFractionDigits: 0 })}</span>
-            <span class="text-[#006a61] font-bold">${totalBilled > 0 ? ((totalCollected / totalBilled) * 100).toFixed(0) : 0}% collected</span>
+      <!-- Clean 3-Metric Summary Bar -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+          <div class="text-xs text-slate-500 font-medium">Total Invoiced</div>
+          <div class="mt-1 font-mono text-xl font-bold text-[#081534]">
+            ₹${totalBilled.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </div>
         </div>
-
-        <div class="p-4 rounded-xl bg-white border border-[#e2e8f0] shadow-sm">
-          <span class="text-xs text-[#76777f] font-medium uppercase">Automated Accuracy</span>
-          <div class="font-mono text-2xl font-bold text-[#006a61] mt-1">100.0%</div>
-          <div class="text-[11px] text-[#64748b] mt-3 flex items-center justify-between">
-            <span>Invoicing Errors:</span>
-            <span class="font-mono font-bold text-[#081534]">0 Skipped / 0 Duplicates</span>
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+          <div class="text-xs text-slate-500 font-medium">Collected via Payments</div>
+          <div class="mt-1 font-mono text-xl font-bold text-teal-700">
+            ₹${totalCollected.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </div>
         </div>
-
-        <div class="p-4 rounded-xl bg-white border border-[#e2e8f0] shadow-sm">
-          <span class="text-xs text-[#76777f] font-medium uppercase">Invoices on Record</span>
-          <div class="font-mono text-2xl font-bold text-[#081534] mt-1">${state.invoices.length}</div>
-          <div class="text-[11px] text-[#64748b] mt-3 flex items-center justify-between">
-            <span>Drafts to Confirm:</span>
-            <span class="font-mono font-bold text-[#081534]">${state.invoices.filter(i => i.status === 'draft').length}</span>
-          </div>
-        </div>
-
-        <div class="p-4 rounded-xl bg-white border border-[#e2e8f0] shadow-sm">
-          <span class="text-xs text-[#76777f] font-medium uppercase">Overdue Receivables</span>
-          <div class="font-mono text-2xl font-bold text-[#ba1a1a] mt-1">${state.invoices.filter(i => i.status === 'overdue').length}</div>
-          <div class="text-[11px] text-[#ba1a1a] mt-3 font-semibold flex items-center justify-between">
-            <span>Payment Chasing:</span>
-            <span>Active</span>
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+          <div class="text-xs text-slate-500 font-medium">Pending Balance Due</div>
+          <div class="mt-1 font-mono text-xl font-bold ${totalOutstanding > 0 ? 'text-amber-700' : 'text-slate-800'}">
+            ₹${totalOutstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </div>
         </div>
       </div>
 
-      <!-- Invoices Workbench Table -->
-      <div class="bg-white rounded-xl border border-[#e2e8f0] shadow-sm overflow-hidden">
-        
-        <!-- Table Filter & Search Controls -->
-        <div class="p-4 border-b border-[#e2e8f0] flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#f8f9ff]">
-          <div class="flex items-center gap-1.5 overflow-x-auto text-xs font-semibold">
-            ${['all', 'draft', 'confirmed', 'paid', 'overdue', 'cancelled'].map(f => `
-              <button onclick="window.filterInvoices('${f}')" 
-                class="px-3 py-1.5 rounded-lg transition-all capitalize ${
-                  invoiceFilter === f 
-                    ? 'bg-[#1e2a4a] text-white shadow-sm' 
-                    : 'bg-white text-[#45464e] hover:bg-[#eff4ff] border border-[#cbd5e1]'
-                }">
-                ${f} (${f === 'all' ? state.invoices.length : state.invoices.filter(i => i.status === f).length})
-              </button>
-            `).join('')}
-          </div>
-
-          <div class="relative w-full md:w-64">
-            <span class="material-symbols-outlined absolute left-2.5 top-2 text-[#76777f] text-sm">search</span>
-            <input type="text" placeholder="Search invoice # or customer..." 
-              value="${invoiceSearch}"
-              oninput="window.searchInvoices(this.value)"
-              class="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border border-[#cbd5e1] focus:ring-2 focus:ring-[#006a61] outline-none" />
-          </div>
+      <!-- Filter Tabs & Search Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-2">
+        <div class="flex items-center gap-1 text-xs font-medium overflow-x-auto">
+          <button onclick="window.setInvoiceFilterTab('all')" 
+            class="pb-2 px-3 border-b-2 transition-colors ${invoiceFilter === 'all' ? 'border-[#081534] text-[#081534] font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'}">
+            All Invoices (${state.invoices.length})
+          </button>
+          <button onclick="window.setInvoiceFilterTab('confirmed')" 
+            class="pb-2 px-3 border-b-2 transition-colors ${invoiceFilter === 'confirmed' ? 'border-[#081534] text-[#081534] font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'}">
+            Confirmed (${state.invoices.filter(i => i.status === 'confirmed').length})
+          </button>
+          <button onclick="window.setInvoiceFilterTab('paid')" 
+            class="pb-2 px-3 border-b-2 transition-colors ${invoiceFilter === 'paid' ? 'border-[#081534] text-[#081534] font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'}">
+            Paid (${state.invoices.filter(i => i.status === 'paid').length})
+          </button>
+          <button onclick="window.setInvoiceFilterTab('overdue')" 
+            class="pb-2 px-3 border-b-2 transition-colors ${invoiceFilter === 'overdue' ? 'border-[#081534] text-[#081534] font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'}">
+            Overdue (${state.invoices.filter(i => i.status === 'overdue').length})
+          </button>
         </div>
 
-        <!-- Invoices List with Full Actions (Confirm, Cancel, Send, Print, Record Pay) -->
+        <div class="relative w-full sm:w-64">
+          <span class="material-symbols-outlined absolute left-2.5 top-2.5 text-sm text-slate-400">search</span>
+          <input type="text" placeholder="Search invoice or customer..." 
+            value="${invoiceSearch}"
+            oninput="window.handleInvoiceSearch(this.value)"
+            class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-teal-700 outline-none text-slate-800 placeholder-slate-400" />
+        </div>
+      </div>
+
+      <!-- Invoices Ledger Table -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
             <thead>
-              <tr class="border-b border-[#cbd5e1] text-[#64748b] uppercase tracking-wider font-semibold bg-white">
-                <th class="py-3 px-3">Invoice #</th>
-                <th class="py-3 px-3">Customer</th>
-                <th class="py-3 px-3">Issue Date</th>
-                <th class="py-3 px-3">Due Date</th>
-                <th class="py-3 px-3">Status</th>
-                <th class="py-3 px-3 text-right">Total Amount</th>
-                <th class="py-3 px-3 text-right">Balance Due</th>
-                <th class="py-3 px-3 text-right">Actions (Confirm • Send • Print • Cancel)</th>
+              <tr class="bg-slate-50/70 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-semibold text-[11px]">
+                <th class="py-3 px-4">Invoice #</th>
+                <th class="py-3 px-4">Client Account</th>
+                <th class="py-3 px-4">Issue Date</th>
+                <th class="py-3 px-4">Due Date</th>
+                <th class="py-3 px-4 text-right">Total (18% GST)</th>
+                <th class="py-3 px-4 text-right">Balance Due</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-[#f1f5f9]">
+            <tbody class="divide-y divide-slate-100">
               ${filteredInvoices.length === 0 ? `
                 <tr>
-                  <td colspan="8" class="py-8 text-center text-[#64748b]">
-                    No invoices match your selected filter criteria.
+                  <td colspan="8" class="py-12 text-center text-slate-400">
+                    No invoices match the selected filter.
                   </td>
                 </tr>
               ` : filteredInvoices.map(inv => `
-                <tr class="hover:bg-[#f8f9ff] transition-colors">
-                  <td class="py-3.5 px-3 font-mono font-bold text-[#081534]">${inv.invoiceNumber}</td>
-                  <td class="py-3.5 px-3">
-                    <div class="font-medium text-[#0b1c30]">${inv.customerName}</div>
-                    <div class="text-[11px] text-[#76777f] font-mono">${inv.customerEmail}</div>
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                  <td class="py-3.5 px-4 font-mono font-semibold text-[#081534]">
+                    ${inv.invoiceNumber}
                   </td>
-                  <td class="py-3.5 px-3 font-mono text-[#64748b]">${inv.issueDate}</td>
-                  <td class="py-3.5 px-3 font-mono text-[#64748b]">${inv.dueDate}</td>
-                  <td class="py-3.5 px-3">
-                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold uppercase ${
-                      inv.status === 'paid' 
-                        ? 'bg-[#86f2e4]/30 text-[#006f66]' 
+                  <td class="py-3.5 px-4">
+                    <div class="font-semibold text-slate-900">${inv.customerName}</div>
+                    <div class="text-[11px] text-slate-500 font-mono">${inv.customerEmail}</div>
+                  </td>
+                  <td class="py-3.5 px-4 font-mono text-slate-600">${inv.invoiceDate || inv.issueDate}</td>
+                  <td class="py-3.5 px-4 font-mono text-slate-600">${inv.dueDate}</td>
+                  <td class="py-3.5 px-4 text-right font-mono font-semibold text-slate-900">
+                    ₹${inv.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </td>
+                  <td class="py-3.5 px-4 text-right font-mono font-semibold ${inv.balanceDue > 0 ? 'text-amber-700' : 'text-slate-400'}">
+                    ₹${inv.balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium capitalize ${
+                      inv.status === 'paid'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                         : inv.status === 'overdue'
-                        ? 'bg-[#ffdad6] text-[#93000a]'
+                        ? 'bg-amber-50 text-amber-800 border border-amber-200'
                         : inv.status === 'confirmed'
-                        ? 'bg-[#dce9ff] text-[#081534]'
-                        : inv.status === 'cancelled'
-                        ? 'bg-gray-100 text-gray-500 line-through'
+                        ? 'bg-sky-50 text-sky-800 border border-sky-200'
                         : 'bg-slate-100 text-slate-700'
                     }">
-                      <span class="w-1.5 h-1.5 rounded-full ${inv.status === 'paid' ? 'bg-[#006a61]' : inv.status === 'overdue' ? 'bg-[#ba1a1a]' : 'bg-[#081534]'}"></span>
+                      <span class="w-1.5 h-1.5 rounded-full ${
+                        inv.status === 'paid' ? 'bg-emerald-500' : inv.status === 'overdue' ? 'bg-amber-500' : 'bg-sky-500'
+                      }"></span>
                       ${inv.status}
                     </span>
                   </td>
-                  <td class="py-3.5 px-3 font-mono font-bold text-right text-[#081534]">
-                    ₹${inv.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                  </td>
-                  <td class="py-3.5 px-3 font-mono font-bold text-right ${inv.balanceDue > 0 ? 'text-[#ba1a1a]' : 'text-[#006a61]'}">
-                    ₹${inv.balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                  </td>
-                  <td class="py-3.5 px-3 text-right">
-                    <div class="inline-flex items-center gap-1 justify-end flex-wrap">
-                      
-                      <!-- 1. Confirm (if Draft) -->
+                  <td class="py-3.5 px-4 text-right">
+                    <div class="inline-flex items-center gap-1.5">
+                      <button onclick="window.previewInvoicePDF('${inv.invoiceNumber}')" 
+                        class="px-2.5 py-1 rounded bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-medium transition-colors"
+                        title="View printable tax invoice">
+                        View
+                      </button>
+                      ${inv.balanceDue > 0 && inv.status !== 'cancelled' ? `
+                        <button onclick="window.openRecordPaymentModal('${inv.invoiceNumber}', ${inv.balanceDue})" 
+                          class="px-2.5 py-1 rounded bg-teal-700 hover:bg-teal-800 text-white text-xs font-medium transition-colors">
+                          Pay
+                        </button>
+                      ` : ''}
                       ${inv.status === 'draft' ? `
-                        <button onclick="window.confirmDraftInvoice('${inv.invoiceNumber}')" 
-                          class="px-2 py-1 rounded bg-[#006a61] text-white hover:bg-[#005049] text-[11px] font-semibold transition-colors"
-                          title="Confirm draft invoice">
+                        <button onclick="window.confirmInvoiceAction('${inv.invoiceNumber}')" 
+                          class="px-2.5 py-1 rounded bg-[#081534] hover:bg-[#1e2a4a] text-white text-xs font-medium transition-colors">
                           Confirm
                         </button>
                       ` : ''}
-
-                      <!-- 2. Send to Customer -->
-                      <button onclick="window.sendInvoiceAction('${inv.invoiceNumber}', '${inv.customerName}')" 
-                        class="px-2 py-1 rounded bg-white border border-[#cbd5e1] text-[#081534] hover:bg-[#eff4ff] text-[11px] font-medium transition-colors"
-                        title="Send invoice email to customer">
-                        Send
-                      </button>
-
-                      <!-- 3. Record Payment (if outstanding) -->
-                      ${inv.balanceDue > 0 && inv.status !== 'cancelled' ? `
-                        <button onclick="window.openRecordPaymentModal('${inv.invoiceNumber}', ${inv.balanceDue})" 
-                          class="px-2 py-1 rounded bg-[#081534] text-white hover:bg-[#1e2a4a] text-[11px] font-semibold transition-colors">
-                          Record Pay
-                        </button>
-                      ` : ''}
-
-                      <!-- 4. Print / PDF -->
-                      <button onclick="window.previewInvoicePrint('${inv.invoiceNumber}')" 
-                        class="p-1 rounded text-[#76777f] hover:bg-[#e5eeff] hover:text-[#081534] transition-colors" 
-                        title="Print / PDF Invoice">
-                        <span class="material-symbols-outlined text-base">print</span>
-                      </button>
-
-                      <!-- 5. Cancel (if not paid & not cancelled) -->
-                      ${inv.status !== 'paid' && inv.status !== 'cancelled' ? `
-                        <button onclick="window.cancelInvoiceAction('${inv.invoiceNumber}')" 
-                          class="p-1 rounded text-[#ba1a1a] hover:bg-red-50 transition-colors" 
-                          title="Cancel / Void Invoice">
-                          <span class="material-symbols-outlined text-base">block</span>
-                        </button>
-                      ` : ''}
-
                     </div>
                   </td>
                 </tr>

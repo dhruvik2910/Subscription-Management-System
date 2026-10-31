@@ -1,272 +1,239 @@
-// src/components/subscriptions.js - Subscriptions & Quotation Detail Workbench
+// src/components/subscriptions.js - Clean, Human Subscriptions & Quotation Workbench
 import { store } from '../store.js';
 
 let selectedSubscriptionId = 'sub-8842';
+let filterTab = 'all'; // 'all' | 'active' | 'quotation' | 'closed'
 
 export function setSelectedSubscription(id) {
   selectedSubscriptionId = id;
 }
 
+export function setSubFilter(filter) {
+  filterTab = filter;
+}
+
 export function renderSubscriptions() {
   const state = store.getState();
   const sub = state.subscriptions.find(s => s.id === selectedSubscriptionId) || state.subscriptions[0];
-  if (!sub) return `<div class="p-8 text-center text-slate-500">No subscriptions found.</div>`;
+  
+  const filteredSubs = state.subscriptions.filter(s => {
+    if (filterTab === 'all') return true;
+    return s.status === filterTab;
+  });
 
   const stages = ['draft', 'quotation', 'confirmed', 'active', 'closed'];
-  const currentStageIndex = stages.indexOf(sub.status);
+  const currentStageIndex = sub ? stages.indexOf(sub.status) : 0;
 
   return `
     <div class="flex flex-col gap-6 w-full animate-fade-in">
       
-      <!-- Top Breadcrumb & Subscription Selector -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#e2e8f0]">
-        <div class="flex items-center gap-2 text-xs text-[#76777f]">
-          <span class="hover:text-[#081534] cursor-pointer" onclick="window.appNavigate('revenue-operations')">Subscriptions</span>
-          <span class="material-symbols-outlined text-xs">chevron_right</span>
-          <span class="font-mono bg-[#dce9ff] px-1.5 py-0.5 rounded text-[#081534] font-semibold">${sub.subscriptionNumber}</span>
-          <span class="material-symbols-outlined text-xs">chevron_right</span>
-          <span class="text-[#0b1c30] font-medium truncate">${sub.customerName}</span>
+      <!-- Top Header & Primary Action -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
+        <div>
+          <h1 class="text-2xl font-bold text-[#081534] tracking-tight">Subscriptions & Quotations</h1>
+          <p class="text-xs text-slate-500 mt-1">
+            Manage customer recurring contracts, quotes, lifecycle transitions, and renewals.
+          </p>
         </div>
 
-        <!-- Quick Switcher -->
-        <div class="flex items-center gap-2">
-          <label class="text-xs text-[#64748b] font-medium">Select Record:</label>
-          <select onchange="window.selectSubscriptionRecord(this.value)" 
-            class="text-xs font-mono bg-white border border-[#cbd5e1] rounded-lg px-2.5 py-1 text-[#081534] font-medium focus:ring-2 focus:ring-[#006a61] outline-none">
-            ${state.subscriptions.map(s => `
-              <option value="${s.id}" ${s.id === sub.id ? 'selected' : ''}>
-                ${s.subscriptionNumber} - ${s.customerName} (${s.status.toUpperCase()})
-              </option>
-            `).join('')}
-          </select>
-        </div>
+        <button onclick="window.openNewQuoteModal()" 
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#081534] hover:bg-[#1e2a4a] text-white text-xs font-semibold shadow-sm transition-all self-start sm:self-auto">
+          <span class="material-symbols-outlined text-sm">add</span>
+          <span>New Quotation</span>
+        </button>
       </div>
 
-      <!-- Subscription Header Card & Lifecycle Stepper -->
-      <div class="bg-white rounded-xl p-6 border border-[#e2e8f0] shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-        
-        <!-- Identifier & Client Info -->
-        <div class="flex flex-col gap-1.5">
-          <div class="flex items-center flex-wrap gap-2.5">
-            <h1 class="text-2xl font-bold font-mono text-[#081534] tracking-tight">${sub.subscriptionNumber}</h1>
-            
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold tracking-wider uppercase ${
-              sub.status === 'active' 
-                ? 'bg-[#86f2e4]/30 text-[#006f66]' 
-                : sub.status === 'closed'
-                ? 'bg-[#ffdad6] text-[#93000a]'
-                : 'bg-[#eff4ff] text-[#081534]'
-            }">
-              <span class="w-1.5 h-1.5 rounded-full ${sub.status === 'active' ? 'bg-[#006a61]' : sub.status === 'closed' ? 'bg-[#ba1a1a]' : 'bg-[#76777f]'}"></span>
-              ${sub.status} ${sub.isPaused ? '(PAUSED)' : sub.autoRenew ? '• Auto-Renewing' : ''}
-            </span>
-
-            <span class="px-2 py-0.5 rounded bg-[#e5eeff] text-[#081534] text-xs font-mono">
-              ${sub.tier || 'Enterprise'}
-            </span>
-          </div>
-
-          <div class="flex items-center gap-2 text-xs text-[#45464e] flex-wrap">
-            <span class="text-[#0b1c30] font-semibold">${sub.customerName}</span>
-            <span>•</span>
-            <span>${sub.planName}</span>
-            <span>•</span>
-            <span class="font-mono text-[#76777f]">${sub.crn || 'CIN: U72200MH2021PTC384420'}</span>
-          </div>
-        </div>
-
-        <!-- Lifecycle Stepper Component -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 xl:pb-0">
-          ${stages.map((stage, idx) => {
-            const isCompleted = idx < currentStageIndex;
-            const isCurrent = idx === currentStageIndex;
-
-            return `
-              <div class="flex items-center gap-2 shrink-0">
-                <div class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                  isCurrent 
-                    ? 'bg-[#1e2a4a] text-white shadow-sm ring-2 ring-[#006a61]/30 font-bold' 
-                    : isCompleted 
-                    ? 'bg-[#86f2e4]/30 text-[#006f66]' 
-                    : 'bg-[#f1f5f9] text-[#76777f]'
-                }">
-                  ${isCompleted ? '<span class="material-symbols-outlined text-sm font-bold">check_circle</span>' : ''}
-                  ${isCurrent ? '<span class="w-2 h-2 rounded-full bg-[#86f2e4] animate-ping"></span>' : ''}
-                  <span class="capitalize">${stage}</span>
-                </div>
-                ${idx < stages.length - 1 ? `
-                  <div class="w-4 h-0.5 ${idx < currentStageIndex ? 'bg-[#006a61]' : 'bg-[#cbd5e1]'}"></div>
-                ` : ''}
-              </div>
-            `;
-          }).join('')}
-        </div>
-
+      <!-- Filter Tabs -->
+      <div class="flex items-center gap-1 border-b border-slate-200 text-xs font-medium">
+        <button onclick="window.setSubFilterTab('all')" 
+          class="pb-2.5 px-3 border-b-2 transition-colors ${filterTab === 'all' ? 'border-[#081534] text-[#081534] font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'}">
+          All (${state.subscriptions.length})
+        </button>
+        <button onclick="window.setSubFilterTab('active')" 
+          class="pb-2.5 px-3 border-b-2 transition-colors ${filterTab === 'active' ? 'border-[#081534] text-[#081534] font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'}">
+          Active (${state.subscriptions.filter(s => s.status === 'active').length})
+        </button>
+        <button onclick="window.setSubFilterTab('quotation')" 
+          class="pb-2.5 px-3 border-b-2 transition-colors ${filterTab === 'quotation' ? 'border-[#081534] text-[#081534] font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'}">
+          Quotations (${state.subscriptions.filter(s => s.status === 'quotation').length})
+        </button>
+        <button onclick="window.setSubFilterTab('closed')" 
+          class="pb-2.5 px-3 border-b-2 transition-colors ${filterTab === 'closed' ? 'border-[#081534] text-[#081534] font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'}">
+          Closed (${state.subscriptions.filter(s => s.status === 'closed').length})
+        </button>
       </div>
 
-      <!-- Action Toolbar -->
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div class="flex flex-wrap items-center gap-2">
-          
-          ${currentStageIndex < stages.length - 1 && sub.status !== 'closed' ? `
-            <button onclick="window.advanceSubscriptionStage('${sub.id}')" 
-              class="inline-flex items-center gap-1.5 bg-[#006a61] hover:bg-[#005049] text-white px-3.5 py-2 rounded-lg text-xs font-semibold shadow-sm transition-all">
-              <span class="material-symbols-outlined text-sm">arrow_forward</span>
-              <span>Advance to "${stages[currentStageIndex + 1]}"</span>
-            </button>
-          ` : ''}
-
-          <button onclick="window.createRenewalQuote('${sub.id}')" 
-            class="inline-flex items-center gap-1.5 bg-[#1e2a4a] text-white hover:bg-[#081534] px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm">
-            <span class="material-symbols-outlined text-sm">autorenew</span>
-            <span>Create Renewal Quote</span>
-          </button>
-
-          <button onclick="window.generateNextInvoiceForSub('${sub.id}')" 
-            class="inline-flex items-center gap-1.5 bg-white text-[#0b1c30] hover:bg-[#eff4ff] px-3.5 py-2 rounded-lg text-xs font-semibold transition-all border border-[#cbd5e1] shadow-sm">
-            <span class="material-symbols-outlined text-sm">receipt_long</span>
-            <span>Generate Next Invoice</span>
-          </button>
-
-          <button onclick="window.togglePauseSub('${sub.id}')" 
-            class="inline-flex items-center gap-1.5 bg-white text-[#0b1c30] hover:bg-[#eff4ff] px-3.5 py-2 rounded-lg text-xs font-semibold transition-all border border-[#cbd5e1] shadow-sm">
-            <span class="material-symbols-outlined text-sm">${sub.isPaused ? 'play_arrow' : 'pause'}</span>
-            <span>${sub.isPaused ? 'Resume Plan' : 'Pause Plan'}</span>
-          </button>
-
-          ${sub.status !== 'closed' ? `
-            <button onclick="window.closeSubscription('${sub.id}')" 
-              class="inline-flex items-center gap-1.5 bg-white text-[#ba1a1a] hover:bg-red-50 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all border border-[#ffdad6] shadow-sm">
-              <span class="material-symbols-outlined text-sm">cancel</span>
-              <span>Cancel / Close</span>
-            </button>
-          ` : ''}
-        </div>
-
-        <div class="flex items-center gap-2">
-          <button onclick="window.previewQuotationPrint('${sub.id}')" 
-            class="inline-flex items-center gap-1.5 bg-white text-[#081534] hover:bg-[#eff4ff] px-3 py-2 rounded-lg text-xs font-semibold border border-[#cbd5e1] shadow-sm">
-            <span class="material-symbols-outlined text-sm">print</span>
-            <span>Print / PDF View</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Line Items & Financial Breakdown -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
-        <!-- Lines Table (8 Cols) -->
-        <div class="lg:col-span-8 bg-white rounded-xl p-6 border border-[#e2e8f0] shadow-sm flex flex-col gap-4">
-          <div class="flex items-center justify-between border-b border-[#cbd5e1] pb-3">
-            <h2 class="text-base font-bold text-[#081534]">Contract Line Items & Brand Variants</h2>
-            <span class="text-xs font-mono text-[#64748b]">${sub.items.length} Product Lines</span>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-              <thead>
-                <tr class="border-b border-[#e2e8f0] text-[#64748b] uppercase tracking-wider font-semibold">
-                  <th class="py-2.5 px-3">Product / Service</th>
-                  <th class="py-2.5 px-3 text-center">Seats / Qty</th>
-                  <th class="py-2.5 px-3 text-right">Unit Price</th>
-                  <th class="py-2.5 px-3 text-right">Tax (GST)</th>
-                  <th class="py-2.5 px-3 text-right">Line Total</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-[#f1f5f9]">
-                ${sub.items.map(item => `
-                  <tr class="hover:bg-[#f8f9ff]">
-                    <td class="py-3.5 px-3">
-                      <div class="font-semibold text-[#081534]">${item.productName}</div>
-                      <div class="text-[11px] text-[#006a61] font-mono mt-0.5 flex items-center gap-1">
-                        <span class="material-symbols-outlined text-xs">sell</span>
-                        <span>Variant: <strong>${item.variantName || 'Standard Edition'}</strong></span>
-                      </div>
+      <!-- Main Layout: Table of Subscriptions -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="bg-slate-50/70 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-semibold text-[11px]">
+                <th class="py-3 px-4">Subscription #</th>
+                <th class="py-3 px-4">Customer Account</th>
+                <th class="py-3 px-4">Plan / Cadence</th>
+                <th class="py-3 px-4">Next Renewal</th>
+                <th class="py-3 px-4 text-right">Amount (₹)</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              ${filteredSubs.map(s => {
+                const isSelected = sub && sub.id === s.id;
+                return `
+                  <tr class="hover:bg-slate-50/80 cursor-pointer transition-colors ${isSelected ? 'bg-slate-50 font-medium' : ''}" 
+                    onclick="window.selectSubscriptionRecord('${s.id}')">
+                    <td class="py-3.5 px-4 font-mono font-semibold text-[#081534]">
+                      ${s.subscriptionNumber}
                     </td>
-                    <td class="py-3.5 px-3 text-center font-mono font-bold text-[#0b1c30]">
-                      ${item.quantity}
+                    <td class="py-3.5 px-4">
+                      <div class="font-semibold text-slate-900">${s.customerName}</div>
+                      <div class="text-[11px] text-slate-500 font-mono">${s.customerEmail}</div>
                     </td>
-                    <td class="py-3.5 px-3 text-right font-mono text-[#45464e]">
-                      ₹${item.unitPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    <td class="py-3.5 px-4">
+                      <div class="text-slate-800">${s.planName}</div>
+                      <div class="text-[11px] text-slate-500 capitalize">${s.billingPeriod || 'monthly'}</div>
                     </td>
-                    <td class="py-3.5 px-3 text-right font-mono text-[#64748b]">
-                      ${item.taxRate}%
+                    <td class="py-3.5 px-4 font-mono text-slate-600">
+                      ${s.nextBillingDate}
                     </td>
-                    <td class="py-3.5 px-3 text-right font-mono font-bold text-[#081534]">
-                      ₹${item.total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    <td class="py-3.5 px-4 text-right font-mono font-semibold text-slate-900">
+                      ₹${(s.totalAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium capitalize ${
+                        s.status === 'active' 
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' 
+                          : s.status === 'closed'
+                          ? 'bg-rose-50 text-rose-800 border border-rose-200'
+                          : 'bg-slate-100 text-slate-700'
+                      }">
+                        <span class="w-1.5 h-1.5 rounded-full ${s.status === 'active' ? 'bg-emerald-500' : s.status === 'closed' ? 'bg-rose-500' : 'bg-slate-400'}"></span>
+                        ${s.status} ${s.isPaused ? '(Paused)' : ''}
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4 text-right">
+                      <button onclick="event.stopPropagation(); window.selectSubscriptionRecord('${s.id}')" 
+                        class="px-2.5 py-1 rounded bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-medium transition-colors">
+                        Details
+                      </button>
                     </td>
                   </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Totals Breakdown -->
-          <div class="border-t border-[#cbd5e1] pt-4 flex flex-col items-end gap-1.5 text-xs font-mono">
-            <div class="flex justify-between w-64 text-[#45464e]">
-              <span>Subtotal:</span>
-              <span>₹${sub.subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-            </div>
-            ${sub.discountTotal > 0 ? `
-              <div class="flex justify-between w-64 text-[#006a61] font-semibold">
-                <span>Discount Applied:</span>
-                <span>-₹${sub.discountTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-              </div>
-            ` : ''}
-            <div class="flex justify-between w-64 text-[#45464e]">
-              <span>Taxes (GST 18%):</span>
-              <span>+₹${sub.taxTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-            </div>
-            <div class="flex justify-between w-64 text-sm font-bold text-[#081534] border-t border-[#cbd5e1] pt-2 mt-1">
-              <span>Recurring Total:</span>
-              <span class="text-[#006a61]">₹${sub.grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-            </div>
-          </div>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
         </div>
-
-        <!-- Sidebar: Terms & Contract Details (4 Cols) -->
-        <div class="lg:col-span-4 flex flex-col gap-4">
-          
-          <div class="bg-white rounded-xl p-5 border border-[#e2e8f0] shadow-sm">
-            <h3 class="text-sm font-bold text-[#081534] mb-3">Billing & Term Schedule</h3>
-            
-            <div class="space-y-3 text-xs">
-              <div class="flex justify-between pb-2 border-b border-[#f1f5f9]">
-                <span class="text-[#64748b]">Recurrence</span>
-                <span class="font-mono font-semibold text-[#081534] capitalize">${sub.planName.includes('Yearly') ? 'Yearly' : 'Monthly'}</span>
-              </div>
-              <div class="flex justify-between pb-2 border-b border-[#f1f5f9]">
-                <span class="text-[#64748b]">Effective From</span>
-                <span class="font-mono text-[#081534]">${sub.startDate}</span>
-              </div>
-              <div class="flex justify-between pb-2 border-b border-[#f1f5f9]">
-                <span class="text-[#64748b]">Expires On</span>
-                <span class="font-mono text-[#081534]">${sub.expiryDate}</span>
-              </div>
-              <div class="flex justify-between pb-2 border-b border-[#f1f5f9]">
-                <span class="text-[#64748b]">Next Billing Date</span>
-                <span class="font-mono font-semibold text-[#006a61]">${sub.nextBillingDate}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-[#64748b]">Payment Terms</span>
-                <span class="font-mono text-[#081534] font-medium">${sub.paymentTerms}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-xl p-5 border border-[#e2e8f0] shadow-sm">
-            <h3 class="text-sm font-bold text-[#081534] mb-2">Customer Account Profile</h3>
-            <p class="text-xs text-[#0b1c30] font-semibold">${sub.customerName}</p>
-            <p class="text-xs text-[#76777f] font-mono mt-0.5">${sub.customerEmail}</p>
-            <div class="mt-4 pt-3 border-t border-[#f1f5f9] flex items-center justify-between text-xs">
-              <span class="text-[#64748b]">Customer Portal:</span>
-              <span class="px-2 py-0.5 rounded-full bg-[#86f2e4]/30 text-[#006f66] font-mono font-bold">Self-Service Active</span>
-            </div>
-          </div>
-
-        </div>
-
       </div>
+
+      <!-- Selected Subscription Detail View -->
+      ${sub ? `
+        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm space-y-6">
+          
+          <!-- Stepper & Quick Actions -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+            <div>
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-lg font-bold text-[#081534]">${sub.subscriptionNumber}</span>
+                <span class="text-xs text-slate-500">•</span>
+                <span class="font-semibold text-slate-800 text-sm">${sub.customerName}</span>
+                <span class="text-xs font-mono text-slate-400">(${sub.customerGstin || 'GSTIN on file'})</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">
+                ${sub.planName} • Billed ${sub.billingPeriod || 'monthly'} • Renewal date: <span class="font-mono font-medium text-slate-800">${sub.nextBillingDate}</span>
+              </p>
+            </div>
+
+            <!-- Lifecycle Stage Buttons -->
+            <div class="flex flex-wrap items-center gap-2">
+              ${sub.status !== 'closed' ? `
+                <button onclick="window.advanceSubscriptionStage('${sub.id}')" 
+                  class="px-3 py-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-medium transition-colors flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-sm">step_into</span>
+                  <span>Advance Stage (${stages[Math.min(stages.length - 1, currentStageIndex + 1)]})</span>
+                </button>
+                <button onclick="window.togglePauseSub('${sub.id}')" 
+                  class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition-colors">
+                  ${sub.isPaused ? 'Resume Contract' : 'Pause Contract'}
+                </button>
+                <button onclick="window.generateNextInvoiceForSub('${sub.id}')" 
+                  class="px-3 py-1.5 rounded-lg bg-[#081534] hover:bg-[#1e2a4a] text-white text-xs font-semibold shadow-sm transition-all">
+                  Generate Invoice
+                </button>
+              ` : `
+                <button onclick="window.createRenewalQuote('${sub.id}')" 
+                  class="px-3.5 py-1.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold shadow-sm transition-all">
+                  Create Renewal Quote
+                </button>
+              `}
+            </div>
+          </div>
+
+          <!-- Lifecycle Stage Tracker -->
+          <div>
+            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Lifecycle Stage</div>
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+              ${stages.map((stg, idx) => {
+                const isPassed = idx < currentStageIndex;
+                const isCurrent = idx === currentStageIndex;
+                return `
+                  <div class="flex items-center gap-2 shrink-0">
+                    <span class="px-3 py-1 rounded-lg text-xs font-medium capitalize ${
+                      isCurrent 
+                        ? 'bg-[#081534] text-white font-semibold shadow-sm' 
+                        : isPassed 
+                        ? 'bg-teal-50 text-teal-800 border border-teal-200' 
+                        : 'bg-slate-100 text-slate-400'
+                    }">
+                      ${isPassed ? '✓ ' : ''}${stg}
+                    </span>
+                    ${idx < stages.length - 1 ? '<span class="text-slate-300">→</span>' : ''}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Line Items Table -->
+          <div>
+            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Contract Line Items</div>
+            <div class="border border-slate-200 rounded-lg overflow-hidden">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 font-semibold text-[11px]">
+                    <th class="py-2.5 px-3">Product Description</th>
+                    <th class="py-2.5 px-3">Edition / Variant</th>
+                    <th class="py-2.5 px-3 text-center">Qty</th>
+                    <th class="py-2.5 px-3 text-right">Unit Price (₹)</th>
+                    <th class="py-2.5 px-3 text-right">Subtotal (₹)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  ${(sub.lines || []).map(line => `
+                    <tr>
+                      <td class="py-2.5 px-3 text-slate-900 font-medium">${line.product_name}</td>
+                      <td class="py-2.5 px-3 text-slate-600">${line.variant_name || 'Standard'}</td>
+                      <td class="py-2.5 px-3 text-center font-mono">${line.quantity || 1}</td>
+                      <td class="py-2.5 px-3 text-right font-mono">₹${(line.unit_price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                      <td class="py-2.5 px-3 text-right font-mono font-semibold text-slate-900">₹${(line.subtotal || line.unit_price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+                <tfoot>
+                  <tr class="bg-slate-50/70 border-t border-slate-200 font-semibold">
+                    <td colspan="4" class="py-2.5 px-3 text-right text-slate-600">Recurring Total:</td>
+                    <td class="py-2.5 px-3 text-right font-mono text-slate-900 font-bold">
+                      ₹${(sub.totalAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      ` : ''}
 
     </div>
   `;

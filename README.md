@@ -366,9 +366,8 @@ erDiagram
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v18+ or LTS) or Python (3.11+)
-- PostgreSQL 14+
-- Redis (optional, for background billing queues)
+- Node.js (v18+ or LTS)
+- npm (v9+)
 
 ### Quick Setup Example
 ```bash
@@ -376,16 +375,14 @@ erDiagram
 git clone https://github.com/dhruvik2910/Subscription-Management-System.git
 cd Subscription-Management-System
 
-# 2. Configure environment variables
-cp .env.example .env
+# 2. Install dependencies
+npm install
 
-# 3. Install dependencies
-npm install  # or: pip install -r requirements.txt
+# 3. Start the Express + SQLite Backend Server (Port 3001)
+npm run server
+# Note: Automatically initializes server/data/subscriptions.db and seeds initial data in INR (₹)
 
-# 4. Run database migrations
-npm run db:migrate
-
-# 5. Start development server
+# 4. Start the Frontend Application (Port 5173) in a second terminal
 npm run dev
 ```
 
