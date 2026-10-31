@@ -1,7 +1,7 @@
 // src/components/billing.js - Automated Billing Day Console & Invoices Workbench
 import { store } from '../store.js';
 
-let invoiceFilter = 'all'; // 'all' | 'draft' | 'confirmed' | 'paid' | 'overdue'
+let invoiceFilter = 'all'; // 'all' | 'draft' | 'confirmed' | 'paid' | 'overdue' | 'cancelled'
 let invoiceSearch = '';
 
 export function setInvoiceFilter(filter) {
@@ -16,11 +16,11 @@ export function renderBilling() {
   const state = store.getState();
   const latestRun = state.billingRuns[0] || {
     id: 'BR-2024-10-01',
-    date: 'Oct 01, 2024 00:01 AM UTC',
+    date: '01 Oct 2024 00:01 AM IST',
     subscriptionsProcessed: 412,
     duplicatesPrevented: 0,
     skippedCycles: 0,
-    executionTimeMs: 184
+    executionTimeMs: 142
   };
 
   const filteredInvoices = state.invoices.filter(inv => {
@@ -47,41 +47,39 @@ export function renderBilling() {
             </div>
             <div>
               <div class="flex flex-wrap items-center gap-2">
-                <span class="text-base font-semibold text-[#0b1c30]">Billing Run #${latestRun.id} Complete</span>
+                <span class="text-base font-semibold text-[#0b1c30]">Automated Billing Run #${latestRun.id} Complete</span>
                 <span class="px-2 py-0.5 rounded text-[#006f66] bg-[#86f2e4]/30 text-xs font-mono font-semibold">${latestRun.date}</span>
-                <span class="px-2 py-0.5 rounded bg-[#dce9ff] text-[#006a61] text-[10px] font-mono uppercase tracking-wider font-bold">Guaranteed Idempotency</span>
+                <span class="px-2 py-0.5 rounded bg-[#dce9ff] text-[#006a61] text-[10px] font-mono uppercase tracking-wider font-bold">Zero Duplicate Protection</span>
               </div>
               <p class="text-xs text-[#45464e] mt-1">
-                <span class="font-semibold text-[#0b1c30]">${latestRun.subscriptionsProcessed} active subscriptions processed</span> automatically from contract terms. 
-                <span class="text-[#006a61] font-semibold">${latestRun.duplicatesPrevented} duplicates</span>, <span class="text-[#006a61] font-semibold">${latestRun.skippedCycles} skipped</span>. Regional taxes computed instantaneously via Brightloop Rules Engine.
+                <span class="font-semibold text-[#0b1c30]">${latestRun.subscriptionsProcessed} active contracts checked</span> on scheduled billing date. 
+                <span class="text-[#006a61] font-semibold">${latestRun.duplicatesPrevented} duplicates prevented</span>, <span class="text-[#006a61] font-semibold">${latestRun.skippedCycles} skipped</span>. Applicable GST calculated automatically.
               </p>
             </div>
           </div>
 
           <div class="flex items-center gap-3 w-full xl:w-auto shrink-0 justify-end">
             <div class="hidden sm:flex flex-col text-right">
-              <span class="text-[10px] text-[#76777f] uppercase tracking-wider font-semibold">Engine Throughput</span>
-              <span class="text-xs font-mono text-[#0b1c30] font-semibold">${latestRun.executionTimeMs}ms execution SLA</span>
+              <span class="text-[10px] text-[#76777f] uppercase tracking-wider font-semibold">Engine Speed</span>
+              <span class="text-xs font-mono text-[#0b1c30] font-semibold">${latestRun.executionTimeMs}ms (target &lt; 2.0s)</span>
             </div>
             <button onclick="window.triggerBatchBillingRun()" 
               class="inline-flex items-center gap-2 bg-[#081534] hover:bg-[#1e2a4a] text-white px-4 py-2.5 rounded-lg text-xs font-semibold shadow-md transition-all group">
               <span class="material-symbols-outlined text-base transition-transform group-hover:rotate-180">autorenew</span>
-              <span>Run Billing Day Cycle (Auto-Batch)</span>
+              <span>Run Billing Day Cycle</span>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Header & Real-time Metrics Bento Strip -->
+      <!-- Header & Metrics -->
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
           <div class="flex items-center gap-1.5 mb-1 text-xs font-mono text-[#006a61] font-semibold uppercase tracking-wider">
-            <span>Recurring Ledger Workbench</span>
-            <span class="text-[#cbd5e1]">•</span>
-            <span>Zero Double-Billing Engine</span>
+            <span>Recurring Invoices & Receivables</span>
           </div>
-          <h1 class="text-2xl font-bold text-[#081534] tracking-tight">Automated Invoices & Billing Operations</h1>
-          <p class="text-xs text-[#64748b]">Idempotent recurring invoices generated automatically from active contracts</p>
+          <h1 class="text-2xl font-bold text-[#081534] tracking-tight">Billing & Invoices Workbench</h1>
+          <p class="text-xs text-[#64748b]">Review, confirm, send, cancel, print, and collect payments on customer invoices</p>
         </div>
 
         <div class="flex items-center gap-2">
@@ -96,31 +94,31 @@ export function renderBilling() {
       <!-- Quick Metrics Bento -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="p-4 rounded-xl bg-white border border-[#e2e8f0] shadow-sm">
-          <span class="text-xs text-[#76777f] font-medium uppercase">Total Invoiced (Cycle)</span>
-          <div class="font-mono text-2xl font-bold text-[#081534] mt-1">$${totalBilled.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+          <span class="text-xs text-[#76777f] font-medium uppercase">Total Invoiced (This Month)</span>
+          <div class="font-mono text-2xl font-bold text-[#081534] mt-1">₹${totalBilled.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
           <div class="w-full bg-[#eff4ff] h-1.5 rounded-full mt-2.5 overflow-hidden">
             <div class="bg-[#006a61] h-full" style="width: ${totalBilled > 0 ? (totalCollected / totalBilled) * 100 : 0}%"></div>
           </div>
           <div class="flex justify-between text-[11px] font-mono text-[#64748b] mt-1.5">
-            <span>Collected: $${totalCollected.toLocaleString('en-US', { minimumFractionDigits: 0 })}</span>
-            <span class="text-[#006a61] font-bold">${totalBilled > 0 ? ((totalCollected / totalBilled) * 100).toFixed(0) : 0}% settled</span>
+            <span>Collected: ₹${totalCollected.toLocaleString('en-IN', { minimumFractionDigits: 0 })}</span>
+            <span class="text-[#006a61] font-bold">${totalBilled > 0 ? ((totalCollected / totalBilled) * 100).toFixed(0) : 0}% collected</span>
           </div>
         </div>
 
         <div class="p-4 rounded-xl bg-white border border-[#e2e8f0] shadow-sm">
-          <span class="text-xs text-[#76777f] font-medium uppercase">Automated Precision</span>
+          <span class="text-xs text-[#76777f] font-medium uppercase">Automated Accuracy</span>
           <div class="font-mono text-2xl font-bold text-[#006a61] mt-1">100.0%</div>
           <div class="text-[11px] text-[#64748b] mt-3 flex items-center justify-between">
-            <span>Manual Errors Prevented:</span>
-            <span class="font-mono font-bold text-[#081534]">0 Skipped / 0 Dups</span>
+            <span>Invoicing Errors:</span>
+            <span class="font-mono font-bold text-[#081534]">0 Skipped / 0 Duplicates</span>
           </div>
         </div>
 
         <div class="p-4 rounded-xl bg-white border border-[#e2e8f0] shadow-sm">
-          <span class="text-xs text-[#76777f] font-medium uppercase">Active Invoices</span>
+          <span class="text-xs text-[#76777f] font-medium uppercase">Invoices on Record</span>
           <div class="font-mono text-2xl font-bold text-[#081534] mt-1">${state.invoices.length}</div>
           <div class="text-[11px] text-[#64748b] mt-3 flex items-center justify-between">
-            <span>Drafts Awaiting Review:</span>
+            <span>Drafts to Confirm:</span>
             <span class="font-mono font-bold text-[#081534]">${state.invoices.filter(i => i.status === 'draft').length}</span>
           </div>
         </div>
@@ -129,8 +127,8 @@ export function renderBilling() {
           <span class="text-xs text-[#76777f] font-medium uppercase">Overdue Receivables</span>
           <div class="font-mono text-2xl font-bold text-[#ba1a1a] mt-1">${state.invoices.filter(i => i.status === 'overdue').length}</div>
           <div class="text-[11px] text-[#ba1a1a] mt-3 font-semibold flex items-center justify-between">
-            <span>Dunning Sequence Active:</span>
-            <span>Immediate Settle</span>
+            <span>Payment Chasing:</span>
+            <span>Active</span>
           </div>
         </div>
       </div>
@@ -141,7 +139,7 @@ export function renderBilling() {
         <!-- Table Filter & Search Controls -->
         <div class="p-4 border-b border-[#e2e8f0] flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#f8f9ff]">
           <div class="flex items-center gap-1.5 overflow-x-auto text-xs font-semibold">
-            ${['all', 'draft', 'confirmed', 'paid', 'overdue'].map(f => `
+            ${['all', 'draft', 'confirmed', 'paid', 'overdue', 'cancelled'].map(f => `
               <button onclick="window.filterInvoices('${f}')" 
                 class="px-3 py-1.5 rounded-lg transition-all capitalize ${
                   invoiceFilter === f 
@@ -155,26 +153,26 @@ export function renderBilling() {
 
           <div class="relative w-full md:w-64">
             <span class="material-symbols-outlined absolute left-2.5 top-2 text-[#76777f] text-sm">search</span>
-            <input type="text" placeholder="Search by invoice # or client..." 
+            <input type="text" placeholder="Search invoice # or customer..." 
               value="${invoiceSearch}"
               oninput="window.searchInvoices(this.value)"
               class="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border border-[#cbd5e1] focus:ring-2 focus:ring-[#006a61] outline-none" />
           </div>
         </div>
 
-        <!-- Invoices List -->
+        <!-- Invoices List with Full Actions (Confirm, Cancel, Send, Print, Record Pay) -->
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
             <thead>
               <tr class="border-b border-[#cbd5e1] text-[#64748b] uppercase tracking-wider font-semibold bg-white">
                 <th class="py-3 px-3">Invoice #</th>
-                <th class="py-3 px-3">Customer Account</th>
+                <th class="py-3 px-3">Customer</th>
                 <th class="py-3 px-3">Issue Date</th>
                 <th class="py-3 px-3">Due Date</th>
                 <th class="py-3 px-3">Status</th>
                 <th class="py-3 px-3 text-right">Total Amount</th>
                 <th class="py-3 px-3 text-right">Balance Due</th>
-                <th class="py-3 px-3 text-right">Actions</th>
+                <th class="py-3 px-3 text-right">Actions (Confirm • Send • Print • Cancel)</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[#f1f5f9]">
@@ -201,6 +199,8 @@ export function renderBilling() {
                         ? 'bg-[#ffdad6] text-[#93000a]'
                         : inv.status === 'confirmed'
                         ? 'bg-[#dce9ff] text-[#081534]'
+                        : inv.status === 'cancelled'
+                        ? 'bg-gray-100 text-gray-500 line-through'
                         : 'bg-slate-100 text-slate-700'
                     }">
                       <span class="w-1.5 h-1.5 rounded-full ${inv.status === 'paid' ? 'bg-[#006a61]' : inv.status === 'overdue' ? 'bg-[#ba1a1a]' : 'bg-[#081534]'}"></span>
@@ -208,33 +208,53 @@ export function renderBilling() {
                     </span>
                   </td>
                   <td class="py-3.5 px-3 font-mono font-bold text-right text-[#081534]">
-                    $${inv.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    ₹${inv.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </td>
                   <td class="py-3.5 px-3 font-mono font-bold text-right ${inv.balanceDue > 0 ? 'text-[#ba1a1a]' : 'text-[#006a61]'}">
-                    $${inv.balanceDue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    ₹${inv.balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </td>
                   <td class="py-3.5 px-3 text-right">
-                    <div class="inline-flex items-center gap-1.5 justify-end">
+                    <div class="inline-flex items-center gap-1 justify-end flex-wrap">
                       
+                      <!-- 1. Confirm (if Draft) -->
                       ${inv.status === 'draft' ? `
                         <button onclick="window.confirmDraftInvoice('${inv.invoiceNumber}')" 
-                          class="px-2.5 py-1 rounded bg-[#006a61] text-white hover:bg-[#005049] text-[11px] font-semibold transition-colors">
+                          class="px-2 py-1 rounded bg-[#006a61] text-white hover:bg-[#005049] text-[11px] font-semibold transition-colors"
+                          title="Confirm draft invoice">
                           Confirm
                         </button>
                       ` : ''}
 
-                      ${inv.balanceDue > 0 ? `
+                      <!-- 2. Send to Customer -->
+                      <button onclick="window.sendInvoiceAction('${inv.invoiceNumber}', '${inv.customerName}')" 
+                        class="px-2 py-1 rounded bg-white border border-[#cbd5e1] text-[#081534] hover:bg-[#eff4ff] text-[11px] font-medium transition-colors"
+                        title="Send invoice email to customer">
+                        Send
+                      </button>
+
+                      <!-- 3. Record Payment (if outstanding) -->
+                      ${inv.balanceDue > 0 && inv.status !== 'cancelled' ? `
                         <button onclick="window.openRecordPaymentModal('${inv.invoiceNumber}', ${inv.balanceDue})" 
-                          class="px-2.5 py-1 rounded bg-[#081534] text-white hover:bg-[#1e2a4a] text-[11px] font-semibold transition-colors">
+                          class="px-2 py-1 rounded bg-[#081534] text-white hover:bg-[#1e2a4a] text-[11px] font-semibold transition-colors">
                           Record Pay
                         </button>
                       ` : ''}
 
+                      <!-- 4. Print / PDF -->
                       <button onclick="window.previewInvoicePrint('${inv.invoiceNumber}')" 
                         class="p-1 rounded text-[#76777f] hover:bg-[#e5eeff] hover:text-[#081534] transition-colors" 
                         title="Print / PDF Invoice">
                         <span class="material-symbols-outlined text-base">print</span>
                       </button>
+
+                      <!-- 5. Cancel (if not paid & not cancelled) -->
+                      ${inv.status !== 'paid' && inv.status !== 'cancelled' ? `
+                        <button onclick="window.cancelInvoiceAction('${inv.invoiceNumber}')" 
+                          class="p-1 rounded text-[#ba1a1a] hover:bg-red-50 transition-colors" 
+                          title="Cancel / Void Invoice">
+                          <span class="material-symbols-outlined text-base">block</span>
+                        </button>
+                      ` : ''}
 
                     </div>
                   </td>

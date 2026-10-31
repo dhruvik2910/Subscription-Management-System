@@ -1,4 +1,4 @@
-// src/components/modals.js - Interactive System Modals
+// src/components/modals.js - Interactive System Modals in Rupees (₹)
 import { store } from '../store.js';
 
 let activeModal = null;
@@ -36,6 +36,9 @@ export function renderModalContainer() {
     case 'batchRun':
       content = renderBatchRunModal(modalData);
       break;
+    case 'staffManagement':
+      content = renderStaffManagementModal();
+      break;
     case 'addVariant':
       content = renderAddVariantModal();
       break;
@@ -70,6 +73,7 @@ export function renderModalContainer() {
   `;
 }
 
+// 1. New Quote Modal with 1-Click Quotation Template Selector (Scene 3 in PDF)
 function renderNewQuoteModal() {
   const state = store.getState();
   return `
@@ -77,7 +81,7 @@ function renderNewQuoteModal() {
       <div class="flex items-center justify-between pb-4 border-b border-[#e2e8f0]">
         <div>
           <h2 class="text-lg font-bold text-[#081534]">Create New Quotation</h2>
-          <p class="text-xs text-[#64748b]">Draft an offer with predefined templates, brand edition variants, and discount rules</p>
+          <p class="text-xs text-[#64748b]">Select a predefined template or customize products, variants, and discounts</p>
         </div>
         <button onclick="window.closeModal()" class="text-[#76777f] hover:text-[#081534]">
           <span class="material-symbols-outlined">close</span>
@@ -86,15 +90,33 @@ function renderNewQuoteModal() {
 
       <form id="newQuoteForm" onsubmit="window.handleCreateQuoteSubmit(event)" class="space-y-4 mt-4 text-xs">
         
+        <!-- 1-Click Quotation Template Selector (From PDF) -->
+        <div class="p-3 bg-[#eff4ff] rounded-xl border border-[#dce9ff] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[#006a61]">auto_stories</span>
+            <div>
+              <div class="font-bold text-[#081534]">Use Quotation Template</div>
+              <div class="text-[11px] text-[#64748b]">Auto-fills plan, products, variants, and validity window</div>
+            </div>
+          </div>
+          <select id="quoteTemplateSelector" onchange="window.applyQuotationTemplate(this.value)" 
+            class="px-2.5 py-1.5 rounded-lg border border-[#cbd5e1] bg-white font-medium text-xs text-[#081534] outline-none">
+            <option value="">-- Choose Template --</option>
+            ${state.quotationTemplates.map(t => `
+              <option value="${t.id}">${t.name} (${t.validityDays} Days)</option>
+            `).join('')}
+          </select>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-[#45464e] font-semibold mb-1">Customer Account / Company</label>
-            <input type="text" id="quoteCustomerName" required placeholder="e.g. Wayne Enterprises" 
+            <label class="block text-[#45464e] font-semibold mb-1">Customer / Company Name</label>
+            <input type="text" id="quoteCustomerName" required placeholder="e.g. Tata Digital Pvt Ltd" 
               class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none" />
           </div>
           <div>
             <label class="block text-[#45464e] font-semibold mb-1">Billing Email</label>
-            <input type="email" id="quoteCustomerEmail" required placeholder="billing@waynecorp.com" 
+            <input type="email" id="quoteCustomerEmail" required placeholder="billing@tatadigital.in" 
               class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none" />
           </div>
         </div>
@@ -104,16 +126,16 @@ function renderNewQuoteModal() {
             <label class="block text-[#45464e] font-semibold mb-1">Billing Plan & Frequency</label>
             <select id="quotePlan" class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none">
               ${state.plans.map(p => `
-                <option value="${p.id}">${p.name} ($${p.price.toFixed(2)} / ${p.recurrence})</option>
+                <option value="${p.id}">${p.name} (₹${p.price.toFixed(2)} / ${p.recurrence})</option>
               `).join('')}
             </select>
           </div>
           <div>
             <label class="block text-[#45464e] font-semibold mb-1">Payment Terms</label>
             <select id="quotePaymentTerms" class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none">
-              <option value="Net 30">Net 30 Days</option>
-              <option value="Net 15">Net 15 Days</option>
-              <option value="Net 45">Net 45 Days</option>
+              <option value="Net 30 Days">Net 30 Days</option>
+              <option value="Net 15 Days">Net 15 Days</option>
+              <option value="Net 45 Days">Net 45 Days</option>
               <option value="Due on Receipt">Due on Receipt</option>
             </select>
           </div>
@@ -121,19 +143,22 @@ function renderNewQuoteModal() {
 
         <!-- Product & Brand Variant Selection -->
         <div class="p-3 bg-[#f8f9ff] rounded-xl border border-[#e2e8f0] space-y-3">
-          <div class="font-bold text-[#081534]">Primary Line Item & Variant Modifier</div>
+          <div class="font-bold text-[#081534] flex items-center justify-between">
+            <span>Product & Brand Edition Variant</span>
+            <span class="text-[11px] text-[#006a61] font-mono font-semibold">Odoo Brand: +₹560</span>
+          </div>
           
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div class="sm:col-span-2">
               <label class="block text-[#76777f] text-[11px] font-semibold mb-1">Brand Edition Variant</label>
               <select id="quoteVariant" class="w-full px-3 py-1.5 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono">
-                <option value="var-std">Standard Multi-Tenant Cloud ($1,000.00)</option>
-                <option value="var-odoo" selected>Odoo Enterprise Brand Edition ($1,560.00 - adds +$560)</option>
-                <option value="var-gov">Federal GovCloud Dedicated Enclave ($2,200.00)</option>
+                <option value="var-std">Standard Edition (₹1,000.00)</option>
+                <option value="var-odoo" selected>Odoo Enterprise Brand Edition (₹1,560.00 - adds +₹560)</option>
+                <option value="var-gov">High-Security Dedicated Cloud (₹2,200.00)</option>
               </select>
             </div>
             <div>
-              <label class="block text-[#76777f] text-[11px] font-semibold mb-1">Seat Quantity</label>
+              <label class="block text-[#76777f] text-[11px] font-semibold mb-1">Seats / Quantity</label>
               <input type="number" id="quoteQty" min="1" value="10" 
                 class="w-full px-3 py-1.5 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono text-center font-bold" />
             </div>
@@ -142,13 +167,13 @@ function renderNewQuoteModal() {
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-[#45464e] font-semibold mb-1">Promotional Discount Code</label>
-            <input type="text" id="quoteDiscountCode" placeholder="e.g. TIER1ENTERPRISE or EARLYBIRD15" 
+            <label class="block text-[#45464e] font-semibold mb-1">Discount Code (Optional)</label>
+            <input type="text" id="quoteDiscountCode" placeholder="VOLUME500 or FESTIVE15" 
               class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono uppercase" />
           </div>
           <div>
-            <label class="block text-[#45464e] font-semibold mb-1">Quotation Validity</label>
-            <input type="text" readonly value="Valid for 30 calendar days" 
+            <label class="block text-[#45464e] font-semibold mb-1">Quote Validity Window</label>
+            <input type="text" id="quoteValidityDisplay" readonly value="Valid for 30 calendar days" 
               class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg bg-slate-50 text-[#76777f]" />
           </div>
         </div>
@@ -160,7 +185,7 @@ function renderNewQuoteModal() {
           </button>
           <button type="submit" 
             class="px-5 py-2 rounded-lg bg-[#006a61] text-white font-semibold hover:bg-[#005049] shadow-sm">
-            Generate Quotation
+            Generate Quotation (Draft)
           </button>
         </div>
 
@@ -169,16 +194,110 @@ function renderNewQuoteModal() {
   `;
 }
 
+// 2. Staff Management Modal ("Only the admin can add a new member of staff" from PDF)
+function renderStaffManagementModal() {
+  const state = store.getState();
+  return `
+    <div class="p-6">
+      <div class="flex items-center justify-between pb-4 border-b border-[#e2e8f0]">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-lg font-bold text-[#081534]">Internal Staff Management</h2>
+            <span class="px-2 py-0.5 rounded-full bg-[#86f2e4]/30 text-[#006f66] font-mono text-[10px] font-bold">Admin Only</span>
+          </div>
+          <p class="text-xs text-[#64748b]">Per business requirements: Only the admin can add a new member of staff.</p>
+        </div>
+        <button onclick="window.closeModal()" class="text-[#76777f] hover:text-[#081534]">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- Add Staff Form -->
+      <form onsubmit="window.handleAddStaffSubmit(event)" class="mt-4 p-4 bg-[#f8f9ff] rounded-xl border border-[#e2e8f0] space-y-3 text-xs">
+        <div class="font-bold text-[#081534] flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-sm text-[#006a61]">person_add</span>
+          <span>Add New Staff Member</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[#45464e] font-medium mb-1">Full Name</label>
+            <input type="text" id="newStaffName" required placeholder="e.g. Ananya Rao" 
+              class="w-full px-3 py-1.5 border border-[#cbd5e1] rounded-lg outline-none focus:ring-2 focus:ring-[#006a61] bg-white" />
+          </div>
+          <div>
+            <label class="block text-[#45464e] font-medium mb-1">Work Email</label>
+            <input type="email" id="newStaffEmail" required placeholder="ananya@brightloop.in" 
+              class="w-full px-3 py-1.5 border border-[#cbd5e1] rounded-lg outline-none focus:ring-2 focus:ring-[#006a61] bg-white" />
+          </div>
+          <div>
+            <label class="block text-[#45464e] font-medium mb-1">Operational Role</label>
+            <select id="newStaffRole" class="w-full px-3 py-1.5 border border-[#cbd5e1] rounded-lg outline-none focus:ring-2 focus:ring-[#006a61] bg-white font-medium">
+              <option value="Sales & Billing Specialist">Sales & Billing Specialist</option>
+              <option value="Customer Success Lead">Customer Success Lead</option>
+              <option value="Billing Operations Associate">Billing Operations Associate</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button type="submit" class="px-4 py-1.5 rounded-lg bg-[#006a61] text-white font-semibold hover:bg-[#005049] transition-all">
+            + Onboard Staff Member
+          </button>
+        </div>
+      </form>
+
+      <!-- Active Staff Members Table -->
+      <div class="mt-4">
+        <h3 class="text-xs font-bold text-[#081534] uppercase tracking-wider mb-2">Current Active Team Members</h3>
+        <div class="overflow-x-auto border border-[#e2e8f0] rounded-xl">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-[#cbd5e1] bg-[#f8f9ff] text-[#76777f] font-semibold">
+                <th class="py-2 px-3">Name</th>
+                <th class="py-2 px-3">Email</th>
+                <th class="py-2 px-3">Role</th>
+                <th class="py-2 px-3">Joined</th>
+                <th class="py-2 px-3 text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#f1f5f9]">
+              ${(state.staffMembers || []).map(s => `
+                <tr class="hover:bg-[#f8f9ff]">
+                  <td class="py-2.5 px-3 font-semibold text-[#081534]">${s.name}</td>
+                  <td class="py-2.5 px-3 font-mono text-[#45464e]">${s.email}</td>
+                  <td class="py-2.5 px-3 text-[#45464e]">${s.role}</td>
+                  <td class="py-2.5 px-3 font-mono text-[#76777f]">${s.joined}</td>
+                  <td class="py-2.5 px-3 text-right">
+                    <span class="px-2 py-0.5 rounded-full bg-[#86f2e4]/30 text-[#006f66] font-mono text-[10px] font-bold">Active</span>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-[#e2e8f0] mt-4 flex justify-end">
+        <button onclick="window.closeModal()" class="px-4 py-2 rounded-lg bg-[#081534] text-white text-xs font-semibold">
+          Done
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// 3. Record Payment Modal (UPI, Net Banking, Cards, Cheque in ₹)
 function renderRecordPaymentModal(data) {
   const invoiceNumber = data.invoiceNumber || 'INV-2024-1029';
-  const balanceDue = data.balanceDue || 1569.63;
+  const balanceDue = data.balanceDue || 1711.00;
 
   return `
     <div class="p-6">
       <div class="flex items-center justify-between pb-4 border-b border-[#e2e8f0]">
         <div>
-          <h2 class="text-lg font-bold text-[#081534]">Record Incoming Payment</h2>
-          <p class="text-xs text-[#64748b]">Reconcile payment against invoice <span class="font-mono font-bold text-[#081534]">${invoiceNumber}</span></p>
+          <h2 class="text-lg font-bold text-[#081534]">Record Payment</h2>
+          <p class="text-xs text-[#64748b]">Reconcile incoming payment for invoice <span class="font-mono font-bold text-[#081534]">${invoiceNumber}</span></p>
         </div>
         <button onclick="window.closeModal()" class="text-[#76777f] hover:text-[#081534]">
           <span class="material-symbols-outlined">close</span>
@@ -188,12 +307,12 @@ function renderRecordPaymentModal(data) {
       <form onsubmit="window.handleRecordPaymentSubmit(event, '${invoiceNumber}')" class="space-y-4 mt-4 text-xs">
         
         <div class="p-4 bg-[#eff4ff] rounded-xl flex items-center justify-between">
-          <span class="text-[#45464e] font-medium">Outstanding Balance:</span>
-          <span class="font-mono text-xl font-bold text-[#ba1a1a]">$${balanceDue.toFixed(2)}</span>
+          <span class="text-[#45464e] font-medium">Balance Due:</span>
+          <span class="font-mono text-xl font-bold text-[#ba1a1a]">₹${balanceDue.toFixed(2)}</span>
         </div>
 
         <div>
-          <label class="block text-[#45464e] font-semibold mb-1">Settlement Amount ($)</label>
+          <label class="block text-[#45464e] font-semibold mb-1">Settlement Amount (INR ₹)</label>
           <input type="number" step="0.01" id="paymentAmount" required value="${balanceDue.toFixed(2)}" 
             class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono font-bold text-sm" />
         </div>
@@ -201,17 +320,18 @@ function renderRecordPaymentModal(data) {
         <div>
           <label class="block text-[#45464e] font-semibold mb-1">Payment Method</label>
           <select id="paymentMethod" class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-medium">
-            <option value="ACH Direct Debit">ACH Direct Debit (Bank Transfer)</option>
-            <option value="Stripe Credit Card">Stripe Credit Card (Visa/Mastercard)</option>
-            <option value="Bank Wire Transfer">Bank Wire Transfer (SWIFT)</option>
-            <option value="UPI / Instant Bank Pay">UPI / Instant Bank Pay</option>
-            <option value="Check / Cheque">Corporate Check</option>
+            <option value="UPI (Corporate GPay / PhonePe)">UPI (Corporate GPay / PhonePe)</option>
+            <option value="Net Banking (HDFC Corporate)">Net Banking (HDFC Corporate)</option>
+            <option value="Net Banking (ICICI / SBI)">Net Banking (ICICI / SBI)</option>
+            <option value="NEFT / RTGS Wire">NEFT / RTGS Wire Transfer</option>
+            <option value="Corporate Credit Card">Corporate Credit Card (Visa/Mastercard)</option>
+            <option value="Cheque Deposit">Corporate Cheque</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-[#45464e] font-semibold mb-1">Audit Reference / Note</label>
-          <input type="text" id="paymentNote" placeholder="e.g. Bank statement ref #CH-9941-SETTLED" 
+          <label class="block text-[#45464e] font-semibold mb-1">Transaction Reference / UTR Number</label>
+          <input type="text" id="paymentNote" placeholder="e.g. UTR #HDFC0001928491 or UPI Ref #4289102" 
             class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono" />
         </div>
 
@@ -222,7 +342,7 @@ function renderRecordPaymentModal(data) {
           </button>
           <button type="submit" 
             class="px-5 py-2 rounded-lg bg-[#006a61] text-white font-semibold hover:bg-[#005049] shadow-sm">
-            Reconcile & Settle Invoice
+            Confirm Payment & Mark Paid
           </button>
         </div>
 
@@ -231,6 +351,7 @@ function renderRecordPaymentModal(data) {
   `;
 }
 
+// 4. Batch Billing Run Simulator Modal
 function renderBatchRunModal(data) {
   return `
     <div class="p-6">
@@ -238,8 +359,8 @@ function renderBatchRunModal(data) {
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-2xl text-[#006a61]">autorenew</span>
           <div>
-            <h2 class="text-lg font-bold text-[#081534]">Automated Billing Cycle Run</h2>
-            <p class="text-xs text-[#64748b]">Zero Double-Billing Engine Execution</p>
+            <h2 class="text-lg font-bold text-[#081534]">Billing Day Cycle Complete</h2>
+            <p class="text-xs text-[#64748b]">Automated recurring billing run</p>
           </div>
         </div>
         <button onclick="window.closeModal()" class="text-[#76777f] hover:text-[#081534]">
@@ -254,42 +375,43 @@ function renderBatchRunModal(data) {
             <span class="font-mono font-bold text-[#081534]">${data.subscriptionsProcessed || 4} Contracts</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-[#45464e]">Idempotency Verification:</span>
+            <span class="text-[#45464e]">Duplicate Prevention Check:</span>
             <span class="font-mono font-bold text-[#006a61]">PASSED (0 Duplicates)</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-[#45464e]">Invoices Generated:</span>
+            <span class="text-[#45464e]">Invoices Created:</span>
             <span class="font-mono font-bold text-[#081534]">+${data.invoicesGenerated || 0} Invoices</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-[#45464e]">Cycle Total Accrued:</span>
-            <span class="font-mono font-bold text-[#006a61]">+$${(data.totalBilled || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+            <span class="font-mono font-bold text-[#006a61]">+₹${(data.totalBilled || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
           </div>
         </div>
 
         <div class="flex items-center gap-2 text-[#006f66] bg-[#86f2e4]/30 px-3 py-2 rounded-lg font-medium">
           <span class="material-symbols-outlined text-sm">verified_user</span>
-          <span>Guaranteed idempotency: No active subscription was billed twice or skipped.</span>
+          <span>Zero duplicates, zero skipped cycles. Automated 18% GST rules applied.</span>
         </div>
       </div>
 
       <div class="pt-4 border-t border-[#e2e8f0] flex justify-end">
         <button onclick="window.closeModal()" 
           class="px-5 py-2 rounded-lg bg-[#081534] text-white font-semibold hover:bg-[#1e2a4a]">
-          Done & View Ledger
+          Done & View Invoices
         </button>
       </div>
     </div>
   `;
 }
 
+// 5. Auth Modal: Strict Password Policy (>8 chars, uppercase, lowercase, special char)
 function renderAuthModal() {
   return `
     <div class="p-6">
       <div class="flex items-center justify-between pb-4 border-b border-[#e2e8f0]">
         <div>
-          <h2 class="text-lg font-bold text-[#081534]">Authentication & Strict Password Validation</h2>
-          <p class="text-xs text-[#64748b]">Odoo Challenge Spec: >8 chars, upper, lower & special character policy</p>
+          <h2 class="text-lg font-bold text-[#081534]">Customer Signup & Password Policy</h2>
+          <p class="text-xs text-[#64748b]">Per PDF: >8 chars, uppercase, lowercase & special character requirement</p>
         </div>
         <button onclick="window.closeModal()" class="text-[#76777f] hover:text-[#081534]">
           <span class="material-symbols-outlined">close</span>
@@ -298,20 +420,20 @@ function renderAuthModal() {
 
       <div class="mt-4 space-y-4 text-xs">
         <div>
-          <label class="block text-[#45464e] font-semibold mb-1">Customer Email</label>
-          <input type="email" id="testAuthEmail" placeholder="newcustomer@brightloop.com" 
+          <label class="block text-[#45464e] font-semibold mb-1">Work Email</label>
+          <input type="email" id="testAuthEmail" placeholder="customer@company.in" 
             class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none" />
         </div>
 
         <div>
-          <label class="block text-[#45464e] font-semibold mb-1">Create Password</label>
-          <input type="password" id="testAuthPassword" oninput="window.validatePasswordStrength(this.value)" placeholder="Enter secure password" 
+          <label class="block text-[#45464e] font-semibold mb-1">Create Secure Password</label>
+          <input type="password" id="testAuthPassword" oninput="window.validatePasswordStrength(this.value)" placeholder="Enter password to test policy" 
             class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono" />
         </div>
 
-        <!-- Live Password Rule Checklist -->
+        <!-- Live Password Rules -->
         <div class="p-3 bg-[#f8f9ff] rounded-xl border border-[#e2e8f0] space-y-2">
-          <div class="text-[11px] font-bold text-[#081534] uppercase tracking-wider">Security Requirements:</div>
+          <div class="text-[11px] font-bold text-[#081534] uppercase tracking-wider">Password Rules Checklist:</div>
           <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
             <div id="ruleLen" class="flex items-center gap-1.5 text-[#76777f]">
               <span class="material-symbols-outlined text-sm">radio_button_unchecked</span>
@@ -332,13 +454,12 @@ function renderAuthModal() {
           </div>
         </div>
 
-        <!-- Forgot Password Link Test -->
         <div class="pt-3 border-t border-[#f1f5f9] flex justify-between items-center">
           <button onclick="window.sendResetPasswordLink()" class="text-[#006a61] hover:underline font-semibold">
             Forgot Password? Send Reset Link
           </button>
           <button onclick="window.simulateCustomerSignup()" class="px-4 py-2 rounded-lg bg-[#006a61] text-white font-semibold hover:bg-[#005049]">
-            Validate & Create Account
+            Verify & Create Account
           </button>
         </div>
       </div>
@@ -346,6 +467,7 @@ function renderAuthModal() {
   `;
 }
 
+// 6. Printable Official Tax Invoice in Rupees (₹)
 function renderPrintInvoiceModal(data) {
   const state = store.getState();
   const inv = state.invoices.find(i => i.invoiceNumber === data.invoiceNumber) || state.invoices[0];
@@ -355,12 +477,12 @@ function renderPrintInvoiceModal(data) {
       <div class="flex items-center justify-between pb-4 border-b border-[#e2e8f0] no-print">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-xl text-[#081534]">receipt_long</span>
-          <span class="font-bold text-[#081534]">Official Tax Invoice • ${inv.invoiceNumber}</span>
+          <span class="font-bold text-[#081534]">Tax Invoice • ${inv.invoiceNumber}</span>
         </div>
         <div class="flex items-center gap-2">
           <button onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-[#081534] text-white text-xs font-semibold hover:bg-[#1e2a4a] flex items-center gap-1">
             <span class="material-symbols-outlined text-sm">print</span>
-            <span>Print / Save PDF</span>
+            <span>Print / PDF</span>
           </button>
           <button onclick="window.closeModal()" class="text-[#76777f] hover:text-[#081534]">
             <span class="material-symbols-outlined">close</span>
@@ -368,19 +490,19 @@ function renderPrintInvoiceModal(data) {
         </div>
       </div>
 
-      <!-- Printable Document Sheet -->
+      <!-- Printable Invoice Sheet in INR -->
       <div class="mt-4 p-8 bg-white border border-[#cbd5e1] rounded-xl text-xs text-[#0b1c30] space-y-6 shadow-sm">
         
         <div class="flex justify-between items-start">
           <div>
-            <div class="text-xl font-bold text-[#081534] tracking-tight">Brightloop Software Inc.</div>
-            <p class="text-[#64748b] text-[11px] mt-0.5">Enterprise Recurring Billing Platform</p>
-            <p class="text-[#64748b] text-[11px]">100 Innovation Way, Suite 400 • Dover, DE 19901</p>
-            <p class="text-[#64748b] text-[11px]">Tax ID: US-EIN-98-4420199</p>
+            <div class="text-xl font-bold text-[#081534] tracking-tight">Brightloop Software Pvt Ltd</div>
+            <p class="text-[#64748b] text-[11px] mt-0.5">Subscription & Cloud Systems</p>
+            <p class="text-[#64748b] text-[11px]">7th Floor, Mindspace Tech Park • Mumbai, MH 400064</p>
+            <p class="text-[#64748b] text-[11px] font-mono">GSTIN: 27AABCB1234F1Z0</p>
           </div>
           <div class="text-right">
             <div class="text-xl font-bold font-mono text-[#081534]">${inv.invoiceNumber}</div>
-            <p class="font-mono text-[#64748b]">Issue Date: ${inv.issueDate}</p>
+            <p class="font-mono text-[#64748b]">Date: ${inv.issueDate}</p>
             <p class="font-mono text-[#ba1a1a] font-bold">Due Date: ${inv.dueDate}</p>
             <span class="inline-block px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase mt-1 ${
               inv.status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
@@ -402,7 +524,7 @@ function renderPrintInvoiceModal(data) {
               <th class="py-2">Description</th>
               <th class="py-2 text-center">Qty</th>
               <th class="py-2 text-right">Unit Price</th>
-              <th class="py-2 text-right">Amount</th>
+              <th class="py-2 text-right">Amount (INR)</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-[#f1f5f9]">
@@ -410,8 +532,8 @@ function renderPrintInvoiceModal(data) {
               <tr>
                 <td class="py-2 font-medium">${line.description}</td>
                 <td class="py-2 text-center font-mono">${line.qty}</td>
-                <td class="py-2 text-right font-mono">$${line.unitPrice.toFixed(2)}</td>
-                <td class="py-2 text-right font-mono font-bold">$${line.total.toFixed(2)}</td>
+                <td class="py-2 text-right font-mono">₹${line.unitPrice.toFixed(2)}</td>
+                <td class="py-2 text-right font-mono font-bold">₹${line.total.toFixed(2)}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -420,27 +542,26 @@ function renderPrintInvoiceModal(data) {
         <div class="border-t border-[#cbd5e1] pt-3 flex flex-col items-end gap-1 font-mono text-xs">
           <div class="flex justify-between w-60">
             <span>Subtotal:</span>
-            <span>$${inv.subtotal.toFixed(2)}</span>
+            <span>₹${inv.subtotal.toFixed(2)}</span>
           </div>
           ${inv.discountAmount > 0 ? `
             <div class="flex justify-between w-60 text-emerald-700">
               <span>Discount Applied:</span>
-              <span>-$${inv.discountAmount.toFixed(2)}</span>
+              <span>-₹${inv.discountAmount.toFixed(2)}</span>
             </div>
           ` : ''}
           <div class="flex justify-between w-60">
-            <span>Tax (${inv.taxRate || 8.25}%):</span>
-            <span>+$${inv.taxAmount.toFixed(2)}</span>
+            <span>GST (18%):</span>
+            <span>+₹${inv.taxAmount.toFixed(2)}</span>
           </div>
           <div class="flex justify-between w-60 text-sm font-bold border-t border-[#cbd5e1] pt-1.5 text-[#081534]">
-            <span>Total Due:</span>
-            <span>$${inv.totalAmount.toFixed(2)}</span>
+            <span>Total Payable:</span>
+            <span>₹${inv.totalAmount.toFixed(2)}</span>
           </div>
         </div>
 
         <div class="pt-4 border-t border-[#cbd5e1] text-[11px] text-[#64748b]">
-          <p><strong>Payment Instructions:</strong> Settle via ACH direct debit or credit card through customer portal.</p>
-          <p class="mt-0.5">Thank you for powering your operations with Brightloop Software.</p>
+          <p><strong>Payment Options:</strong> Settle via UPI (GPay/PhonePe) or Net Banking mandate in customer portal.</p>
         </div>
 
       </div>
@@ -448,18 +569,19 @@ function renderPrintInvoiceModal(data) {
   `;
 }
 
+// 7. Search Modal
 function renderSearchModal() {
   const state = store.getState();
   return `
     <div class="p-4">
       <div class="relative">
         <span class="material-symbols-outlined absolute left-3 top-2.5 text-[#76777f] text-lg">search</span>
-        <input type="text" id="quickSearchInput" oninput="window.handleQuickSearch(this.value)" placeholder="Search subscriptions, invoices, customers, products..." 
+        <input type="text" id="quickSearchInput" oninput="window.handleQuickSearch(this.value)" placeholder="Search subscriptions, invoices, customers..." 
           class="w-full pl-10 pr-4 py-2 border-b border-[#cbd5e1] text-sm outline-none font-medium" autofocus />
       </div>
 
       <div id="quickSearchResults" class="mt-3 max-h-80 overflow-y-auto space-y-1 text-xs">
-        <div class="text-[11px] font-semibold text-[#76777f] px-2 py-1 uppercase">Recent Subscriptions</div>
+        <div class="text-[11px] font-semibold text-[#76777f] px-2 py-1 uppercase">Subscriptions</div>
         ${state.subscriptions.map(s => `
           <div onclick="window.selectSubscriptionRecord('${s.id}'); window.appNavigate('subscriptions-quotes'); window.closeModal();" 
             class="p-2 rounded-lg hover:bg-[#eff4ff] cursor-pointer flex items-center justify-between">
@@ -471,13 +593,13 @@ function renderSearchModal() {
           </div>
         `).join('')}
 
-        <div class="text-[11px] font-semibold text-[#76777f] px-2 py-1 uppercase mt-3">Recent Invoices</div>
+        <div class="text-[11px] font-semibold text-[#76777f] px-2 py-1 uppercase mt-3">Invoices</div>
         ${state.invoices.slice(0, 3).map(i => `
           <div onclick="window.previewInvoicePrint('${i.invoiceNumber}');" 
             class="p-2 rounded-lg hover:bg-[#eff4ff] cursor-pointer flex items-center justify-between">
             <div>
               <span class="font-mono font-bold text-[#081534]">${i.invoiceNumber}</span>
-              <span class="text-[#45464e] ml-2">${i.customerName} ($${i.totalAmount.toFixed(2)})</span>
+              <span class="text-[#45464e] ml-2">${i.customerName} (₹${i.totalAmount.toFixed(2)})</span>
             </div>
             <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase ${i.status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">${i.status}</span>
           </div>
@@ -492,8 +614,8 @@ function renderAddVariantModal() {
     <div class="p-6">
       <div class="flex items-center justify-between pb-4 border-b border-[#e2e8f0]">
         <div>
-          <h2 class="text-lg font-bold text-[#081534]">Add Product Brand Variant</h2>
-          <p class="text-xs text-[#64748b]">Configure dynamic variant price modifiers (e.g. Odoo brand +$560)</p>
+          <h2 class="text-lg font-bold text-[#081534]">Add Brand Variant</h2>
+          <p class="text-xs text-[#64748b]">Configure dynamic price modifier (e.g. Odoo brand +₹560)</p>
         </div>
         <button onclick="window.closeModal()" class="text-[#76777f] hover:text-[#081534]">
           <span class="material-symbols-outlined">close</span>
@@ -505,33 +627,26 @@ function renderAddVariantModal() {
           <label class="block text-[#45464e] font-semibold mb-1">Target Product</label>
           <select id="varTargetProduct" class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none">
             <option value="prod-erp-01">Brightloop ERP Suite</option>
-            <option value="prod-analytics-02">Brightloop Analytics & Forecasting Pro</option>
-            <option value="prod-support-03">24/7 Enterprise Dedicated Support SLA</option>
+            <option value="prod-analytics-02">Analytics & Revenue Forecasting</option>
+            <option value="prod-support-03">24/7 Dedicated Support SLA</option>
           </select>
         </div>
 
         <div>
           <label class="block text-[#45464e] font-semibold mb-1">Variant Name</label>
-          <input type="text" id="varName" required placeholder="e.g. Odoo Enterprise Custom Cloud" 
+          <input type="text" id="varName" required placeholder="e.g. Odoo Custom Cloud Edition" 
             class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none" />
         </div>
 
         <div>
-          <label class="block text-[#45464e] font-semibold mb-1">Price Adjustment ($)</label>
+          <label class="block text-[#45464e] font-semibold mb-1">Price Adjustment (₹)</label>
           <input type="number" step="0.01" id="varPriceModifier" required placeholder="560.00" 
             class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono font-bold" />
-          <span class="text-[11px] text-[#76777f] mt-1 block">Positive numbers increase price; zero keeps base price.</span>
         </div>
 
         <div class="pt-4 border-t border-[#e2e8f0] flex justify-end gap-2">
-          <button type="button" onclick="window.closeModal()" 
-            class="px-4 py-2 rounded-lg bg-white border border-[#cbd5e1] text-[#081534] font-semibold hover:bg-[#eff4ff]">
-            Cancel
-          </button>
-          <button type="submit" 
-            class="px-5 py-2 rounded-lg bg-[#006a61] text-white font-semibold hover:bg-[#005049] shadow-sm">
-            Save Brand Variant
-          </button>
+          <button type="button" onclick="window.closeModal()" class="px-4 py-2 rounded-lg bg-white border border-[#cbd5e1] text-[#081534]">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-[#006a61] text-white font-semibold">Save Variant</button>
         </div>
       </form>
     </div>
@@ -543,8 +658,8 @@ function renderAddPlanModal() {
     <div class="p-6">
       <div class="flex items-center justify-between pb-4 border-b border-[#e2e8f0]">
         <div>
-          <h2 class="text-lg font-bold text-[#081534]">Create Recurring Billing Plan</h2>
-          <p class="text-xs text-[#64748b]">Configure billing cadence and lifecycle policies</p>
+          <h2 class="text-lg font-bold text-[#081534]">Create Subscription Plan</h2>
+          <p class="text-xs text-[#64748b]">Configure billing frequency and end-of-term behavior</p>
         </div>
         <button onclick="window.closeModal()" class="text-[#76777f] hover:text-[#081534]">
           <span class="material-symbols-outlined">close</span>
@@ -554,13 +669,13 @@ function renderAddPlanModal() {
       <form onsubmit="window.handleAddPlanSubmit(event)" class="space-y-4 mt-4 text-xs">
         <div>
           <label class="block text-[#45464e] font-semibold mb-1">Plan Name</label>
-          <input type="text" id="planName" required placeholder="e.g. Growth Quarterly License" 
+          <input type="text" id="planName" required placeholder="e.g. Annual Growth Tier" 
             class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none" />
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-[#45464e] font-semibold mb-1">Recurrence Cadence</label>
+            <label class="block text-[#45464e] font-semibold mb-1">Billing Frequency</label>
             <select id="planRecurrence" class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none">
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
@@ -569,7 +684,7 @@ function renderAddPlanModal() {
             </select>
           </div>
           <div>
-            <label class="block text-[#45464e] font-semibold mb-1">Seat Price ($)</label>
+            <label class="block text-[#45464e] font-semibold mb-1">Seat Price (₹)</label>
             <input type="number" step="0.01" id="planPrice" required value="450.00" 
               class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono" />
           </div>
@@ -577,7 +692,7 @@ function renderAddPlanModal() {
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-[#45464e] font-semibold mb-1">Min Quantity</label>
+            <label class="block text-[#45464e] font-semibold mb-1">Min Seats</label>
             <input type="number" id="planMinQty" min="1" value="1" 
               class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono text-center" />
           </div>
@@ -590,14 +705,8 @@ function renderAddPlanModal() {
         </div>
 
         <div class="pt-4 border-t border-[#e2e8f0] flex justify-end gap-2">
-          <button type="button" onclick="window.closeModal()" 
-            class="px-4 py-2 rounded-lg bg-white border border-[#cbd5e1] text-[#081534] font-semibold hover:bg-[#eff4ff]">
-            Cancel
-          </button>
-          <button type="submit" 
-            class="px-5 py-2 rounded-lg bg-[#006a61] text-white font-semibold hover:bg-[#005049] shadow-sm">
-            Save Billing Plan
-          </button>
+          <button type="button" onclick="window.closeModal()" class="px-4 py-2 rounded-lg bg-white border border-[#cbd5e1]">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-[#006a61] text-white font-semibold">Save Plan</button>
         </div>
       </form>
     </div>
@@ -609,8 +718,8 @@ function renderAddDiscountModal() {
     <div class="p-6">
       <div class="flex items-center justify-between pb-4 border-b border-[#e2e8f0]">
         <div>
-          <h2 class="text-lg font-bold text-[#081534]">Create Automated Discount Rule</h2>
-          <p class="text-xs text-[#64748b]">Configure promo rules with min quantities, spend thresholds, and limits</p>
+          <h2 class="text-lg font-bold text-[#081534]">Create Discount Rule</h2>
+          <p class="text-xs text-[#64748b]">Configure promo codes with spend thresholds and usage limits</p>
         </div>
         <button onclick="window.closeModal()" class="text-[#76777f] hover:text-[#081534]">
           <span class="material-symbols-outlined">close</span>
@@ -621,53 +730,47 @@ function renderAddDiscountModal() {
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-[#45464e] font-semibold mb-1">Coupon Code</label>
-            <input type="text" id="discCode" required placeholder="WINTER2024" 
+            <input type="text" id="discCode" required placeholder="SAVE500" 
               class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono uppercase" />
           </div>
           <div>
             <label class="block text-[#45464e] font-semibold mb-1">Rule Name</label>
-            <input type="text" id="discName" required placeholder="Winter Launch Special" 
+            <input type="text" id="discName" required placeholder="Festive Special" 
               class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-[#45464e] font-semibold mb-1">Deduction Type</label>
+            <label class="block text-[#45464e] font-semibold mb-1">Discount Type</label>
             <select id="discType" class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none">
+              <option value="fixed">Fixed Deduction (₹)</option>
               <option value="percentage">Percentage (%)</option>
-              <option value="fixed">Fixed Cash Amount ($)</option>
             </select>
           </div>
           <div>
-            <label class="block text-[#45464e] font-semibold mb-1">Value (Rate or $)</label>
-            <input type="number" step="0.01" id="discValue" required value="20" 
+            <label class="block text-[#45464e] font-semibold mb-1">Value (₹ or %)</label>
+            <input type="number" step="0.01" id="discValue" required value="500" 
               class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono font-bold" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-[#45464e] font-semibold mb-1">Min Order Subtotal ($)</label>
-            <input type="number" id="discMinSpend" value="1000" 
+            <label class="block text-[#45464e] font-semibold mb-1">Min Order Subtotal (₹)</label>
+            <input type="number" id="discMinSpend" value="2000" 
               class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono" />
           </div>
           <div>
-            <label class="block text-[#45464e] font-semibold mb-1">Max Redemptions</label>
+            <label class="block text-[#45464e] font-semibold mb-1">Max Uses</label>
             <input type="number" id="discMaxUses" value="50" 
               class="w-full px-3 py-2 border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#006a61] outline-none font-mono text-center" />
           </div>
         </div>
 
         <div class="pt-4 border-t border-[#e2e8f0] flex justify-end gap-2">
-          <button type="button" onclick="window.closeModal()" 
-            class="px-4 py-2 rounded-lg bg-white border border-[#cbd5e1] text-[#081534] font-semibold hover:bg-[#eff4ff]">
-            Cancel
-          </button>
-          <button type="submit" 
-            class="px-5 py-2 rounded-lg bg-[#006a61] text-white font-semibold hover:bg-[#005049] shadow-sm">
-            Save Discount Rule
-          </button>
+          <button type="button" onclick="window.closeModal()" class="px-4 py-2 rounded-lg bg-white border border-[#cbd5e1]">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-[#006a61] text-white font-semibold">Save Rule</button>
         </div>
       </form>
     </div>
@@ -679,8 +782,8 @@ function renderUpgradeModal() {
     <div class="p-6">
       <div class="flex items-center justify-between pb-4 border-b border-[#e2e8f0]">
         <div>
-          <h2 class="text-lg font-bold text-[#081534]">Request Plan Upgrade & Additional Seats</h2>
-          <p class="text-xs text-[#64748b]">Scale Apex Retail's enterprise license immediately</p>
+          <h2 class="text-lg font-bold text-[#081534]">Request Additional Seats</h2>
+          <p class="text-xs text-[#64748b]">Scale your team's subscription</p>
         </div>
         <button onclick="window.closeModal()" class="text-[#76777f] hover:text-[#081534]">
           <span class="material-symbols-outlined">close</span>
@@ -690,10 +793,10 @@ function renderUpgradeModal() {
       <div class="py-4 space-y-4 text-xs">
         <div class="p-4 bg-[#eff4ff] rounded-xl flex items-center justify-between">
           <div>
-            <div class="font-bold text-[#081534]">Enterprise Annual Agreement</div>
-            <div class="text-[#64748b] text-[11px]">Includes dedicated technical account manager & 15-min SLA</div>
+            <div class="font-bold text-[#081534]">Brightloop ERP Suite (Standard Edition)</div>
+            <div class="text-[#64748b] text-[11px]">Billed monthly on contract</div>
           </div>
-          <span class="font-mono font-bold text-[#006a61] text-sm">$1,200/seat/yr</span>
+          <span class="font-mono font-bold text-[#006a61] text-sm">₹1,000 / seat / mo</span>
         </div>
 
         <div>
@@ -706,9 +809,9 @@ function renderUpgradeModal() {
         <button onclick="window.closeModal()" class="px-4 py-2 rounded-lg bg-white border border-[#cbd5e1] text-[#081534] font-semibold">
           Cancel
         </button>
-        <button onclick="alert('Upgrade request received! Your account manager Elena Rostova has generated a pro-forma quote.'); window.closeModal();" 
+        <button onclick="alert('Seat upgrade request submitted! Your account manager Rohan Mehta will apply it to your next billing cycle.'); window.closeModal();" 
           class="px-5 py-2 rounded-lg bg-[#006a61] text-white font-semibold">
-          Submit Upgrade Request
+          Submit Request
         </button>
       </div>
     </div>

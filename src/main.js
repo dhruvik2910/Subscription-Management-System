@@ -40,7 +40,7 @@ window.appNavigate = (route) => {
 
 window.switchRole = (role) => {
   store.setRole(role);
-  showToast(`Switched perspective to ${role.toUpperCase()}`, 'info');
+  showToast(`Switched view to ${role.toUpperCase()}`, 'info');
 };
 
 window.selectSubscriptionRecord = (subId) => {
@@ -68,9 +68,9 @@ window.togglePauseSub = (subId) => {
 };
 
 window.closeSubscription = (subId) => {
-  if (confirm('Are you sure you want to terminate and close this subscription?')) {
+  if (confirm('Are you sure you want to cancel and close this subscription?')) {
     store.updateSubscriptionStatus(subId, 'closed');
-    showToast('Subscription closed and finalized', 'warning');
+    showToast('Subscription closed and marked as finalized', 'warning');
   }
 };
 
@@ -92,7 +92,7 @@ window.createRenewalQuote = (subId) => {
 
   store.addSubscription(renewalSub);
   setSelectedSubscription(renewalSub.id);
-  showToast(`Renewal Quote ${newSubNumber} generated in Quotation stage!`, 'success');
+  showToast(`Renewal Quote ${newSubNumber} created in Quotation stage!`, 'success');
 };
 
 window.generateNextInvoiceForSub = (subId) => {
@@ -114,7 +114,7 @@ window.generateNextInvoiceForSub = (subId) => {
     dueDate: dueDate,
     status: 'confirmed',
     subtotal: sub.subtotal,
-    taxRate: sub.items[0]?.taxRate || 8.25,
+    taxRate: 18.0,
     taxAmount: sub.taxTotal,
     discountAmount: sub.discountTotal,
     totalAmount: sub.grandTotal,
@@ -131,23 +131,36 @@ window.generateNextInvoiceForSub = (subId) => {
 
   state.invoices.unshift(newInv);
   store.saveState();
-  showToast(`Generated Invoice ${nextInvNum} for ${sub.customerName}!`, 'success');
+  showToast(`Invoice ${nextInvNum} generated for ${sub.customerName}!`, 'success');
   window.appNavigate('billing-invoices');
 };
 
+// Batch Billing Run
 window.triggerBatchBillingRun = () => {
   const runResult = store.runBatchBilling();
   showModal('batchRun', runResult);
-  showToast(`Batch run complete: ${runResult.invoicesGenerated} invoices generated with 0 duplicates!`, 'success');
+  showToast(`Billing run complete: ${runResult.invoicesGenerated} invoices generated (0 duplicates)!`, 'success');
 };
 
+// Invoice Actions (Confirm, Cancel, Send, Print, Record Pay)
 window.confirmDraftInvoice = (invNum) => {
   store.confirmInvoice(invNum);
-  showToast(`Invoice ${invNum} confirmed & dispatched to client!`, 'success');
+  showToast(`Invoice ${invNum} confirmed & moved to Confirmed!`, 'success');
+};
+
+window.sendInvoiceAction = (invNum, clientName) => {
+  showToast(`Invoice ${invNum} sent via email to ${clientName}!`, 'success');
+};
+
+window.cancelInvoiceAction = (invNum) => {
+  if (confirm(`Are you sure you want to cancel and void invoice ${invNum}?`)) {
+    store.cancelInvoice(invNum);
+    showToast(`Invoice ${invNum} has been cancelled and voided.`, 'warning');
+  }
 };
 
 window.sendDunningNotice = (invNum, clientName) => {
-  showToast(`Dunning reminder email sent to ${clientName} for invoice ${invNum}`, 'info');
+  showToast(`Payment reminder dispatched to ${clientName} for invoice ${invNum}`, 'info');
 };
 
 window.filterInvoices = (filter) => {
@@ -165,6 +178,12 @@ window.switchCatalogTab = (tab) => {
   renderApp();
 };
 
+// Customer Portal: Toggling Add-ons ("add-ons customers switch on and off" from PDF)
+window.toggleCustomerAddonAction = (subId, addonType) => {
+  store.toggleCustomerAddon(subId, addonType);
+  showToast(`Add-on updated! Next billing cycle adjusted in real-time.`, 'success');
+};
+
 // Modal helpers
 window.openModal = showModal;
 window.closeModal = closeModal;
@@ -177,6 +196,7 @@ window.openAddDiscountModal = () => showModal('addDiscount');
 window.openAuthModal = () => showModal('auth');
 window.openSearchModal = () => showModal('search');
 window.openCustomerUpgradeModal = () => showModal('upgrade');
+window.openStaffModal = () => showModal('staffManagement');
 window.previewInvoicePrint = (invoiceNumber) => showModal('printInvoice', { invoiceNumber });
 window.previewQuotationPrint = (subId) => {
   const sub = store.getState().subscriptions.find(s => s.id === subId);
@@ -185,10 +205,40 @@ window.previewQuotationPrint = (subId) => {
   }
 };
 
-window.toggleNotifications = () => {
+// 1-Click Quotation Template Auto-population (From PDF Scene 3)
+window.applyQuotationTemplate = (templateId) => {
+  if (!templateId) return;
   const state = store.getState();
-  const notices = state.notifications.map(n => `• [${n.time}] ${n.text}`).join('\n');
-  alert(`Recent RevOps Notifications:\n\n${notices}`);
+  const tpl = state.quotationTemplates.find(t => t.id === templateId);
+  if (!tpl) return;
+
+  const planEl = document.getElementById('quotePlan');
+  const variantEl = document.getElementById('quoteVariant');
+  const qtyEl = document.getElementById('quoteQty');
+  const validityEl = document.getElementById('quoteValidityDisplay');
+
+  if (planEl) planEl.value = tpl.planId;
+  if (variantEl && tpl.items[0]?.variantId) variantEl.value = tpl.items[0].variantId;
+  if (qtyEl && tpl.items[0]?.quantity) qtyEl.value = tpl.items[0].quantity;
+  if (validityEl) validityEl.value = `Valid for ${tpl.validityDays} calendar days (Template standard)`;
+
+  showToast(`Applied "${tpl.name}" template with Odoo Brand Edition lines!`, 'info');
+};
+
+// Admin Add Staff Member ("Only the admin can add a new member of staff")
+window.handleAddStaffSubmit = (e) => {
+  e.preventDefault();
+  const name = document.getElementById('newStaffName').value;
+  const email = document.getElementById('newStaffEmail').value;
+  const role = document.getElementById('newStaffRole').value;
+
+  try {
+    store.addStaffMember({ name, email, role });
+    showToast(`Staff member ${name} (${role}) onboarded successfully!`, 'success');
+    showModal('staffManagement');
+  } catch (err) {
+    alert(err.message);
+  }
 };
 
 // Form submission handlers
@@ -203,7 +253,7 @@ window.handleCreateQuoteSubmit = (e) => {
   const paymentTerms = document.getElementById('quotePaymentTerms').value;
 
   const state = store.getState();
-  const plan = state.plans.find(p => p.id === planId);
+  const plan = state.plans.find(p => p.id === planId) || state.plans[0];
   const product = state.products[0];
   const variant = product.variants.find(v => v.id === variantId) || product.variants[0];
 
@@ -211,14 +261,14 @@ window.handleCreateQuoteSubmit = (e) => {
   let lineTotal = unitPrice * qty;
   let discountAmount = 0;
 
-  if (discountCode === 'TIER1ENTERPRISE') {
-    discountAmount = 200.00;
-  } else if (discountCode === 'EARLYBIRD15') {
+  if (discountCode === 'VOLUME500') {
+    discountAmount = 500.00;
+  } else if (discountCode === 'FESTIVE15') {
     discountAmount = lineTotal * 0.15;
   }
 
   const subtotal = lineTotal;
-  const taxTotal = (subtotal - discountAmount) * 0.0825;
+  const taxTotal = (subtotal - discountAmount) * 0.18;
   const grandTotal = subtotal - discountAmount + taxTotal;
 
   const newSubNumber = `SUB-2024-${Math.floor(2000 + Math.random() * 8000)}`;
@@ -227,8 +277,8 @@ window.handleCreateQuoteSubmit = (e) => {
     subscriptionNumber: newSubNumber,
     customerName,
     customerEmail,
-    crn: 'US-' + Math.floor(1000000 + Math.random() * 9000000),
-    tier: 'Custom Enterprise',
+    crn: 'CIN: U' + Math.floor(100000000000 + Math.random() * 900000000000),
+    tier: 'Enterprise Custom',
     planId: plan.id,
     planName: plan.name,
     startDate: new Date().toISOString().split('T')[0],
@@ -247,7 +297,7 @@ window.handleCreateQuoteSubmit = (e) => {
         variantName: variant.name,
         quantity: qty,
         unitPrice,
-        taxRate: 8.25,
+        taxRate: 18.0,
         discountAmount,
         total: lineTotal
       }
@@ -261,7 +311,7 @@ window.handleCreateQuoteSubmit = (e) => {
   store.addSubscription(newSub);
   setSelectedSubscription(newSub.id);
   closeModal();
-  showToast(`Draft Quotation ${newSubNumber} created successfully!`, 'success');
+  showToast(`Draft Quotation ${newSubNumber} created!`, 'success');
   window.appNavigate('subscriptions-quotes');
 };
 
@@ -274,7 +324,7 @@ window.handleRecordPaymentSubmit = (e, invoiceNumber) => {
   const success = store.recordPayment({ invoiceNumber, amount, method, note });
   if (success) {
     closeModal();
-    showToast(`Payment of $${amount.toFixed(2)} recorded for ${invoiceNumber}!`, 'success');
+    showToast(`Payment of ₹${amount.toFixed(2)} recorded for ${invoiceNumber}!`, 'success');
   }
 };
 
@@ -313,7 +363,7 @@ window.handleAddPlanSubmit = (e) => {
     autoClose: false,
     allowPause,
     allowRenew: true,
-    description: `Configured ${recurrence} cadence with flexible renewal policies.`
+    description: `Configured ${recurrence} cadence.`
   });
 
   closeModal();
@@ -349,7 +399,7 @@ window.handleAddDiscountSubmit = (e) => {
   showToast(`Discount rule "${code}" created and active!`, 'success');
 };
 
-// Strict Password Validation Rule (Challenge Requirement)
+// Strict Password Validation Rule (Challenge Requirement: >8 chars, upper, lower, special)
 window.validatePasswordStrength = (pwd) => {
   const hasLen = pwd.length > 8;
   const hasUpper = /[A-Z]/.test(pwd);
@@ -377,8 +427,8 @@ window.validatePasswordStrength = (pwd) => {
 };
 
 window.sendResetPasswordLink = () => {
-  const email = document.getElementById('testAuthEmail')?.value || 'alex.chen@apexretail.com';
-  alert(`A secure password reset link has been dispatched to: ${email}\n\n(Follows Brightloop tenant verification rules).`);
+  const email = document.getElementById('testAuthEmail')?.value || 'aarav@apexretail.in';
+  alert(`A secure password reset link has been dispatched to: ${email}`);
 };
 
 window.simulateCustomerSignup = () => {
@@ -398,15 +448,10 @@ window.simulateCustomerSignup = () => {
   store.setRole('customer');
 };
 
-window.customerTogglePause = (subId) => {
-  store.toggleSubscriptionPause(subId);
-  showToast('Plan state modified from self-service customer portal.', 'info');
-};
-
 window.exportReportCSV = () => {
   const state = store.getState();
   const rows = [
-    ['Subscription Number', 'Customer', 'Plan', 'Status', 'MRR / Invoiced'],
+    ['Subscription Number', 'Customer', 'Plan', 'Status', 'MRR / Invoiced (INR)'],
     ...state.subscriptions.map(s => [s.subscriptionNumber, s.customerName, s.planName, s.status, s.grandTotal])
   ];
   downloadCSV('Brightloop_Revenue_Report.csv', rows);
@@ -415,14 +460,14 @@ window.exportReportCSV = () => {
 window.exportLedgerCSV = () => {
   const state = store.getState();
   const rows = [
-    ['Invoice Number', 'Customer', 'Issue Date', 'Due Date', 'Status', 'Total', 'Balance Due'],
+    ['Invoice Number', 'Customer', 'Issue Date', 'Due Date', 'Status', 'Total (INR)', 'Balance Due (INR)'],
     ...state.invoices.map(i => [i.invoiceNumber, i.customerName, i.issueDate, i.dueDate, i.status, i.totalAmount, i.balanceDue])
   ];
   downloadCSV('Brightloop_Invoices_Ledger.csv', rows);
 };
 
 window.refreshLedger = () => {
-  showToast('Reconciling ledger with bank statements... 0 discrepancies found.', 'success');
+  showToast('Reconciled ledger with bank statements... 0 discrepancies.', 'success');
   renderApp();
 };
 
