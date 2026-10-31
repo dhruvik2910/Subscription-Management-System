@@ -4,12 +4,78 @@ import { db } from '../db/database.js';
 
 export const apiRouter = express.Router();
 
+// --- Helper Utilities for Cadence, Lifecycle & Overdue Handling ---
+function getCycleToken(subId, period, dateStr) {
+  const d = new Date(dateStr);
+  if (period === 'daily') {
+    return `${subId}-${dateStr}`;
+  } else if (period === 'weekly') {
+    const target = new Date(d.valueOf());
+    const dayNr = (d.getDay() + 6) % 7;
+    target.setDate(target.getDate() - dayNr + 3);
+    const firstThursday = target.valueOf();
+    target.setMonth(0, 1);
+    if (target.getDay() !== 4) {
+      target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+    }
+    const week = 1 + Math.ceil((firstThursday - target) / 604800000);
+    return `${subId}-${d.getFullYear()}-W${String(week).padStart(2, '0')}`;
+  } else if (period === 'yearly') {
+    return `${subId}-${dateStr.substring(0, 4)}`;
+  } else {
+    // monthly default
+    return `${subId}-${dateStr.substring(0, 7)}`;
+  }
+}
+
+function advanceBillingDate(dateStr, period) {
+  const d = new Date(dateStr || new Date().toISOString().split('T')[0]);
+  if (period === 'daily') {
+    d.setDate(d.getDate() + 1);
+  } else if (period === 'weekly') {
+    d.setDate(d.getDate() + 7);
+  } else if (period === 'yearly') {
+    d.setFullYear(d.getFullYear() + 1);
+  } else {
+    // monthly
+    d.setMonth(d.getMonth() + 1);
+  }
+  return d.toISOString().split('T')[0];
+}
+
+function updateOverdueInvoices(todayStr) {
+  const today = todayStr || new Date().toISOString().split('T')[0];
+  return db.prepare(`
+    UPDATE invoices 
+    SET status = 'overdue' 
+    WHERE status = 'confirmed' 
+      AND due_date < ? 
+      AND balance_due > 0
+  `).run(today);
+}
+
+function autoCloseExpiredSubscriptions(todayStr) {
+  const today = todayStr || new Date().toISOString().split('T')[0];
+  return db.prepare(`
+    UPDATE subscriptions 
+    SET status = 'closed', updated_at = CURRENT_TIMESTAMP 
+    WHERE status = 'active' 
+      AND end_date IS NOT NULL 
+      AND end_date <= ?
+  `).run(today);
+}
+
 // ==========================================
 // 1. REVENUE & OPERATIONS OVERVIEW
 // ==========================================
 apiRouter.get('/overview', (req, res) => {
   try {
     const startTime = Date.now();
+    const today = new Date().toISOString().split('T')[0];
+
+    // Maintain real-time state for overdue invoices & expired subscriptions
+    updateOverdueInvoices(today);
+    autoCloseExpiredSubscriptions(today);
 
     // Active subscriptions count
     const activeSubsRow = db.prepare(`
@@ -268,6 +334,170 @@ apiRouter.patch('/subscriptions/:id/addons', (req, res) => {
   }
 });
 
+// Generate next invoice for a single subscription
+apiRouter.post('/subscriptions/:id/generate-invoice', (req, res) => {
+  try {
+    const sub = db.prepare('SELECT * FROM subscriptions WHERE id = ?').get(req.params.id);
+    if (!sub) return res.status(404).json({ success: false, error: 'Subscription not found.' });
+
+    const today = new Date().toISOString().split('T')[0];
+    const cycleToken = getCycleToken(sub.id, sub.billing_period, today);
+
+    // Prevent duplicate billing for this cycle
+    const existing = db.prepare('SELECT * FROM invoices WHERE cycle_token = ?').get(cycleToken);
+    if (existing) {
+      return res.status(409).json({
+        success: false,
+        error: `Invoice already generated for ${sub.subscription_number} in current cycle (${cycleToken}).`,
+        data: existing
+      });
+    }
+
+    const invNum = 'INV-' + today.replace(/-/g, '').substring(2, 6) + '-' + Math.floor(1000 + Math.random() * 9000);
+    const invId = 'inv-' + Date.now();
+    const dueDate = new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0];
+
+    // Find any matching active discount rule
+    const matchingDiscount = db.prepare(`
+      SELECT * FROM discount_rules 
+      WHERE is_active = 1 
+        AND min_purchase_amount <= ?
+        AND (valid_from IS NULL OR valid_from <= ?)
+        AND (valid_to IS NULL OR valid_to >= ?)
+        AND used_count < max_uses
+      ORDER BY discount_value DESC
+      LIMIT 1
+    `).get(sub.total_amount, today, today);
+
+    let discountAmount = 0;
+    if (matchingDiscount) {
+      if (matchingDiscount.discount_type === 'percent') {
+        discountAmount = sub.total_amount * (matchingDiscount.discount_value / 100);
+      } else {
+        discountAmount = Math.min(sub.total_amount, matchingDiscount.discount_value);
+      }
+      db.prepare('UPDATE discount_rules SET used_count = used_count + 1 WHERE id = ?').run(matchingDiscount.id);
+    }
+
+    const subtotal = sub.total_amount;
+    const taxableSubtotal = Math.max(0, subtotal - discountAmount);
+    const gstRate = 18.0;
+    const gstAmount = taxableSubtotal * (gstRate / 100);
+    const totalAmount = taxableSubtotal + gstAmount;
+
+    const createTransaction = db.transaction(() => {
+      db.prepare(`
+        INSERT INTO invoices (
+          id, invoice_number, subscription_id, customer_name, customer_email, customer_gstin,
+          invoice_date, due_date, status, subtotal, discount_amount, gst_rate, gst_amount,
+          total_amount, amount_paid, balance_due, cycle_token, sent_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', ?, ?, ?, ?, ?, 0, ?, ?, CURRENT_TIMESTAMP)
+      `).run(
+        invId,
+        invNum,
+        sub.id,
+        sub.customer_name,
+        sub.customer_email,
+        sub.customer_gstin,
+        today,
+        dueDate,
+        subtotal,
+        discountAmount,
+        gstRate,
+        gstAmount,
+        totalAmount,
+        totalAmount,
+        cycleToken
+      );
+
+      const lines = db.prepare('SELECT * FROM subscription_lines WHERE subscription_id = ?').all(sub.id);
+      lines.forEach((l, idx) => {
+        db.prepare(`
+          INSERT INTO invoice_lines (id, invoice_id, description, sac_code, quantity, unit_price, amount)
+          VALUES (?, ?, ?, '998313', ?, ?, ?)
+        `).run(`iline-${Date.now()}-${idx}`, invId, `${l.product_name} (${l.variant_name || 'Standard'})`, l.quantity, l.unit_price, l.subtotal);
+      });
+
+      // Advance subscription next_billing_date
+      const advancedBillingDate = advanceBillingDate(sub.next_billing_date || today, sub.billing_period);
+      db.prepare('UPDATE subscriptions SET next_billing_date = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+        .run(advancedBillingDate, sub.id);
+    });
+
+    createTransaction();
+
+    const createdInvoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(invId);
+    res.status(201).json({
+      success: true,
+      message: `Invoice ${invNum} generated successfully for ${sub.subscription_number}.`,
+      data: createdInvoice
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create a renewal quotation from an existing subscription
+apiRouter.post('/subscriptions/:id/renew', (req, res) => {
+  try {
+    const sub = db.prepare('SELECT * FROM subscriptions WHERE id = ?').get(req.params.id);
+    if (!sub) return res.status(404).json({ success: false, error: 'Subscription not found.' });
+
+    const today = new Date().toISOString().split('T')[0];
+    const newSubId = 'sub-' + Date.now();
+    const newSubNumber = 'SUB-2025-' + Math.floor(1000 + Math.random() * 9000);
+    const startDate = sub.end_date && sub.end_date > today ? sub.end_date : today;
+    const expiryDate = new Date(new Date(startDate).getTime() + 365 * 86400000).toISOString().split('T')[0];
+
+    const renewTransaction = db.transaction(() => {
+      db.prepare(`
+        INSERT INTO subscriptions (
+          id, subscription_number, customer_id, customer_name, customer_email, customer_company, customer_gstin,
+          plan_id, plan_name, billing_period, start_date, next_billing_date, end_date, status, is_paused,
+          auto_renew, tier, total_amount, addons_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'quotation', 0, 1, ?, ?, ?)
+      `).run(
+        newSubId,
+        newSubNumber,
+        sub.customer_id,
+        sub.customer_name,
+        sub.customer_email,
+        sub.customer_company,
+        sub.customer_gstin,
+        sub.plan_id,
+        sub.plan_name,
+        sub.billing_period,
+        startDate,
+        startDate,
+        expiryDate,
+        sub.tier,
+        sub.total_amount,
+        sub.addons_json || '{}'
+      );
+
+      const oldLines = db.prepare('SELECT * FROM subscription_lines WHERE subscription_id = ?').all(sub.id);
+      oldLines.forEach((l, idx) => {
+        db.prepare(`
+          INSERT INTO subscription_lines (
+            id, subscription_id, product_name, variant_name, quantity, unit_price, discount_percent, subtotal
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(`sline-${Date.now()}-${idx}`, newSubId, l.product_name, l.variant_name, l.quantity, l.unit_price, l.discount_percent, l.subtotal);
+      });
+    });
+
+    renewTransaction();
+
+    const newSub = db.prepare('SELECT * FROM subscriptions WHERE id = ?').get(newSubId);
+    res.status(201).json({
+      success: true,
+      message: `Renewal Quote ${newSubNumber} generated in Quotation status.`,
+      data: newSub
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ==========================================
 // 3. INVOICES & RECURRING BILLING
 // ==========================================
@@ -313,6 +543,121 @@ apiRouter.get('/invoices/:id', (req, res) => {
     res.json({ success: true, data: { ...inv, lines } });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Official Printable Tax Invoice HTML/PDF Endpoint
+apiRouter.get('/invoices/:id/pdf', (req, res) => {
+  try {
+    const inv = db.prepare('SELECT * FROM invoices WHERE id = ?').get(req.params.id);
+    if (!inv) return res.status(404).send('Invoice not found');
+
+    const lines = db.prepare('SELECT * FROM invoice_lines WHERE invoice_id = ?').all(inv.id);
+
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Tax Invoice ${inv.invoice_number} • Brightloop Software</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #0b1c30; padding: 40px; max-width: 800px; margin: auto; }
+    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #081534; padding-bottom: 20px; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: bold; text-transform: uppercase; background: #e0f2fe; color: #0369a1; }
+    .badge.paid { background: #dcfce7; color: #15803d; }
+    .badge.overdue { background: #fee2e2; color: #b91c1c; }
+    table { width: 100%; border-collapse: collapse; margin-top: 25px; }
+    th { background: #f8fafc; text-align: left; padding: 10px; font-size: 12px; border-bottom: 1px solid #cbd5e1; }
+    td { padding: 10px; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
+    .right { text-align: right; }
+    .totals { margin-top: 20px; width: 300px; margin-left: auto; }
+    .totals div { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
+    .totals .grand { font-size: 16px; font-weight: bold; border-top: 2px solid #081534; padding-top: 10px; color: #081534; }
+    @media print {
+      body { padding: 0; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+    <button onclick="window.print()" style="background:#081534; color:white; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; border:none;">Print / Save PDF</button>
+  </div>
+  <div class="header">
+    <div>
+      <h1 style="margin: 0; font-size: 24px; color: #081534;">Brightloop Software Pvt Ltd</h1>
+      <p style="margin: 4px 0; color: #64748b; font-size: 12px;">7th Floor, Mindspace Tech Park, Mumbai, MH 400064</p>
+      <p style="margin: 2px 0; font-family: monospace; font-size: 12px; color: #475569;">GSTIN: 27AABCB1234F1Z0 • PAN: AABCB1234F</p>
+    </div>
+    <div style="text-align: right;">
+      <h2 style="margin: 0; font-size: 20px; color: #081534;">TAX INVOICE</h2>
+      <p style="margin: 4px 0; font-family: monospace; font-weight: bold;">${inv.invoice_number}</p>
+      <span class="badge ${inv.status}">${inv.status}</span>
+    </div>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; margin-top: 25px; font-size: 13px;">
+    <div>
+      <strong style="color: #64748b; font-size: 11px; text-transform: uppercase;">Billed To:</strong>
+      <div style="font-weight: bold; font-size: 14px; margin-top: 4px;">${inv.customer_name}</div>
+      <div style="color: #64748b;">${inv.customer_email}</div>
+      <div style="font-family: monospace; color: #475569; margin-top: 2px;">GSTIN: ${inv.customer_gstin || 'Unregistered'}</div>
+    </div>
+    <div style="text-align: right;">
+      <div><strong>Invoice Date:</strong> ${inv.invoice_date}</div>
+      <div><strong>Payment Due:</strong> ${inv.due_date}</div>
+      <div><strong>Terms:</strong> Net 15 Days</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>SAC Code</th>
+        <th class="right">Qty</th>
+        <th class="right">Unit Price (₹)</th>
+        <th class="right">Total (₹)</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${lines.map(l => `
+        <tr>
+          <td><strong>${l.description}</strong></td>
+          <td style="font-family: monospace;">${l.sac_code || '998313'}</td>
+          <td class="right font-mono">${l.quantity}</td>
+          <td class="right font-mono">₹${l.unit_price.toFixed(2)}</td>
+          <td class="right font-mono">₹${l.amount.toFixed(2)}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+
+  <div class="totals">
+    <div><span>Subtotal:</span><span style="font-family: monospace;">₹${inv.subtotal.toFixed(2)}</span></div>
+    ${inv.discount_amount > 0 ? `<div><span style="color:#16a34a;">Discount:</span><span style="font-family: monospace; color:#16a34a;">-₹${inv.discount_amount.toFixed(2)}</span></div>` : ''}
+    <div><span>GST (${inv.gst_rate}%):</span><span style="font-family: monospace;">₹${inv.gst_amount.toFixed(2)}</span></div>
+    <div class="grand"><span>Total Amount:</span><span style="font-family: monospace;">₹${inv.total_amount.toFixed(2)}</span></div>
+    <div><span>Amount Paid:</span><span style="font-family: monospace; color:#15803d;">₹${inv.amount_paid.toFixed(2)}</span></div>
+    <div style="border-top: 1px solid #e2e8f0; padding-top: 4px; font-weight: bold;">
+      <span>Balance Due:</span>
+      <span style="font-family: monospace; color: ${inv.balance_due > 0 ? '#b91c1c' : '#15803d'};">₹${inv.balance_due.toFixed(2)}</span>
+    </div>
+  </div>
+
+  <div style="margin-top: 40px; padding: 15px; background: #f8fafc; border-radius: 8px; font-size: 11px; color: #64748b;">
+    <strong>Payment Details (UPI / RTGS / NEFT):</strong><br/>
+    Bank: HDFC Bank Ltd • A/C: 50200019284910 • IFSC: HDFC0000240 • UPI ID: brightloop@hdfcbank<br/>
+    <em>This is a computer-generated tax invoice issued by Brightloop Software Pvt Ltd under GST Law.</em>
+  </div>
+</body>
+</html>
+    `;
+
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (error) {
+    res.status(500).send('Error generating invoice: ' + error.message);
   }
 });
 
@@ -412,6 +757,46 @@ apiRouter.post('/invoices/:id/payments', (req, res) => {
   }
 });
 
+// List all payments with optional filtering
+apiRouter.get('/payments', (req, res) => {
+  try {
+    const { invoiceId, method, limit = 50 } = req.query;
+    let query = 'SELECT * FROM payments WHERE 1=1';
+    let params = [];
+
+    if (invoiceId) {
+      query += ' AND invoice_id = ?';
+      params.push(invoiceId);
+    }
+    if (method) {
+      query += ' AND payment_method = ?';
+      params.push(method);
+    }
+    query += ' ORDER BY payment_date DESC, created_at DESC LIMIT ?';
+    params.push(parseInt(limit) || 50);
+
+    const payments = db.prepare(query).all(...params);
+    res.json({ success: true, data: payments });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Trigger overdue verification check
+apiRouter.post('/invoices/check-overdue', (req, res) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const result = updateOverdueInvoices(today);
+    res.json({
+      success: true,
+      message: `Overdue check executed. ${result.changes} invoices transitioned to OVERDUE.`,
+      updatedCount: result.changes
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ==========================================
 // 4. AUTOMATED RECURRING BILLING ENGINE
 // ==========================================
@@ -419,12 +804,20 @@ apiRouter.post('/billing/run', (req, res) => {
   try {
     const startTime = Date.now();
     const today = new Date().toISOString().split('T')[0];
+    const { forceAll = false } = req.body || {};
 
-    // Find all active subscriptions not paused
-    const activeSubs = db.prepare(`
-      SELECT * FROM subscriptions 
-      WHERE status = 'active' AND is_paused = 0
-    `).all();
+    // 1. Maintain lifecycle: close expired contracts and mark past-due invoices as overdue
+    autoCloseExpiredSubscriptions(today);
+    updateOverdueInvoices(today);
+
+    // 2. Select active subscriptions due for billing (or all if forceAll flag is provided)
+    let query = `SELECT * FROM subscriptions WHERE status = 'active' AND is_paused = 0`;
+    let params = [];
+    if (!forceAll) {
+      query += ` AND (next_billing_date <= ? OR next_billing_date IS NULL)`;
+      params.push(today);
+    }
+    const dueSubs = db.prepare(query).all(...params);
 
     let invoicesGenerated = 0;
     let duplicatesPrevented = 0;
@@ -433,25 +826,47 @@ apiRouter.post('/billing/run', (req, res) => {
     const runId = 'BR-' + today.replace(/-/g, '') + '-' + Math.floor(100 + Math.random() * 900);
 
     const billingTransaction = db.transaction(() => {
-      activeSubs.forEach(sub => {
-        // Idempotency token: sub_id + cycle date
-        const cycleToken = `${sub.id}-${today.substring(0, 7)}`;
+      dueSubs.forEach(sub => {
+        // Multi-cadence cycle token (daily, weekly, monthly, yearly)
+        const cycleToken = getCycleToken(sub.id, sub.billing_period, today);
 
-        // Check if invoice already exists for this cycle token
+        // Idempotency: Prevent duplicate charges within the same cycle period
         const existing = db.prepare('SELECT id FROM invoices WHERE cycle_token = ?').get(cycleToken);
         if (existing) {
           duplicatesPrevented++;
           return;
         }
 
-        // Generate invoice
+        // Evaluate active discount rules
+        const matchingDiscount = db.prepare(`
+          SELECT * FROM discount_rules 
+          WHERE is_active = 1 
+            AND min_purchase_amount <= ?
+            AND (valid_from IS NULL OR valid_from <= ?)
+            AND (valid_to IS NULL OR valid_to >= ?)
+            AND used_count < max_uses
+          ORDER BY discount_value DESC
+          LIMIT 1
+        `).get(sub.total_amount, today, today);
+
+        let discountAmount = 0;
+        if (matchingDiscount) {
+          if (matchingDiscount.discount_type === 'percent') {
+            discountAmount = sub.total_amount * (matchingDiscount.discount_value / 100);
+          } else {
+            discountAmount = Math.min(sub.total_amount, matchingDiscount.discount_value);
+          }
+          db.prepare('UPDATE discount_rules SET used_count = used_count + 1 WHERE id = ?').run(matchingDiscount.id);
+        }
+
         const invNum = 'INV-' + today.replace(/-/g, '').substring(2, 6) + '-' + Math.floor(1000 + Math.random() * 9000);
         const invId = 'inv-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-        
+
         const subtotal = sub.total_amount;
+        const taxableSubtotal = Math.max(0, subtotal - discountAmount);
         const gstRate = 18.0;
-        const gstAmount = subtotal * (gstRate / 100);
-        const totalAmount = subtotal + gstAmount;
+        const gstAmount = taxableSubtotal * (gstRate / 100);
+        const totalAmount = taxableSubtotal + gstAmount;
 
         // Due in 14 days
         const dueDate = new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0];
@@ -461,7 +876,7 @@ apiRouter.post('/billing/run', (req, res) => {
             id, invoice_number, subscription_id, customer_name, customer_email, customer_gstin,
             invoice_date, due_date, status, subtotal, discount_amount, gst_rate, gst_amount,
             total_amount, amount_paid, balance_due, cycle_token, sent_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', ?, 0, ?, ?, ?, 0, ?, ?, CURRENT_TIMESTAMP)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', ?, ?, ?, ?, ?, 0, ?, ?, CURRENT_TIMESTAMP)
         `).run(
           invId,
           invNum,
@@ -472,6 +887,7 @@ apiRouter.post('/billing/run', (req, res) => {
           today,
           dueDate,
           subtotal,
+          discountAmount,
           gstRate,
           gstAmount,
           totalAmount,
@@ -489,13 +905,18 @@ apiRouter.post('/billing/run', (req, res) => {
           `).run(lineId, invId, `${l.product_name} (${l.variant_name || 'Standard'})`, l.quantity, l.unit_price, l.subtotal);
         });
 
+        // Advance subscription next_billing_date automatically
+        const nextDate = advanceBillingDate(sub.next_billing_date || today, sub.billing_period);
+        db.prepare('UPDATE subscriptions SET next_billing_date = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+          .run(nextDate, sub.id);
+
         invoicesGenerated++;
         totalBilled += totalAmount;
       });
 
       const durationMs = Date.now() - startTime;
 
-      // Log billing run
+      // Log billing run audit record
       db.prepare(`
         INSERT INTO billing_runs (
           id, run_date, subscriptions_scanned, invoices_generated, duplicates_prevented,
@@ -503,7 +924,7 @@ apiRouter.post('/billing/run', (req, res) => {
         ) VALUES (?, CURRENT_TIMESTAMP, ?, ?, ?, 0, ?, ?, 'completed')
       `).run(
         runId,
-        activeSubs.length,
+        dueSubs.length,
         invoicesGenerated,
         duplicatesPrevented,
         totalBilled,
@@ -519,7 +940,7 @@ apiRouter.post('/billing/run', (req, res) => {
       success: true,
       data: {
         runId,
-        subscriptionsScanned: activeSubs.length,
+        subscriptionsScanned: dueSubs.length,
         invoicesGenerated,
         duplicatesPrevented,
         totalBilled,
@@ -550,10 +971,85 @@ apiRouter.get('/products', (req, res) => {
   }
 });
 
+// Create software product
+apiRouter.post('/products', (req, res) => {
+  try {
+    const { name, category = 'Software License', basePrice = 0, description, sacCode = '998313' } = req.body;
+    if (!name) return res.status(400).json({ success: false, error: 'Product name is required.' });
+
+    const id = 'prod-' + Date.now();
+    db.prepare(`
+      INSERT INTO products (id, name, category, base_price, description, sac_code, is_active)
+      VALUES (?, ?, ?, ?, ?, ?, 1)
+    `).run(id, name, category, parseFloat(basePrice) || 0, description || '', sacCode);
+
+    res.status(201).json({
+      success: true,
+      message: `Product "${name}" created.`,
+      data: { id, name, category, basePrice }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Add brand edition variant to product (e.g. Odoo Connected Edition +₹560)
+apiRouter.post('/products/:id/variants', (req, res) => {
+  try {
+    const { variantName, extraPrice = 0, sku } = req.body;
+    if (!variantName) return res.status(400).json({ success: false, error: 'Variant name is required.' });
+
+    const prod = db.prepare('SELECT id FROM products WHERE id = ?').get(req.params.id);
+    if (!prod) return res.status(404).json({ success: false, error: 'Target product not found.' });
+
+    const id = 'var-' + Date.now();
+    const variantSku = sku || `BL-SKU-${Date.now().toString().slice(-5)}`;
+    db.prepare(`
+      INSERT INTO product_variants (id, product_id, variant_name, extra_price, sku, is_active)
+      VALUES (?, ?, ?, ?, ?, 1)
+    `).run(id, req.params.id, variantName, parseFloat(extraPrice) || 0, variantSku);
+
+    res.status(201).json({
+      success: true,
+      message: `Variant "${variantName}" added (+₹${parseFloat(extraPrice).toFixed(2)}).`,
+      data: { id, productId: req.params.id, variantName, extraPrice: parseFloat(extraPrice) || 0, sku: variantSku }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 apiRouter.get('/plans', (req, res) => {
   try {
     const plans = db.prepare('SELECT * FROM plans WHERE is_active = 1').all();
     res.json({ success: true, data: plans });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create recurring cadence plan
+apiRouter.post('/plans', (req, res) => {
+  try {
+    const { name, billingPeriod = 'monthly', intervalCount = 1, autoCloseDays = 15, description } = req.body;
+    if (!name) return res.status(400).json({ success: false, error: 'Plan name is required.' });
+
+    const allowed = ['daily', 'weekly', 'monthly', 'yearly'];
+    if (!allowed.includes(billingPeriod)) {
+      return res.status(400).json({ success: false, error: 'Billing period must be daily, weekly, monthly, or yearly.' });
+    }
+
+    const id = 'plan-' + Date.now();
+    db.prepare(`
+      INSERT INTO plans (id, name, billing_period, interval_count, auto_close_days, description, is_active)
+      VALUES (?, ?, ?, ?, ?, ?, 1)
+    `).run(id, name, billingPeriod, intervalCount, autoCloseDays, description || `Billed ${billingPeriod}.`);
+
+    res.status(201).json({
+      success: true,
+      message: `Plan "${name}" created for ${billingPeriod} cadence.`,
+      data: { id, name, billingPeriod, intervalCount, autoCloseDays }
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -581,10 +1077,158 @@ apiRouter.get('/templates', (req, res) => {
   }
 });
 
+// Create quotation template
+apiRouter.post('/templates', (req, res) => {
+  try {
+    const { name, validityDays = 30, defaultPlanId, description, items = [] } = req.body;
+    if (!name) return res.status(400).json({ success: false, error: 'Template name is required.' });
+
+    const tplId = 'tpl-' + Date.now();
+    const createTransaction = db.transaction(() => {
+      db.prepare(`
+        INSERT INTO quotation_templates (id, name, validity_days, default_plan_id, description)
+        VALUES (?, ?, ?, ?, ?)
+      `).run(tplId, name, validityDays, defaultPlanId || null, description || '');
+
+      items.forEach((it, idx) => {
+        db.prepare(`
+          INSERT INTO template_items (id, template_id, product_id, variant_id, quantity, unit_price, discount_percent)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          `titem-${Date.now()}-${idx}`,
+          tplId,
+          it.productId,
+          it.variantId || null,
+          it.quantity || 1,
+          it.unitPrice || 0,
+          it.discountPercent || 0
+        );
+      });
+    });
+
+    createTransaction();
+
+    res.status(201).json({
+      success: true,
+      message: `Quotation template "${name}" created.`,
+      data: { id: tplId, name, validityDays }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 apiRouter.get('/discounts', (req, res) => {
   try {
     const discounts = db.prepare('SELECT * FROM discount_rules WHERE is_active = 1').all();
     res.json({ success: true, data: discounts });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Admin discount rule creation
+apiRouter.post('/admin/discounts', (req, res) => {
+  try {
+    const {
+      code,
+      description,
+      discountType = 'fixed',
+      discountValue = 0,
+      minPurchaseAmount = 0,
+      validFrom,
+      validTo,
+      maxUses = 100
+    } = req.body;
+
+    if (!code || !discountValue) {
+      return res.status(400).json({ success: false, error: 'Discount code and value are required.' });
+    }
+
+    const id = 'disc-' + Date.now();
+    const today = new Date().toISOString().split('T')[0];
+
+    db.prepare(`
+      INSERT INTO discount_rules (
+        id, code, description, discount_type, discount_value, min_purchase_amount,
+        valid_from, valid_to, max_uses, used_count, is_active
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1)
+    `).run(
+      id,
+      code.toUpperCase(),
+      description || `Discount code ${code}`,
+      discountType,
+      parseFloat(discountValue),
+      parseFloat(minPurchaseAmount) || 0,
+      validFrom || today,
+      validTo || '2026-12-31',
+      parseInt(maxUses) || 100
+    );
+
+    res.status(201).json({
+      success: true,
+      message: `Discount rule "${code.toUpperCase()}" created and active.`,
+      data: { id, code: code.toUpperCase(), discountType, discountValue }
+    });
+  } catch (error) {
+    if (error.message.includes('UNIQUE constraint failed')) {
+      return res.status(400).json({ success: false, error: 'Discount code already exists.' });
+    }
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Validate discount code for an order subtotal
+apiRouter.post('/discounts/validate', (req, res) => {
+  try {
+    const { code, subtotal = 0 } = req.body;
+    if (!code) return res.status(400).json({ success: false, error: 'Discount code is required.' });
+
+    const today = new Date().toISOString().split('T')[0];
+    const rule = db.prepare('SELECT * FROM discount_rules WHERE code = ? AND is_active = 1').get(code.toUpperCase());
+
+    if (!rule) {
+      return res.status(404).json({ success: false, valid: false, error: 'Invalid or inactive discount code.' });
+    }
+
+    if (rule.valid_from && rule.valid_from > today) {
+      return res.status(400).json({ success: false, valid: false, error: 'Promotion has not started yet.' });
+    }
+
+    if (rule.valid_to && rule.valid_to < today) {
+      return res.status(400).json({ success: false, valid: false, error: 'Promotion has expired.' });
+    }
+
+    if (rule.used_count >= rule.max_uses) {
+      return res.status(400).json({ success: false, valid: false, error: 'Promotion usage limit has been reached.' });
+    }
+
+    if (subtotal < rule.min_purchase_amount) {
+      return res.status(400).json({
+        success: false,
+        valid: false,
+        error: `Minimum purchase of ₹${rule.min_purchase_amount.toFixed(2)} required to apply ${rule.code}.`
+      });
+    }
+
+    let deduction = 0;
+    if (rule.discount_type === 'percent') {
+      deduction = subtotal * (rule.discount_value / 100);
+    } else {
+      deduction = Math.min(subtotal, rule.discount_value);
+    }
+
+    res.json({
+      success: true,
+      valid: true,
+      data: {
+        code: rule.code,
+        discountType: rule.discount_type,
+        discountValue: rule.discount_value,
+        deductionAmount: deduction,
+        newSubtotal: Math.max(0, subtotal - deduction)
+      }
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -701,6 +1345,37 @@ apiRouter.post('/auth/reset-password', (req, res) => {
       message: `Password reset link sent to ${email}.`,
       token: resetToken
     });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Confirm password reset with new password
+apiRouter.post('/auth/reset-password/confirm', (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+      return res.status(400).json({ success: false, error: 'Email and new password are required.' });
+    }
+
+    const isLongEnough = newPassword.length > 8;
+    const hasUpper = /[A-Z]/.test(newPassword);
+    const hasLower = /[a-z]/.test(newPassword);
+    const hasSpecial = /[^A-Za-z0-9]/.test(newPassword);
+
+    if (!isLongEnough || !hasUpper || !hasLower || !hasSpecial) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password must be greater than 8 characters and contain at least 1 uppercase letter, 1 lowercase letter, and 1 special character.'
+      });
+    }
+
+    const result = db.prepare('UPDATE users SET password_hash = ? WHERE email = ?').run(newPassword, email);
+    if (result.changes === 0) {
+      return res.status(404).json({ success: false, error: 'User account not found.' });
+    }
+
+    res.json({ success: true, message: 'Password has been successfully updated. You can now log in.' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

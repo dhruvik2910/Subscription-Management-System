@@ -595,7 +595,7 @@ function seedInitialData() {
       discount_value: 20.0,
       min_purchase_amount: 2500.0,
       valid_from: '2024-10-01',
-      valid_to: '2024-11-30',
+      valid_to: '2027-12-31',
       max_uses: 200,
       used_count: 34
     });
@@ -608,7 +608,7 @@ function seedInitialData() {
       discount_value: 500.0,
       min_purchase_amount: 3000.0,
       valid_from: '2024-01-01',
-      valid_to: '2025-12-31',
+      valid_to: '2027-12-31',
       max_uses: 500,
       used_count: 142
     });
